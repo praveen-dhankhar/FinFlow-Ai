@@ -354,15 +354,15 @@ class ForecastRepositoryComprehensiveTest {
 
     @Test
     void testGetForecastStatistics() {
-        Optional<Object[]> result = forecastRepository.getForecastStatistics(user1.getId());
+        List<Object[]> result = forecastRepository.getForecastStatistics(user1.getId());
         
-        assertThat(result).isPresent();
-        Object[] stats = result.get();
+        assertThat(result).isNotEmpty();
+        Object[] stats = result.get(0);
         
         assertThat(stats[0]).isEqualTo(6L); // totalForecasts
         assertThat(stats[1]).isNotNull(); // avgConfidence
         assertThat(stats[2]).isEqualTo(BigDecimal.valueOf(0.7)); // minConfidence
-        assertThat(stats[3]).isEqualTo(BigDecimal.valueOf(0.9)); // maxConfidence
+        assertThat(stats[3]).isEqualTo(new BigDecimal("0.9000")); // maxConfidence
         assertThat(stats[4]).isNotNull(); // totalPredictedAmount
     }
 
@@ -417,8 +417,8 @@ class ForecastRepositoryComprehensiveTest {
                 user1.getId(), pageable);
         
         assertThat(result).hasSize(3);
-        assertThat(result.get(0).getConfidenceScore()).isEqualTo(BigDecimal.valueOf(0.9));
-        assertThat(result.get(1).getConfidenceScore()).isEqualTo(BigDecimal.valueOf(0.9));
+        assertThat(result.get(0).getConfidenceScore()).isEqualTo(new BigDecimal("0.9000"));
+        assertThat(result.get(1).getConfidenceScore()).isEqualTo(new BigDecimal("0.9000"));
         assertThat(result.get(2).getConfidenceScore()).isEqualTo(BigDecimal.valueOf(0.85));
     }
 
@@ -429,9 +429,9 @@ class ForecastRepositoryComprehensiveTest {
                 user1.getId(), pageable);
         
         assertThat(result).hasSize(3);
-        assertThat(result.get(0).getPredictedAmount()).isEqualTo(BigDecimal.valueOf(1200));
-        assertThat(result.get(1).getPredictedAmount()).isEqualTo(BigDecimal.valueOf(1100));
-        assertThat(result.get(2).getPredictedAmount()).isEqualTo(BigDecimal.valueOf(1000));
+        assertThat(result.get(0).getPredictedAmount()).isEqualTo(new BigDecimal("1200.00"));
+        assertThat(result.get(1).getPredictedAmount()).isEqualTo(new BigDecimal("1100.00"));
+        assertThat(result.get(2).getPredictedAmount()).isEqualTo(new BigDecimal("1000.00"));
     }
 
     @Test
@@ -475,8 +475,8 @@ class ForecastRepositoryComprehensiveTest {
         assertThat(result.getTotalPages()).isEqualTo(2);
         
         // Check sorting
-        assertThat(result.getContent().get(0).getPredictedAmount()).isEqualTo(BigDecimal.valueOf(1200));
-        assertThat(result.getContent().get(1).getPredictedAmount()).isEqualTo(BigDecimal.valueOf(1100));
+        assertThat(result.getContent().get(0).getPredictedAmount()).isEqualTo(new BigDecimal("1200.00"));
+        assertThat(result.getContent().get(1).getPredictedAmount()).isEqualTo(new BigDecimal("1100.00"));
     }
 
     @Test

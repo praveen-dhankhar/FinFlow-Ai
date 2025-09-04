@@ -106,7 +106,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
      */
     @Query("SELECT u.id, SIZE(u.financialData), SIZE(u.forecasts), " +
            "COALESCE(MAX(u.updatedAt), u.createdAt) FROM User u WHERE u.id = :userId")
-    Optional<Object[]> getUserStatistics(@Param("userId") Long userId);
+    List<Object[]> getUserStatistics(@Param("userId") Long userId);
     
     /**
      * Find all users with pagination and sorting

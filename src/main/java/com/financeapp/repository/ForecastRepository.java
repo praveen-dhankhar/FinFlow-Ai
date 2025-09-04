@@ -205,7 +205,7 @@ public interface ForecastRepository extends JpaRepository<Forecast, Long> {
      */
     @Query("SELECT COUNT(f), AVG(f.confidenceScore), MIN(f.confidenceScore), MAX(f.confidenceScore), SUM(f.predictedAmount) " +
            "FROM Forecast f WHERE f.user.id = :userId")
-    Optional<Object[]> getForecastStatistics(@Param("userId") Long userId);
+    List<Object[]> getForecastStatistics(@Param("userId") Long userId);
     
     /**
      * Find forecasts by status with amount aggregation

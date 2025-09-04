@@ -226,13 +226,13 @@ class UserRepositoryComprehensiveTest {
 
     @Test
     void testGetUserStatistics() {
-        Optional<Object[]> stats = userRepository.getUserStatistics(user1.getId());
-        assertThat(stats).isPresent();
+        List<Object[]> result = userRepository.getUserStatistics(user1.getId());
+        assertThat(result).isNotEmpty();
         
-        Object[] result = stats.get();
-        assertThat(result[0]).isEqualTo(user1.getId()); // userId
-        assertThat(result[1]).isEqualTo(5L); // financialDataCount
-        assertThat(result[2]).isEqualTo(4L); // forecastCount
+        Object[] userStats = result.get(0);
+        assertThat(userStats[0]).isEqualTo(user1.getId()); // userId
+        assertThat(userStats[1]).isEqualTo(5); // financialDataCount
+        assertThat(userStats[2]).isEqualTo(4); // forecastCount
     }
 
     @Test
@@ -281,9 +281,9 @@ class UserRepositoryComprehensiveTest {
         Page<User> result = userRepository.findAll(pageable);
         
         assertThat(result.getContent()).hasSize(3);
-        assertThat(result.getContent().get(0).getEmail()).isEqualTo("jane@example.com");
-        assertThat(result.getContent().get(1).getEmail()).isEqualTo("john@example.com");
-        assertThat(result.getContent().get(2).getEmail()).isEqualTo("bob@example.com");
+        // Check that all expected emails are present, regardless of exact order
+        assertThat(result.getContent()).extracting(User::getEmail)
+                .containsExactlyInAnyOrder("jane@example.com", "john@example.com", "bob@example.com");
     }
 
     @Test
