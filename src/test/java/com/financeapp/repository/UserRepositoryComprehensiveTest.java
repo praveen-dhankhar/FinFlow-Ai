@@ -103,11 +103,13 @@ class UserRepositoryComprehensiveTest {
             forecast.setUser(user1);
             forecast.setForecastDate(LocalDate.now().plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(500 + i * 100));
-            forecast.setConfidenceScore(BigDecimal.valueOf(0.8 + i * 0.05));
+            forecast.setConfidenceScore(BigDecimal.valueOf(0.8 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
             forecast.setForecastType(ForecastType.INCOME_EXPENSE);
             forecast.setModelName("test_model");
             forecast.setModelVersion("1.0");
+            forecast.setCreatedAt(OffsetDateTime.now());
+            forecast.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(forecast);
         }
 
@@ -117,11 +119,13 @@ class UserRepositoryComprehensiveTest {
             forecast.setUser(user2);
             forecast.setForecastDate(LocalDate.now().plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(300 + i * 50));
-            forecast.setConfidenceScore(BigDecimal.valueOf(0.7 + i * 0.1));
+            forecast.setConfidenceScore(BigDecimal.valueOf(0.7 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
             forecast.setForecastType(ForecastType.BUDGET_FORECAST);
             forecast.setModelName("test_model");
             forecast.setModelVersion("1.0");
+            forecast.setCreatedAt(OffsetDateTime.now());
+            forecast.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(forecast);
         }
 

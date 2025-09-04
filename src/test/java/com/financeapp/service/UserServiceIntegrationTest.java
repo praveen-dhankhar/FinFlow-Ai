@@ -41,7 +41,8 @@ class UserServiceIntegrationTest {
     
     @BeforeEach
     void setUp() {
-        // Delete in proper order to avoid foreign key constraints
+        // Clean up all data in proper order to avoid foreign key constraints
+        // This will cascade delete related records
         userRepository.deleteAll();
     }
     

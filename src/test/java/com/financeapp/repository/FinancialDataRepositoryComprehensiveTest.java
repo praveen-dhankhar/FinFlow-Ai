@@ -70,6 +70,8 @@ class FinancialDataRepositoryComprehensiveTest {
             data.setCategory(Category.SALARY);
             data.setType(TransactionType.INCOME);
             data.setDescription("Salary payment " + i);
+            data.setCreatedAt(OffsetDateTime.now());
+            data.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(data);
         }
 

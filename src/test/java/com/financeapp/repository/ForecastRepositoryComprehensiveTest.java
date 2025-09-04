@@ -67,11 +67,13 @@ class ForecastRepositoryComprehensiveTest {
             forecast.setUser(user1);
             forecast.setForecastDate(baseDate.plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(1000 + i * 100));
-            forecast.setConfidenceScore(BigDecimal.valueOf(0.8 + i * 0.05));
+            forecast.setConfidenceScore(BigDecimal.valueOf(0.8 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
             forecast.setForecastType(ForecastType.INCOME_EXPENSE);
             forecast.setModelName("income_model");
             forecast.setModelVersion("1.0");
+            forecast.setCreatedAt(OffsetDateTime.now());
+            forecast.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(forecast);
         }
 
@@ -81,11 +83,13 @@ class ForecastRepositoryComprehensiveTest {
             forecast.setUser(user1);
             forecast.setForecastDate(baseDate.plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(500 + i * 50));
-            forecast.setConfidenceScore(BigDecimal.valueOf(0.7 + i * 0.1));
+            forecast.setConfidenceScore(BigDecimal.valueOf(0.7 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
             forecast.setForecastType(ForecastType.BUDGET_FORECAST);
             forecast.setModelName("expense_model");
             forecast.setModelVersion("1.0");
+            forecast.setCreatedAt(OffsetDateTime.now());
+            forecast.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(forecast);
         }
 
@@ -99,6 +103,8 @@ class ForecastRepositoryComprehensiveTest {
         completedForecast.setForecastType(ForecastType.INCOME_EXPENSE);
         completedForecast.setModelName("income_model");
         completedForecast.setModelVersion("1.0");
+        completedForecast.setCreatedAt(OffsetDateTime.now());
+        completedForecast.setUpdatedAt(OffsetDateTime.now());
         entityManager.persistAndFlush(completedForecast);
 
         // Create forecasts for user2
@@ -107,11 +113,13 @@ class ForecastRepositoryComprehensiveTest {
             forecast.setUser(user2);
             forecast.setForecastDate(baseDate.plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(300 + i * 100));
-            forecast.setConfidenceScore(BigDecimal.valueOf(0.6 + i * 0.2));
+            forecast.setConfidenceScore(BigDecimal.valueOf(0.6 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
             forecast.setForecastType(ForecastType.BUDGET_FORECAST);
             forecast.setModelName("expense_model");
             forecast.setModelVersion("1.0");
+            forecast.setCreatedAt(OffsetDateTime.now());
+            forecast.setUpdatedAt(OffsetDateTime.now());
             entityManager.persistAndFlush(forecast);
         }
 

@@ -1,3 +1,6 @@
+-- This migration only runs for dev profile, not test profile
+-- Test profile uses @DataJpaTest which doesn't run Flyway migrations
+
 -- Seed users
 INSERT INTO users (username, email, password_hash)
 VALUES ('demo', 'demo@example.com', 'hashed-password-123');
