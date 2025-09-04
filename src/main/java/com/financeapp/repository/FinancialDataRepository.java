@@ -196,14 +196,14 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
      * Find financial data statistics by user ID
      * Returns: [totalEntries, totalIncome, totalExpense, avgAmount, minAmount, maxAmount]
      */
-    @Query("SELECT COUNT(fd), " +
-           "COALESCE(SUM(CASE WHEN fd.type = 'INCOME' THEN fd.amount ELSE 0 END), 0), " +
-           "COALESCE(SUM(CASE WHEN fd.type = 'EXPENSE' THEN fd.amount ELSE 0 END), 0), " +
-           "COALESCE(AVG(fd.amount), 0), " +
-           "COALESCE(MIN(fd.amount), 0), " +
-           "COALESCE(MAX(fd.amount), 0) " +
-           "FROM FinancialData fd WHERE fd.user.id = :userId")
-    Optional<Object[]> getFinancialDataStatistics(@Param("userId") Long userId);
+    @Query(value = "SELECT COUNT(*), " +
+           "SUM(CASE WHEN fd.type = 'INCOME' THEN fd.amount ELSE 0 END), " +
+           "SUM(CASE WHEN fd.type = 'EXPENSE' THEN fd.amount ELSE 0 END), " +
+           "AVG(fd.amount), " +
+           "MIN(fd.amount), " +
+           "MAX(fd.amount) " +
+           "FROM financial_data fd WHERE fd.user_id = :userId", nativeQuery = true)
+    List<Object[]> getFinancialDataStatistics(@Param("userId") Long userId);
     
     /**
      * Find financial data by category with amount aggregation
