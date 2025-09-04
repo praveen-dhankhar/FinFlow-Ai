@@ -16,6 +16,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -59,7 +60,7 @@ class ForecastRepositoryComprehensiveTest {
         user2 = entityManager.persistAndFlush(user2);
 
         // Create forecasts for user1
-        LocalDate baseDate = LocalDate.now();
+        LocalDate baseDate = LocalDate.now().plusDays(30); // Use future dates
         
         // Active income forecasts
         for (int i = 0; i < 3; i++) {

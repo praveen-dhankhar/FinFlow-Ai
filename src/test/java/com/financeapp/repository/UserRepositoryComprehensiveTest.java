@@ -19,6 +19,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -98,10 +99,11 @@ class UserRepositoryComprehensiveTest {
         }
 
         // Create forecasts for user1
+        LocalDate baseDate = LocalDate.now().plusDays(30); // Use future dates
         for (int i = 0; i < 4; i++) {
             Forecast forecast = new Forecast();
             forecast.setUser(user1);
-            forecast.setForecastDate(LocalDate.now().plusDays(i + 1));
+            forecast.setForecastDate(baseDate.plusDays(i + 1));
             forecast.setPredictedAmount(BigDecimal.valueOf(500 + i * 100));
             forecast.setConfidenceScore(BigDecimal.valueOf(0.8 + i * 0.01).setScale(4, RoundingMode.HALF_UP));
             forecast.setStatus(ForecastStatus.ACTIVE);
