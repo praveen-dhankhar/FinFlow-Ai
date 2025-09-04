@@ -18,5 +18,5 @@ SELECT id, CURRENT_DATE, 2000.00, 'SALARY', 'Monthly salary', 'INCOME' FROM user
 
 -- Seed forecast
 INSERT INTO forecasts (user_id, forecast_date, predicted_amount, confidence_score, model_name, model_version, prediction_context, forecast_type, status)
-SELECT id, CURRENT_DATE + 30, 1800.00, 85.0, 'Demo Model v1.0', '1.0.0', 'Demo prediction based on historical data', 'INCOME_EXPENSE', 'ACTIVE' FROM users WHERE username = 'demo';
+SELECT id, CURRENT_DATE + 30, 1800.00, 0.85, 'Demo Model v1.0', '1.0.0', 'Demo prediction based on historical data', 'INCOME_EXPENSE', 'ACTIVE' FROM users WHERE username = 'demo';
 
