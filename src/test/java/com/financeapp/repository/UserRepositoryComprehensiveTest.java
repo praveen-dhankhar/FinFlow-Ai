@@ -53,18 +53,24 @@ class UserRepositoryComprehensiveTest {
         user1.setUsername("john_doe");
         user1.setEmail("john@example.com");
         user1.setPasswordHash("hashed_password_1");
+        user1.setCreatedAt(OffsetDateTime.now());
+        user1.setUpdatedAt(OffsetDateTime.now());
         user1 = entityManager.persistAndFlush(user1);
 
         user2 = new User();
         user2.setUsername("jane_smith");
         user2.setEmail("jane@example.com");
         user2.setPasswordHash("hashed_password_2");
+        user2.setCreatedAt(OffsetDateTime.now());
+        user2.setUpdatedAt(OffsetDateTime.now());
         user2 = entityManager.persistAndFlush(user2);
 
         user3 = new User();
         user3.setUsername("bob_wilson");
         user3.setEmail("bob@example.com");
         user3.setPasswordHash("hashed_password_3");
+        user3.setCreatedAt(OffsetDateTime.now());
+        user3.setUpdatedAt(OffsetDateTime.now());
         user3 = entityManager.persistAndFlush(user3);
 
         // Create financial data for user1

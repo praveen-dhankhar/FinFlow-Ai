@@ -17,6 +17,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -45,12 +46,16 @@ class FinancialDataRepositoryComprehensiveTest {
         user1.setUsername("user1");
         user1.setEmail("user1@example.com");
         user1.setPasswordHash("password1");
+        user1.setCreatedAt(OffsetDateTime.now());
+        user1.setUpdatedAt(OffsetDateTime.now());
         user1 = entityManager.persistAndFlush(user1);
 
         user2 = new User();
         user2.setUsername("user2");
         user2.setEmail("user2@example.com");
         user2.setPasswordHash("password2");
+        user2.setCreatedAt(OffsetDateTime.now());
+        user2.setUpdatedAt(OffsetDateTime.now());
         user2 = entityManager.persistAndFlush(user2);
 
         // Create financial data for user1
