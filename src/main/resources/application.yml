@@ -2,6 +2,11 @@ spring:
   application:
     name: finance-forecast-app
 
+# Transition note:
+# This project currently uses H2 for all profiles (dev/test/prod).
+# To switch to PostgreSQL later, uncomment the corresponding sections below
+# and set DB_USERNAME/DB_PASSWORD environment variables as needed.
+
 ---
 spring:
   config:
@@ -23,13 +28,27 @@ spring:
     console:
       enabled: true
       path: /h2-console
-  security:
-    user:
-      name: user
-      password: user123
   flyway:
     enabled: true
     locations: classpath:db/migration
+
+# PostgreSQL (future) - dev
+#spring:
+#  config:
+#    activate:
+#      on-profile: dev
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/financeapp
+#    driver-class-name: org.postgresql.Driver
+#    username: ${DB_USERNAME:postgres}
+#    password: ${DB_PASSWORD:postgres}
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    show-sql: false
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
 
 management:
   endpoints:
@@ -54,16 +73,35 @@ spring:
     activate:
       on-profile: test
   datasource:
-    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
+    url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
     username: sa
     password: sa
   jpa:
     hibernate:
-      ddl-auto: create-drop
+      ddl-auto: update
     show-sql: false
   flyway:
-    enabled: false
+    enabled: true
+    locations: classpath:db/migration
+
+# PostgreSQL (future) - test
+#spring:
+#  config:
+#    activate:
+#      on-profile: test
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/financeapp_test
+#    driver-class-name: org.postgresql.Driver
+#    username: ${DB_USERNAME:postgres}
+#    password: ${DB_PASSWORD:postgres}
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    show-sql: false
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
 
 ---
 spring:
@@ -71,13 +109,13 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:postgresql://localhost:5432/financeapp
-    driver-class-name: org.postgresql.Driver
-    username: ${DB_USERNAME}
-    password: ${DB_PASSWORD}
+    url: jdbc:h2:file:./data/financeapp;AUTO_SERVER=TRUE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: sa
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: update
     show-sql: false
   flyway:
     enabled: true
@@ -85,3 +123,21 @@ spring:
 
 server:
   port: 8080
+
+# PostgreSQL (future) - prod
+#spring:
+#  config:
+#    activate:
+#      on-profile: prod
+#  datasource:
+#    url: jdbc:postgresql://localhost:5432/financeapp
+#    driver-class-name: org.postgresql.Driver
+#    username: ${DB_USERNAME}
+#    password: ${DB_PASSWORD}
+#  jpa:
+#    hibernate:
+#      ddl-auto: validate
+#    show-sql: false
+#  flyway:
+#    enabled: true
+#    locations: classpath:db/migration
