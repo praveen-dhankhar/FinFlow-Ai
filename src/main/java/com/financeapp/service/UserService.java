@@ -4,125 +4,125 @@ import com.financeapp.dto.UserRegistrationDto;
 import com.financeapp.dto.UserResponseDto;
 import com.financeapp.dto.UserUpdateDto;
 import com.financeapp.entity.User;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 import java.util.List;
 import java.util.Optional;
 
 /**
- * Service interface for user management operations.
+ * Service interface for user management operations
  */
 public interface UserService {
-    
+
     /**
-     * Register a new user with encrypted password.
-     *
-     * @param registrationDto the user registration data
-     * @return the created user response DTO
-     * @throws UserAlreadyExistsException if user with username or email already exists
-     * @throws ValidationException if validation fails
+     * Register a new user with encrypted password
+     * @param registrationDto user registration data
+     * @return created user response
+     * @throws com.financeapp.exception.UserAlreadyExistsException if email/username already exists
+     * @throws com.financeapp.exception.ValidationException if validation fails
      */
     UserResponseDto registerUser(UserRegistrationDto registrationDto);
-    
+
     /**
-     * Find user by ID.
-     *
-     * @param id the user ID
-     * @return the user if found
-     * @throws UserNotFoundException if user not found
+     * Authenticate user with email and password
+     * @param email user email
+     * @param password plain text password
+     * @return authenticated user response
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
+     * @throws com.financeapp.exception.InvalidPasswordException if password is incorrect
      */
-    UserResponseDto findById(Long id);
-    
+    UserResponseDto authenticateUser(String email, String password);
+
     /**
-     * Find user by username.
-     *
-     * @param username the username
-     * @return the user if found
-     * @throws UserNotFoundException if user not found
+     * Get user by ID
+     * @param userId user ID
+     * @return user response
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
      */
-    UserResponseDto findByUsername(String username);
-    
+    UserResponseDto getUserById(Long userId);
+
     /**
-     * Find user by email.
-     *
-     * @param email the email
-     * @return the user if found
-     * @throws UserNotFoundException if user not found
+     * Get user by email
+     * @param email user email
+     * @return user response
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
      */
-    UserResponseDto findByEmail(String email);
-    
+    UserResponseDto getUserByEmail(String email);
+
     /**
-     * Get all users with pagination.
-     *
-     * @param page the page number (0-based)
-     * @param size the page size
-     * @return list of user response DTOs
+     * Get user by username
+     * @param username username
+     * @return user response
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
      */
-    List<UserResponseDto> getAllUsers(int page, int size);
-    
+    UserResponseDto getUserByUsername(String username);
+
     /**
-     * Update user profile.
-     *
-     * @param id the user ID
-     * @param updateDto the update data
-     * @return the updated user response DTO
-     * @throws UserNotFoundException if user not found
-     * @throws UserAlreadyExistsException if username or email already exists
-     * @throws ValidationException if validation fails
+     * Update user profile
+     * @param userId user ID
+     * @param updateDto update data
+     * @return updated user response
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
+     * @throws com.financeapp.exception.ValidationException if validation fails
      */
-    UserResponseDto updateUser(Long id, UserUpdateDto updateDto);
-    
+    UserResponseDto updateUserProfile(Long userId, UserUpdateDto updateDto);
+
     /**
-     * Update user password.
-     *
-     * @param id the user ID
-     * @param currentPassword the current password
-     * @param newPassword the new password
-     * @throws UserNotFoundException if user not found
-     * @throws InvalidPasswordException if password validation fails
+     * Update user password
+     * @param userId user ID
+     * @param currentPassword current password
+     * @param newPassword new password
+     * @return success status
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
+     * @throws com.financeapp.exception.InvalidPasswordException if current password is incorrect
+     * @throws com.financeapp.exception.ValidationException if new password validation fails
      */
-    void updatePassword(Long id, String currentPassword, String newPassword);
-    
+    boolean updatePassword(Long userId, String currentPassword, String newPassword);
+
     /**
-     * Delete user by ID.
-     *
-     * @param id the user ID
-     * @throws UserNotFoundException if user not found
+     * Check if email exists
+     * @param email email to check
+     * @return true if email exists
      */
-    void deleteUser(Long id);
-    
+    boolean emailExists(String email);
+
     /**
-     * Check if username exists.
-     *
-     * @param username the username
-     * @return true if exists, false otherwise
+     * Check if username exists
+     * @param username username to check
+     * @return true if username exists
      */
-    boolean existsByUsername(String username);
-    
+    boolean usernameExists(String username);
+
     /**
-     * Check if email exists.
-     *
-     * @param email the email
-     * @return true if exists, false otherwise
+     * Get all users with pagination
+     * @param pageable pagination information
+     * @return page of users
      */
-    boolean existsByEmail(String email);
-    
+    Page<UserResponseDto> getAllUsers(Pageable pageable);
+
     /**
-     * Authenticate user with username and password.
-     *
-     * @param username the username
-     * @param password the password
-     * @return the user if authentication successful
-     * @throws UserNotFoundException if user not found
-     * @throws InvalidPasswordException if password is incorrect
+     * Search users by criteria
+     * @param username partial username (optional)
+     * @param email partial email (optional)
+     * @param pageable pagination information
+     * @return page of matching users
      */
-    UserResponseDto authenticate(String username, String password);
-    
+    Page<UserResponseDto> searchUsers(String username, String email, Pageable pageable);
+
     /**
-     * Get user entity by ID (for internal use).
-     *
-     * @param id the user ID
-     * @return the user entity
-     * @throws UserNotFoundException if user not found
+     * Delete user by ID
+     * @param userId user ID
+     * @return success status
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
      */
-    User getUserEntity(Long id);
+    boolean deleteUser(Long userId);
+
+    /**
+     * Get user statistics
+     * @param userId user ID
+     * @return user statistics
+     * @throws com.financeapp.exception.UserNotFoundException if user not found
+     */
+    Object[] getUserStatistics(Long userId);
 }

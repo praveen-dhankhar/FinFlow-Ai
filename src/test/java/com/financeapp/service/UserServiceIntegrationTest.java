@@ -14,431 +14,502 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 
-import static org.assertj.core.api.Assertions.*;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
- * Integration tests for UserService.
+ * Integration tests for UserService
  */
 @SpringBootTest
 @ActiveProfiles("test")
 @Transactional
 class UserServiceIntegrationTest {
-    
+
     @Autowired
     private UserService userService;
-    
+
     @Autowired
     private UserRepository userRepository;
-    
+
     @Autowired
     private PasswordEncoder passwordEncoder;
-    
+
+    private User testUser;
+    private UserRegistrationDto testRegistrationDto;
+    private UserUpdateDto testUpdateDto;
+
     @BeforeEach
     void setUp() {
-        // Clean up all data in proper order to avoid foreign key constraints
-        // This will cascade delete related records
+        // Clean up database before each test
         userRepository.deleteAll();
-    }
-    
-    @Test
-    @DisplayName("Should register and authenticate user successfully")
-    void registerAndAuthenticateUser_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
+
+        // Create test user
+        testUser = new User();
+        testUser.setUsername("testuser");
+        testUser.setEmail("test@example.com");
+        testUser.setPasswordHash(passwordEncoder.encode("TestPass123!"));
+        testUser.setCreatedAt(OffsetDateTime.now());
+        testUser.setUpdatedAt(OffsetDateTime.now());
+        testUser = userRepository.save(testUser);
+
+        testRegistrationDto = new UserRegistrationDto(
+                "newuser", "new@example.com", "ValidPass123!"
         );
-        
+
+        testUpdateDto = new UserUpdateDto(
+                "updateduser", "updated@example.com", null
+        );
+    }
+
+    @Test
+    @DisplayName("Should register user successfully with valid data")
+    void registerUser_Success() {
         // When
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        UserResponseDto authenticatedUser = userService.authenticate("testuser", "Password123!");
-        
+        UserResponseDto result = userService.registerUser(testRegistrationDto);
+
         // Then
-        assertThat(registeredUser).isNotNull();
-        assertThat(registeredUser.username()).isEqualTo("testuser");
-        assertThat(registeredUser.email()).isEqualTo("test@example.com");
-        
-        assertThat(authenticatedUser).isNotNull();
-        assertThat(authenticatedUser.id()).isEqualTo(registeredUser.id());
-        assertThat(authenticatedUser.username()).isEqualTo("testuser");
-        
-        // Verify user exists in database
-        User savedUser = userRepository.findById(registeredUser.id()).orElse(null);
+        assertThat(result).isNotNull();
+        assertThat(result.username()).isEqualTo("newuser");
+        assertThat(result.email()).isEqualTo("new@example.com");
+        assertThat(result.id()).isNotNull();
+
+        // Verify user was saved to database
+        User savedUser = userRepository.findById(result.id()).orElse(null);
         assertThat(savedUser).isNotNull();
-        assertThat(savedUser.getUsername()).isEqualTo("testuser");
-        assertThat(savedUser.getEmail()).isEqualTo("test@example.com");
-        assertThat(passwordEncoder.matches("Password123!", savedUser.getPasswordHash())).isTrue();
+        assertThat(savedUser.getUsername()).isEqualTo("newuser");
+        assertThat(savedUser.getEmail()).isEqualTo("new@example.com");
+        assertThat(passwordEncoder.matches("ValidPass123!", savedUser.getPasswordHash())).isTrue();
     }
-    
+
     @Test
-    @DisplayName("Should find user by different criteria")
-    void findUserByDifferentCriteria_Success() {
+    @DisplayName("Should throw UserAlreadyExistsException when email already exists")
+    void registerUser_EmailAlreadyExists() {
         // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
+        UserRegistrationDto duplicateEmailDto = new UserRegistrationDto(
+                "differentuser", "test@example.com", "ValidPass123!"
         );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
+
         // When & Then
-        UserResponseDto byId = userService.findById(registeredUser.id());
-        UserResponseDto byUsername = userService.findByUsername("testuser");
-        UserResponseDto byEmail = userService.findByEmail("test@example.com");
-        
-        assertThat(byId).isNotNull();
-        assertThat(byId.id()).isEqualTo(registeredUser.id());
-        
-        assertThat(byUsername).isNotNull();
-        assertThat(byUsername.username()).isEqualTo("testuser");
-        
-        assertThat(byEmail).isNotNull();
-        assertThat(byEmail.email()).isEqualTo("test@example.com");
+        assertThatThrownBy(() -> userService.registerUser(duplicateEmailDto))
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessageContaining("Email already exists");
     }
-    
+
+    @Test
+    @DisplayName("Should throw UserAlreadyExistsException when username already exists")
+    void registerUser_UsernameAlreadyExists() {
+        // Given
+        UserRegistrationDto duplicateUsernameDto = new UserRegistrationDto(
+                "testuser", "different@example.com", "ValidPass123!"
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> userService.registerUser(duplicateUsernameDto))
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessageContaining("Username already exists");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException for null registration data")
+    void registerUser_NullData() {
+        // When & Then
+        assertThatThrownBy(() -> userService.registerUser(null))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Registration data is required");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException for invalid username length")
+    void registerUser_InvalidUsernameLength() {
+        // Given
+        UserRegistrationDto invalidDto = new UserRegistrationDto(
+                "ab", "test@example.com", "ValidPass123!"
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> userService.registerUser(invalidDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Username must be between 3 and 50 characters");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException for invalid email format")
+    void registerUser_InvalidEmailFormat() {
+        // Given
+        UserRegistrationDto invalidDto = new UserRegistrationDto(
+                "testuser", "invalid-email", "ValidPass123!"
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> userService.registerUser(invalidDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Invalid email format");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException for weak password")
+    void registerUser_WeakPassword() {
+        // Given
+        UserRegistrationDto invalidDto = new UserRegistrationDto(
+                "testuser", "test@example.com", "weak"
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> userService.registerUser(invalidDto))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Password must be at least 8 characters long");
+    }
+
+    @Test
+    @DisplayName("Should authenticate user successfully with valid credentials")
+    void authenticateUser_Success() {
+        // When
+        UserResponseDto result = userService.authenticateUser("test@example.com", "TestPass123!");
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.username()).isEqualTo("testuser");
+        assertThat(result.email()).isEqualTo("test@example.com");
+    }
+
+    @Test
+    @DisplayName("Should throw UserNotFoundException when user not found during authentication")
+    void authenticateUser_UserNotFound() {
+        // When & Then
+        assertThatThrownBy(() -> userService.authenticateUser("nonexistent@example.com", "password"))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User not found");
+    }
+
+    @Test
+    @DisplayName("Should throw InvalidPasswordException when password is incorrect")
+    void authenticateUser_InvalidPassword() {
+        // When & Then
+        assertThatThrownBy(() -> userService.authenticateUser("test@example.com", "wrongpassword"))
+                .isInstanceOf(InvalidPasswordException.class)
+                .hasMessageContaining("Invalid password");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException when email or password is empty")
+    void authenticateUser_EmptyCredentials() {
+        // When & Then
+        assertThatThrownBy(() -> userService.authenticateUser("", "password"))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Email and password are required");
+
+        assertThatThrownBy(() -> userService.authenticateUser("test@example.com", ""))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Email and password are required");
+    }
+
+    @Test
+    @DisplayName("Should get user by ID successfully")
+    void getUserById_Success() {
+        // When
+        UserResponseDto result = userService.getUserById(testUser.getId());
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.id()).isEqualTo(testUser.getId());
+        assertThat(result.username()).isEqualTo("testuser");
+        assertThat(result.email()).isEqualTo("test@example.com");
+    }
+
+    @Test
+    @DisplayName("Should throw UserNotFoundException when user not found by ID")
+    void getUserById_UserNotFound() {
+        // When & Then
+        assertThatThrownBy(() -> userService.getUserById(999L))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User not found");
+    }
+
+    @Test
+    @DisplayName("Should get user by email successfully")
+    void getUserByEmail_Success() {
+        // When
+        UserResponseDto result = userService.getUserByEmail("test@example.com");
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.email()).isEqualTo("test@example.com");
+        assertThat(result.username()).isEqualTo("testuser");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException when email is empty")
+    void getUserByEmail_EmptyEmail() {
+        // When & Then
+        assertThatThrownBy(() -> userService.getUserByEmail(""))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Email is required");
+    }
+
+    @Test
+    @DisplayName("Should get user by username successfully")
+    void getUserByUsername_Success() {
+        // When
+        UserResponseDto result = userService.getUserByUsername("testuser");
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.username()).isEqualTo("testuser");
+        assertThat(result.email()).isEqualTo("test@example.com");
+    }
+
     @Test
     @DisplayName("Should update user profile successfully")
     void updateUserProfile_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
-        UserUpdateDto updateDto = new UserUpdateDto(
-            "updateduser",
-            "updated@example.com",
-            null
-        );
-        
         // When
-        UserResponseDto updatedUser = userService.updateUser(registeredUser.id(), updateDto);
-        
+        UserResponseDto result = userService.updateUserProfile(testUser.getId(), testUpdateDto);
+
         // Then
+        assertThat(result).isNotNull();
+        assertThat(result.username()).isEqualTo("updateduser");
+        assertThat(result.email()).isEqualTo("updated@example.com");
+
+        // Verify user was updated in database
+        User updatedUser = userRepository.findById(testUser.getId()).orElse(null);
         assertThat(updatedUser).isNotNull();
-        assertThat(updatedUser.username()).isEqualTo("updateduser");
-        assertThat(updatedUser.email()).isEqualTo("updated@example.com");
-        
-        // Verify in database
-        User savedUser = userRepository.findById(registeredUser.id()).orElse(null);
-        assertThat(savedUser).isNotNull();
-        assertThat(savedUser.getUsername()).isEqualTo("updateduser");
-        assertThat(savedUser.getEmail()).isEqualTo("updated@example.com");
+        assertThat(updatedUser.getUsername()).isEqualTo("updateduser");
+        assertThat(updatedUser.getEmail()).isEqualTo("updated@example.com");
     }
-    
+
+    @Test
+    @DisplayName("Should throw UserAlreadyExistsException when updating to existing email")
+    void updateUserProfile_EmailAlreadyExists() {
+        // Given - Create another user
+        User anotherUser = new User();
+        anotherUser.setUsername("anotheruser");
+        anotherUser.setEmail("another@example.com");
+        anotherUser.setPasswordHash(passwordEncoder.encode("AnotherPass123!"));
+        anotherUser.setCreatedAt(OffsetDateTime.now());
+        anotherUser.setUpdatedAt(OffsetDateTime.now());
+        userRepository.save(anotherUser);
+
+        UserUpdateDto duplicateEmailDto = new UserUpdateDto(
+                "updateduser", "another@example.com", null
+        );
+
+        // When & Then
+        assertThatThrownBy(() -> userService.updateUserProfile(testUser.getId(), duplicateEmailDto))
+                .isInstanceOf(UserAlreadyExistsException.class)
+                .hasMessageContaining("Email already exists");
+    }
+
     @Test
     @DisplayName("Should update password successfully")
     void updatePassword_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
         // When
-        userService.updatePassword(registeredUser.id(), "Password123!", "NewPassword456!");
-        
+        boolean result = userService.updatePassword(testUser.getId(), "TestPass123!", "NewPass123!");
+
         // Then
-        // Verify old password doesn't work
-        assertThatThrownBy(() -> userService.authenticate("testuser", "Password123!"))
-            .isInstanceOf(InvalidPasswordException.class);
-        
-        // Verify new password works
-        UserResponseDto authenticatedUser = userService.authenticate("testuser", "NewPassword456!");
-        assertThat(authenticatedUser).isNotNull();
-        assertThat(authenticatedUser.username()).isEqualTo("testuser");
+        assertThat(result).isTrue();
+
+        // Verify password was updated in database
+        User updatedUser = userRepository.findById(testUser.getId()).orElse(null);
+        assertThat(updatedUser).isNotNull();
+        assertThat(passwordEncoder.matches("NewPass123!", updatedUser.getPasswordHash())).isTrue();
+        assertThat(passwordEncoder.matches("TestPass123!", updatedUser.getPasswordHash())).isFalse();
     }
-    
+
+    @Test
+    @DisplayName("Should throw InvalidPasswordException when current password is wrong")
+    void updatePassword_InvalidCurrentPassword() {
+        // When & Then
+        assertThatThrownBy(() -> userService.updatePassword(testUser.getId(), "wrongpass", "NewPass123!"))
+                .isInstanceOf(InvalidPasswordException.class)
+                .hasMessageContaining("Invalid current password");
+    }
+
+    @Test
+    @DisplayName("Should throw ValidationException when new password is weak")
+    void updatePassword_WeakNewPassword() {
+        // When & Then
+        assertThatThrownBy(() -> userService.updatePassword(testUser.getId(), "TestPass123!", "weak"))
+                .isInstanceOf(ValidationException.class)
+                .hasMessageContaining("Password must be at least 8 characters long");
+    }
+
+    @Test
+    @DisplayName("Should check email existence correctly")
+    void emailExists() {
+        // When & Then
+        assertThat(userService.emailExists("test@example.com")).isTrue();
+        assertThat(userService.emailExists("nonexistent@example.com")).isFalse();
+        assertThat(userService.emailExists("")).isFalse();
+        assertThat(userService.emailExists(null)).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should check username existence correctly")
+    void usernameExists() {
+        // When & Then
+        assertThat(userService.usernameExists("testuser")).isTrue();
+        assertThat(userService.usernameExists("nonexistent")).isFalse();
+        assertThat(userService.usernameExists("")).isFalse();
+        assertThat(userService.usernameExists(null)).isFalse();
+    }
+
+    @Test
+    @DisplayName("Should get all users with pagination")
+    void getAllUsers() {
+        // Given - Create additional users
+        User user2 = new User();
+        user2.setUsername("user2");
+        user2.setEmail("user2@example.com");
+        user2.setPasswordHash(passwordEncoder.encode("Pass123!"));
+        user2.setCreatedAt(OffsetDateTime.now());
+        user2.setUpdatedAt(OffsetDateTime.now());
+        userRepository.save(user2);
+
+        // When
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<UserResponseDto> result = userService.getAllUsers(pageable);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getTotalElements()).isEqualTo(2);
+    }
+
+    @Test
+    @DisplayName("Should search users by criteria")
+    void searchUsers() {
+        // Given - Create additional users
+        User user2 = new User();
+        user2.setUsername("user2");
+        user2.setEmail("user2@example.com");
+        user2.setPasswordHash(passwordEncoder.encode("Pass123!"));
+        user2.setCreatedAt(OffsetDateTime.now());
+        user2.setUpdatedAt(OffsetDateTime.now());
+        userRepository.save(user2);
+
+        // When
+        Pageable pageable = PageRequest.of(0, 10);
+        Page<UserResponseDto> result = userService.searchUsers("user", null, pageable);
+
+        // Then
+        assertThat(result).isNotNull();
+        assertThat(result.getContent()).hasSize(2);
+        assertThat(result.getContent()).allMatch(user -> user.username().contains("user"));
+    }
+
     @Test
     @DisplayName("Should delete user successfully")
     void deleteUser_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
         // When
-        userService.deleteUser(registeredUser.id());
-        
+        boolean result = userService.deleteUser(testUser.getId());
+
         // Then
-        assertThatThrownBy(() -> userService.findById(registeredUser.id()))
-            .isInstanceOf(UserNotFoundException.class);
-        
-        assertThat(userRepository.existsById(registeredUser.id())).isFalse();
+        assertThat(result).isTrue();
+
+        // Verify user was deleted from database
+        assertThat(userRepository.existsById(testUser.getId())).isFalse();
     }
-    
+
     @Test
-    @DisplayName("Should check username and email existence")
-    void checkExistence_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        userService.registerUser(registrationDto);
-        
+    @DisplayName("Should throw UserNotFoundException when deleting non-existent user")
+    void deleteUser_UserNotFound() {
         // When & Then
-        assertThat(userService.existsByUsername("testuser")).isTrue();
-        assertThat(userService.existsByUsername("nonexistent")).isFalse();
-        
-        assertThat(userService.existsByEmail("test@example.com")).isTrue();
-        assertThat(userService.existsByEmail("nonexistent@example.com")).isFalse();
+        assertThatThrownBy(() -> userService.deleteUser(999L))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User not found");
     }
-    
+
     @Test
-    @DisplayName("Should get all users with pagination")
-    void getAllUsers_Success() {
-        // Given
-        UserRegistrationDto user1 = new UserRegistrationDto(
-            "user1",
-            "user1@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto user2 = new UserRegistrationDto(
-            "user2",
-            "user2@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto user3 = new UserRegistrationDto(
-            "user3",
-            "user3@example.com",
-            "Password123!"
-        );
-        
-        userService.registerUser(user1);
-        userService.registerUser(user2);
-        userService.registerUser(user3);
-        
+    @DisplayName("Should get user statistics successfully")
+    void getUserStatistics_Success() {
         // When
-        List<UserResponseDto> allUsers = userService.getAllUsers(0, 10);
-        List<UserResponseDto> firstPage = userService.getAllUsers(0, 2);
-        List<UserResponseDto> secondPage = userService.getAllUsers(1, 2);
-        
+        Object[] stats = userService.getUserStatistics(testUser.getId());
+
         // Then
-        assertThat(allUsers).hasSize(3);
-        assertThat(firstPage).hasSize(2);
-        assertThat(secondPage).hasSize(1);
+        assertThat(stats).isNotNull();
+        assertThat(stats.length).isEqualTo(4);
+        assertThat(stats[0]).isEqualTo(testUser.getId()); // userId
+        assertThat(stats[1]).isEqualTo(0); // financialDataCount
+        assertThat(stats[2]).isEqualTo(0); // forecastCount
+        assertThat(stats[3]).isNotNull(); // lastActivity
     }
-    
+
     @Test
-    @DisplayName("Should throw UserAlreadyExistsException for duplicate username")
-    void registerUser_DuplicateUsername_ThrowsException() {
-        // Given
-        UserRegistrationDto firstUser = new UserRegistrationDto(
-            "testuser",
-            "test1@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto secondUser = new UserRegistrationDto(
-            "testuser",
-            "test2@example.com",
-            "Password123!"
-        );
-        
-        userService.registerUser(firstUser);
-        
+    @DisplayName("Should throw UserNotFoundException when getting statistics for non-existent user")
+    void getUserStatistics_UserNotFound() {
         // When & Then
-        assertThatThrownBy(() -> userService.registerUser(secondUser))
-            .isInstanceOf(UserAlreadyExistsException.class)
-            .hasMessage("User already exists with username: testuser");
+        assertThatThrownBy(() -> userService.getUserStatistics(999L))
+                .isInstanceOf(UserNotFoundException.class)
+                .hasMessageContaining("User not found");
     }
-    
+
     @Test
-    @DisplayName("Should throw UserAlreadyExistsException for duplicate email")
-    void registerUser_DuplicateEmail_ThrowsException() {
-        // Given
-        UserRegistrationDto firstUser = new UserRegistrationDto(
-            "user1",
-            "test@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto secondUser = new UserRegistrationDto(
-            "user2",
-            "test@example.com",
-            "Password123!"
-        );
-        
-        userService.registerUser(firstUser);
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.registerUser(secondUser))
-            .isInstanceOf(UserAlreadyExistsException.class)
-            .hasMessage("User already exists with email: test@example.com");
-    }
-    
-    @Test
-    @DisplayName("Should throw ValidationException for weak password")
-    void registerUser_WeakPassword_ThrowsException() {
-        // Given
-        UserRegistrationDto weakPasswordUser = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "weak"
-        );
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.registerUser(weakPasswordUser))
-            .isInstanceOf(ValidationException.class)
-            .hasMessageContaining("Password must be at least 8 characters long");
-    }
-    
-    @Test
-    @DisplayName("Should throw ValidationException for invalid email format")
-    void registerUser_InvalidEmail_ThrowsException() {
-        // Given
-        UserRegistrationDto invalidEmailUser = new UserRegistrationDto(
-            "testuser",
-            "invalid-email",
-            "Password123!"
-        );
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.registerUser(invalidEmailUser))
-            .isInstanceOf(ValidationException.class)
-            .hasMessageContaining("Invalid email format");
-    }
-    
-    @Test
-    @DisplayName("Should throw UserNotFoundException for non-existent user")
-    void findById_NonExistentUser_ThrowsException() {
-        // When & Then
-        assertThatThrownBy(() -> userService.findById(999L))
-            .isInstanceOf(UserNotFoundException.class)
-            .hasMessage("User not found with ID: 999");
-    }
-    
-    @Test
-    @DisplayName("Should throw InvalidPasswordException for incorrect password during authentication")
-    void authenticate_IncorrectPassword_ThrowsException() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        userService.registerUser(registrationDto);
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.authenticate("testuser", "WrongPassword"))
-            .isInstanceOf(InvalidPasswordException.class)
-            .hasMessage("Incorrect password provided");
-    }
-    
-    @Test
-    @DisplayName("Should throw InvalidPasswordException when new password same as current")
-    void updatePassword_SamePassword_ThrowsException() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.updatePassword(registeredUser.id(), "Password123!", "Password123!"))
-            .isInstanceOf(InvalidPasswordException.class)
-            .hasMessage("New password must be different from current password");
-    }
-    
-    @Test
-    @DisplayName("Should handle username conflicts during update")
-    void updateUser_UsernameConflict_ThrowsException() {
-        // Given
-        UserRegistrationDto user1 = new UserRegistrationDto(
-            "user1",
-            "user1@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto user2 = new UserRegistrationDto(
-            "user2",
-            "user2@example.com",
-            "Password123!"
-        );
-        
-        UserResponseDto registeredUser1 = userService.registerUser(user1);
-        UserResponseDto registeredUser2 = userService.registerUser(user2);
-        
-        UserUpdateDto updateDto = new UserUpdateDto(
-            "user1", // Try to use user1's username
-            "user2@example.com",
-            null
-        );
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.updateUser(registeredUser2.id(), updateDto))
-            .isInstanceOf(UserAlreadyExistsException.class)
-            .hasMessage("User already exists with username: user1");
-    }
-    
-    @Test
-    @DisplayName("Should handle email conflicts during update")
-    void updateUser_EmailConflict_ThrowsException() {
-        // Given
-        UserRegistrationDto user1 = new UserRegistrationDto(
-            "user1",
-            "user1@example.com",
-            "Password123!"
-        );
-        UserRegistrationDto user2 = new UserRegistrationDto(
-            "user2",
-            "user2@example.com",
-            "Password123!"
-        );
-        
-        UserResponseDto registeredUser1 = userService.registerUser(user1);
-        UserResponseDto registeredUser2 = userService.registerUser(user2);
-        
-        UserUpdateDto updateDto = new UserUpdateDto(
-            "user2",
-            "user1@example.com", // Try to use user1's email
-            null
-        );
-        
-        // When & Then
-        assertThatThrownBy(() -> userService.updateUser(registeredUser2.id(), updateDto))
-            .isInstanceOf(UserAlreadyExistsException.class)
-            .hasMessage("User already exists with email: user1@example.com");
-    }
-    
-    @Test
-    @DisplayName("Should handle update with no changes")
-    void updateUser_NoChanges_Success() {
-        // Given
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-            "testuser",
-            "test@example.com",
-            "Password123!"
-        );
-        UserResponseDto registeredUser = userService.registerUser(registrationDto);
-        
-        UserUpdateDto updateDto = new UserUpdateDto(
-            "testuser", // Same username
-            "test@example.com", // Same email
-            null // No password change
-        );
-        
+    @DisplayName("Should handle multiple user registrations and retrievals")
+    void multipleUserOperations() {
+        // Given - Register multiple users
+        UserRegistrationDto user1Dto = new UserRegistrationDto("user1", "user1@example.com", "Pass123!");
+        UserRegistrationDto user2Dto = new UserRegistrationDto("user2", "user2@example.com", "Pass456!");
+        UserRegistrationDto user3Dto = new UserRegistrationDto("user3", "user3@example.com", "Pass789!");
+
         // When
-        UserResponseDto updatedUser = userService.updateUser(registeredUser.id(), updateDto);
-        
+        UserResponseDto user1 = userService.registerUser(user1Dto);
+        UserResponseDto user2 = userService.registerUser(user2Dto);
+        UserResponseDto user3 = userService.registerUser(user3Dto);
+
         // Then
-        assertThat(updatedUser).isNotNull();
-        assertThat(updatedUser.username()).isEqualTo("testuser");
-        assertThat(updatedUser.email()).isEqualTo("test@example.com");
+        assertThat(user1).isNotNull();
+        assertThat(user2).isNotNull();
+        assertThat(user3).isNotNull();
+        assertThat(user1.username()).isEqualTo("user1");
+        assertThat(user2.username()).isEqualTo("user2");
+        assertThat(user3.username()).isEqualTo("user3");
+
+        // Verify all users can be retrieved
+        assertThat(userService.getUserById(user1.id())).isNotNull();
+        assertThat(userService.getUserById(user2.id())).isNotNull();
+        assertThat(userService.getUserById(user3.id())).isNotNull();
+
+        // Verify pagination works
+        Pageable pageable = PageRequest.of(0, 5);
+        Page<UserResponseDto> allUsers = userService.getAllUsers(pageable);
+        assertThat(allUsers.getTotalElements()).isEqualTo(4); // Including the test user from setUp
+    }
+
+    @Test
+    @DisplayName("Should handle password complexity requirements")
+    void passwordComplexityRequirements() {
+        // Test various password scenarios
+        List<String> validPasswords = List.of(
+                "ValidPass123!", "Complex@456", "Strong@789", "Secure$012"
+        );
+
+        List<String> invalidPasswords = List.of(
+                "weak", "12345678", "abcdefgh", "ABCDEFGH", "!@#$%^&*"
+        );
+
+        // Valid passwords should work
+        for (String password : validPasswords) {
+            UserRegistrationDto validDto = new UserRegistrationDto("user" + password.hashCode(), 
+                    "user" + password.hashCode() + "@example.com", password);
+            UserResponseDto result = userService.registerUser(validDto);
+            assertThat(result).isNotNull();
+        }
+
+        // Invalid passwords should fail
+        for (String password : invalidPasswords) {
+            UserRegistrationDto invalidDto = new UserRegistrationDto("user" + password.hashCode(), 
+                    "user" + password.hashCode() + "@example.com", password);
+            assertThatThrownBy(() -> userService.registerUser(invalidDto))
+                    .isInstanceOf(ValidationException.class);
+        }
     }
 }
