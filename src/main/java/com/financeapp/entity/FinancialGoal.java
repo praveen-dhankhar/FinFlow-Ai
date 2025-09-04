@@ -67,11 +67,11 @@ public class FinancialGoal {
 	private User user;
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = true)
 	private OffsetDateTime createdAt;
 
 	@LastModifiedDate
-	@Column
+	@Column(nullable = true)
 	private OffsetDateTime updatedAt;
 
 	// Constructors

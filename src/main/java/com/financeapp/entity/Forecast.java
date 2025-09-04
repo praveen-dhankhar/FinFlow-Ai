@@ -72,11 +72,11 @@ public class Forecast {
 	private ForecastStatus status = ForecastStatus.ACTIVE;
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = true)
 	private OffsetDateTime createdAt;
 
 	@LastModifiedDate
-	@Column
+	@Column(nullable = true)
 	private OffsetDateTime updatedAt;
 
 	// Constructors

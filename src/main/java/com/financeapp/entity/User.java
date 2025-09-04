@@ -45,11 +45,11 @@ public class User {
 	private String passwordHash;
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = true)
 	private OffsetDateTime createdAt;
 
 	@LastModifiedDate
-	@Column
+	@Column(nullable = true)
 	private OffsetDateTime updatedAt;
 
 	// Relationships

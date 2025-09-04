@@ -59,11 +59,11 @@ public class FinancialData {
 	private TransactionType type;
 
 	@CreatedDate
-	@Column(updatable = false)
+	@Column(updatable = false, nullable = true)
 	private OffsetDateTime createdAt;
 
 	@LastModifiedDate
-	@Column
+	@Column(nullable = true)
 	private OffsetDateTime updatedAt;
 
 	// Constructors

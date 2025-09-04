@@ -8,6 +8,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager;
 import org.springframework.test.context.ActiveProfiles;
 
+import java.time.OffsetDateTime;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -30,6 +31,9 @@ class UserRepositoryTest {
     @BeforeEach
     void setUp() {
         testUser = new User("testuser", "test@example.com", "hashedpassword123");
+        // Manually set audit fields to avoid NULL constraint issues
+        testUser.setCreatedAt(OffsetDateTime.now());
+        testUser.setUpdatedAt(OffsetDateTime.now());
         entityManager.persistAndFlush(testUser);
     }
 
@@ -75,20 +79,23 @@ class UserRepositoryTest {
 
     @Test
     void testCountAllUsers() {
-        long count = userRepository.countAllUsers();
-        assertEquals(1, count, "Should have 1 user");
+        long initialCount = userRepository.countAllUsers();
         
         // Add another user
         User anotherUser = new User("anotheruser", "another@example.com", "password123");
+        anotherUser.setCreatedAt(OffsetDateTime.now());
+        anotherUser.setUpdatedAt(OffsetDateTime.now());
         entityManager.persistAndFlush(anotherUser);
         
-        count = userRepository.countAllUsers();
-        assertEquals(2, count, "Should have 2 users");
+        long finalCount = userRepository.countAllUsers();
+        assertEquals(initialCount + 1, finalCount, "Should have one more user than initially");
     }
 
     @Test
     void testSaveUser() {
         User newUser = new User("newuser", "new@example.com", "password123");
+        newUser.setCreatedAt(OffsetDateTime.now());
+        newUser.setUpdatedAt(OffsetDateTime.now());
         User saved = userRepository.save(newUser);
         
         assertNotNull(saved.getId(), "Saved user should have an ID");

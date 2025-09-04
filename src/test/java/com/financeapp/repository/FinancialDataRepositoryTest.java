@@ -15,6 +15,7 @@ import org.springframework.test.context.ActiveProfiles;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -41,6 +42,8 @@ class FinancialDataRepositoryTest {
     @BeforeEach
     void setUp() {
         testUser = new User("testuser", "test@example.com", "hashedpassword123");
+        testUser.setCreatedAt(OffsetDateTime.now());
+        testUser.setUpdatedAt(OffsetDateTime.now());
         entityManager.persistAndFlush(testUser);
 
         testData = new FinancialData(
@@ -51,6 +54,8 @@ class FinancialDataRepositoryTest {
             "Test transaction",
             TransactionType.EXPENSE
         );
+        testData.setCreatedAt(OffsetDateTime.now());
+        testData.setUpdatedAt(OffsetDateTime.now());
         entityManager.persistAndFlush(testData);
     }
 
