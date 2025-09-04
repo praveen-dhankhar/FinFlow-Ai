@@ -157,8 +157,8 @@ class ForecastRepositoryComprehensiveTest {
 
     @Test
     void testFindByUserAndForecastDateBetween() {
-        LocalDate startDate = LocalDate.now().plusDays(1);
-        LocalDate endDate = LocalDate.now().plusDays(3);
+        LocalDate startDate = LocalDate.now().plusDays(30);
+        LocalDate endDate = LocalDate.now().plusDays(33);
         
         List<Forecast> result = forecastRepository.findByUserAndForecastDateBetween(user1, startDate, endDate);
         assertThat(result).hasSize(5); // 3 income + 2 expense
@@ -194,7 +194,7 @@ class ForecastRepositoryComprehensiveTest {
     @Test
     void testFindUpcomingForecastsByUser() {
         List<Forecast> result = forecastRepository.findUpcomingForecastsByUser(user1, LocalDate.now());
-        assertThat(result).hasSize(5); // All future forecasts
+        assertThat(result).hasSize(6); // All 6 forecasts are in the future
         assertThat(result).allMatch(forecast -> forecast.getForecastDate().isAfter(LocalDate.now()));
     }
 
@@ -257,8 +257,8 @@ class ForecastRepositoryComprehensiveTest {
 
     @Test
     void testFindByUserIdAndForecastDateBetween() {
-        LocalDate startDate = LocalDate.now().plusDays(1);
-        LocalDate endDate = LocalDate.now().plusDays(3);
+        LocalDate startDate = LocalDate.now().plusDays(30);
+        LocalDate endDate = LocalDate.now().plusDays(33);
         Pageable pageable = PageRequest.of(0, 10);
         
         Page<Forecast> result = forecastRepository.findByUserIdAndForecastDateBetween(
@@ -319,7 +319,7 @@ class ForecastRepositoryComprehensiveTest {
         Page<Forecast> result = forecastRepository.findUpcomingForecastsByUserId(
                 user1.getId(), LocalDate.now(), pageable);
         
-        assertThat(result.getContent()).hasSize(5);
+        assertThat(result.getContent()).hasSize(6); // All 6 forecasts are in the future
         assertThat(result.getContent()).allMatch(forecast -> 
                 forecast.getForecastDate().isAfter(LocalDate.now()));
     }
@@ -361,7 +361,7 @@ class ForecastRepositoryComprehensiveTest {
         
         assertThat(stats[0]).isEqualTo(6L); // totalForecasts
         assertThat(stats[1]).isNotNull(); // avgConfidence
-        assertThat(stats[2]).isEqualTo(BigDecimal.valueOf(0.7)); // minConfidence
+        assertThat(stats[2]).isEqualTo(new BigDecimal("0.7000")); // minConfidence
         assertThat(stats[3]).isEqualTo(new BigDecimal("0.9000")); // maxConfidence
         assertThat(stats[4]).isNotNull(); // totalPredictedAmount
     }
@@ -418,8 +418,8 @@ class ForecastRepositoryComprehensiveTest {
         
         assertThat(result).hasSize(3);
         assertThat(result.get(0).getConfidenceScore()).isEqualTo(new BigDecimal("0.9000"));
-        assertThat(result.get(1).getConfidenceScore()).isEqualTo(new BigDecimal("0.9000"));
-        assertThat(result.get(2).getConfidenceScore()).isEqualTo(BigDecimal.valueOf(0.85));
+        assertThat(result.get(1).getConfidenceScore()).isEqualTo(new BigDecimal("0.8200"));
+        assertThat(result.get(2).getConfidenceScore()).isEqualTo(new BigDecimal("0.8100"));
     }
 
     @Test

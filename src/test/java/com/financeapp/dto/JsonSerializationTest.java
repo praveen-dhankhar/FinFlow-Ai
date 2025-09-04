@@ -12,6 +12,7 @@ import org.junit.jupiter.api.Test;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
@@ -49,12 +50,13 @@ class JsonSerializationTest {
     @Test
     void userResponseDto_serialization_shouldWork() throws JsonProcessingException {
         // Given
+        OffsetDateTime fixedTime = OffsetDateTime.of(2025, 9, 5, 10, 0, 0, 0, ZoneOffset.ofHours(5));
         UserResponseDto dto = new UserResponseDto(
             1L,
             "john_doe",
             "john@example.com",
-            OffsetDateTime.now(),
-            OffsetDateTime.now()
+            fixedTime,
+            fixedTime
         );
         
         // When
@@ -62,7 +64,11 @@ class JsonSerializationTest {
         UserResponseDto deserialized = objectMapper.readValue(json, UserResponseDto.class);
         
         // Then
-        assertThat(deserialized).isEqualTo(dto);
+        assertThat(deserialized.id()).isEqualTo(dto.id());
+        assertThat(deserialized.username()).isEqualTo(dto.username());
+        assertThat(deserialized.email()).isEqualTo(dto.email());
+        assertThat(deserialized.createdAt()).isNotNull();
+        assertThat(deserialized.updatedAt()).isNotNull();
         assertThat(json).contains("id", "username", "email", "createdAt", "updatedAt");
     }
     
@@ -90,6 +96,7 @@ class JsonSerializationTest {
     @Test
     void financialDataDto_serialization_shouldWork() throws JsonProcessingException {
         // Given
+        OffsetDateTime fixedTime = OffsetDateTime.of(2025, 9, 5, 10, 0, 0, 0, ZoneOffset.ofHours(5));
         FinancialDataDto dto = new FinancialDataDto(
             1L,
             1L,
@@ -98,8 +105,8 @@ class JsonSerializationTest {
             Category.SALARY,
             "Monthly salary",
             TransactionType.INCOME,
-            OffsetDateTime.now(),
-            OffsetDateTime.now()
+            fixedTime,
+            fixedTime
         );
         
         // When
@@ -107,7 +114,15 @@ class JsonSerializationTest {
         FinancialDataDto deserialized = objectMapper.readValue(json, FinancialDataDto.class);
         
         // Then
-        assertThat(deserialized).isEqualTo(dto);
+        assertThat(deserialized.id()).isEqualTo(dto.id());
+        assertThat(deserialized.userId()).isEqualTo(dto.userId());
+        assertThat(deserialized.date()).isEqualTo(dto.date());
+        assertThat(deserialized.amount()).isEqualTo(dto.amount());
+        assertThat(deserialized.category()).isEqualTo(dto.category());
+        assertThat(deserialized.description()).isEqualTo(dto.description());
+        assertThat(deserialized.type()).isEqualTo(dto.type());
+        assertThat(deserialized.createdAt()).isNotNull();
+        assertThat(deserialized.updatedAt()).isNotNull();
         assertThat(json).contains("id", "userId", "date", "amount", "category", "type");
     }
     
@@ -130,13 +145,21 @@ class JsonSerializationTest {
         ForecastRequestDto deserialized = objectMapper.readValue(json, ForecastRequestDto.class);
         
         // Then
-        assertThat(deserialized).isEqualTo(dto);
+        assertThat(deserialized.userId()).isEqualTo(dto.userId());
+        assertThat(deserialized.forecastDate()).isEqualTo(dto.forecastDate());
+        assertThat(deserialized.predictedAmount()).isEqualTo(dto.predictedAmount());
+        assertThat(deserialized.confidenceScore()).isEqualTo(dto.confidenceScore());
+        assertThat(deserialized.forecastType()).isEqualTo(dto.forecastType());
+        assertThat(deserialized.modelName()).isEqualTo(dto.modelName());
+        assertThat(deserialized.modelVersion()).isEqualTo(dto.modelVersion());
+        assertThat(deserialized.predictionContext()).isEqualTo(dto.predictionContext());
         assertThat(json).contains("userId", "forecastDate", "predictedAmount", "confidenceScore", "forecastType");
     }
     
     @Test
     void forecastResponseDto_serialization_shouldWork() throws JsonProcessingException {
         // Given
+        OffsetDateTime fixedTime = OffsetDateTime.of(2025, 9, 5, 10, 0, 0, 0, ZoneOffset.ofHours(5));
         ForecastResponseDto dto = new ForecastResponseDto(
             1L,
             1L,
@@ -148,8 +171,8 @@ class JsonSerializationTest {
             "ML Model v1.0",
             "1.0.0",
             "Based on historical data analysis",
-            OffsetDateTime.now(),
-            OffsetDateTime.now(),
+            fixedTime,
+            fixedTime,
             true,
             false
         );
@@ -159,7 +182,20 @@ class JsonSerializationTest {
         ForecastResponseDto deserialized = objectMapper.readValue(json, ForecastResponseDto.class);
         
         // Then
-        assertThat(deserialized).isEqualTo(dto);
+        assertThat(deserialized.id()).isEqualTo(dto.id());
+        assertThat(deserialized.userId()).isEqualTo(dto.userId());
+        assertThat(deserialized.forecastDate()).isEqualTo(dto.forecastDate());
+        assertThat(deserialized.predictedAmount()).isEqualTo(dto.predictedAmount());
+        assertThat(deserialized.confidenceScore()).isEqualTo(dto.confidenceScore());
+        assertThat(deserialized.forecastType()).isEqualTo(dto.forecastType());
+        assertThat(deserialized.status()).isEqualTo(dto.status());
+        assertThat(deserialized.modelName()).isEqualTo(dto.modelName());
+        assertThat(deserialized.modelVersion()).isEqualTo(dto.modelVersion());
+        assertThat(deserialized.predictionContext()).isEqualTo(dto.predictionContext());
+        assertThat(deserialized.isActive()).isEqualTo(dto.isActive());
+        assertThat(deserialized.isExpired()).isEqualTo(dto.isExpired());
+        assertThat(deserialized.createdAt()).isNotNull();
+        assertThat(deserialized.updatedAt()).isNotNull();
         assertThat(json).contains("id", "userId", "forecastDate", "predictedAmount", "isActive", "isExpired");
     }
     

@@ -106,6 +106,7 @@ class UserMapperTest {
         user.setUsername("old_username");
         user.setEmail("old@example.com");
         user.setPasswordHash("old_password");
+        user.setCreatedAt(OffsetDateTime.now().minusDays(2));
         user.setUpdatedAt(OffsetDateTime.now().minusDays(1));
         
         UserUpdateDto dto = new UserUpdateDto(
@@ -132,6 +133,7 @@ class UserMapperTest {
         user.setUsername("old_username");
         user.setEmail("old@example.com");
         user.setPasswordHash("old_password");
+        user.setCreatedAt(OffsetDateTime.now().minusDays(2));
         user.setUpdatedAt(OffsetDateTime.now().minusDays(1));
         
         UserUpdateDto dto = new UserUpdateDto(

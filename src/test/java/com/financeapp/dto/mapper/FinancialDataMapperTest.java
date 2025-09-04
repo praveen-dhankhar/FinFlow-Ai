@@ -139,6 +139,7 @@ class FinancialDataMapperTest {
         financialData.setCategory(Category.SALARY);
         financialData.setDescription("Old description");
         financialData.setType(TransactionType.INCOME);
+        financialData.setCreatedAt(OffsetDateTime.now().minusDays(2));
         financialData.setUpdatedAt(OffsetDateTime.now().minusDays(1));
         
         FinancialDataUpdateDto dto = new FinancialDataUpdateDto(

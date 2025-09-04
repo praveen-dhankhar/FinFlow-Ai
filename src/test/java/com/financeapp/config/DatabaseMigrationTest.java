@@ -21,18 +21,23 @@ class DatabaseMigrationTest {
 				"USERS",
 				"FINANCIAL_DATA",
 				"FORECASTS",
-				"CATEGORIES",
-				"USER_SETTINGS"
+				"ACCOUNTS",
+				"TRANSACTIONS",
+				"BUDGETS",
+				"FINANCIAL_GOALS"
 		};
 		for (String table : tables) {
-			Integer count = jdbcTemplate.queryForObject(
-					"SELECT COUNT(*) FROM INFORMATION_SCHEMA.TABLES WHERE UPPER(TABLE_NAME) = ?",
-					Integer.class,
-					table
-			);
-			assertThat(count).isNotNull();
-			assertThat(count).isGreaterThanOrEqualTo(1);
+			try {
+				// Try to query the table directly - if it exists, this won't throw an exception
+				jdbcTemplate.queryForObject("SELECT COUNT(*) FROM " + table, Integer.class);
+				// If we get here, the table exists
+			} catch (Exception e) {
+				// Table doesn't exist or can't be queried
+				throw new AssertionError("Table " + table + " does not exist or cannot be queried", e);
+			}
 		}
+		// If we get here, all tables exist
+		assertThat(true).isTrue(); // All tables exist
 	}
 }
 
