@@ -101,7 +101,7 @@ public class SecurityIntegrationTest {
         // Then login
         String loginRequest = """
                 {
-                    "username": "testuser",
+                    "emailOrUsername": "testuser",
                     "password": "Password@123"
                 }
                 """;
@@ -110,9 +110,9 @@ public class SecurityIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginRequest))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.accessToken").exists())
-                .andExpect(jsonPath("$.refreshToken").exists())
-                .andExpect(jsonPath("$.tokenType").value("Bearer"))
+                .andExpect(jsonPath("$.token.accessToken").exists())
+                .andExpect(jsonPath("$.token.refreshToken").exists())
+                .andExpect(jsonPath("$.token.tokenType").value("Bearer"))
                 .andExpect(jsonPath("$.user.username").value("testuser"));
     }
 
@@ -120,7 +120,7 @@ public class SecurityIntegrationTest {
     void testInvalidLogin() throws Exception {
         String loginRequest = """
                 {
-                    "username": "nonexistent",
+                    "emailOrUsername": "nonexistent",
                     "password": "wrongpassword"
                 }
                 """;
@@ -129,7 +129,7 @@ public class SecurityIntegrationTest {
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(loginRequest))
                 .andExpect(status().isUnauthorized())
-                .andExpect(jsonPath("$.error").value("Invalid username or password"));
+                .andExpect(jsonPath("$.error").value("Invalid credentials"));
     }
 
     @Test
@@ -142,7 +142,7 @@ public class SecurityIntegrationTest {
 
         String loginRequest = """
                 {
-                    "username": "testuser",
+                    "emailOrUsername": "testuser",
                     "password": "Password@123"
                 }
                 """;
@@ -156,7 +156,7 @@ public class SecurityIntegrationTest {
                 .getContentAsString();
 
         // Extract token from response
-        String token = objectMapper.readTree(response).get("accessToken").asText();
+        String token = objectMapper.readTree(response).get("token").get("accessToken").asText();
 
         // Test that the token is valid
         assert jwtTokenProvider.validateToken(token);
@@ -173,7 +173,7 @@ public class SecurityIntegrationTest {
 
         String loginRequest = """
                 {
-                    "username": "testuser",
+                    "emailOrUsername": "testuser",
                     "password": "Password@123"
                 }
                 """;
@@ -186,7 +186,7 @@ public class SecurityIntegrationTest {
                 .getResponse()
                 .getContentAsString();
 
-        String refreshToken = objectMapper.readTree(response).get("refreshToken").asText();
+        String refreshToken = objectMapper.readTree(response).get("token").get("refreshToken").asText();
 
         // Test refresh token
         String refreshRequest = """

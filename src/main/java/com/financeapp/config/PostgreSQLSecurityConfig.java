@@ -13,6 +13,8 @@ import org.springframework.context.annotation.PropertySource;
  * - SSL/TLS settings for production
  * - Database-specific security headers
  * - Performance optimizations for PostgreSQL
+ * 
+ * See postgresql-optimizations.md for detailed indexing and performance strategies.
  */
 @Configuration
 @Profile("prod")
@@ -27,4 +29,11 @@ public class PostgreSQLSecurityConfig {
     // - Connection pool security settings
     // - Database-specific audit configurations
     // - Performance monitoring for PostgreSQL
+    
+    // See postgresql-optimizations.md for:
+    // - Database indexing strategies for auth tables
+    // - Connection pool optimizations
+    // - Query performance tuning
+    // - Security hardening recommendations
+    // - Load testing guidelines
 }

@@ -20,6 +20,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.test.context.support.WithMockUser;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -363,6 +364,7 @@ class UserServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should get all users with pagination")
     void getAllUsers() {
         // Given - Create additional users
@@ -385,6 +387,7 @@ class UserServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "USER")
     @DisplayName("Should search users by criteria")
     void searchUsers() {
         // Given - Create additional users
@@ -453,12 +456,13 @@ class UserServiceIntegrationTest {
     }
 
     @Test
+    @WithMockUser(roles = "ADMIN")
     @DisplayName("Should handle multiple user registrations and retrievals")
     void multipleUserOperations() {
         // Given - Register multiple users
         UserRegistrationDto user1Dto = new UserRegistrationDto("user1", "user1@example.com", "Pass123!");
-        UserRegistrationDto user2Dto = new UserRegistrationDto("user2", "user2@example.com", "Pass456!");
-        UserRegistrationDto user3Dto = new UserRegistrationDto("user3", "user3@example.com", "Pass789!");
+        UserRegistrationDto user2Dto = new UserRegistrationDto("user2", "user2@example.com", "ValidPass456!");
+        UserRegistrationDto user3Dto = new UserRegistrationDto("user3", "user3@example.com", "ValidPass789!");
 
         // When
         UserResponseDto user1 = userService.registerUser(user1Dto);
