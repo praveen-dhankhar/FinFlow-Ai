@@ -40,7 +40,7 @@ public class SecurityTestSuite {
         @DisplayName("Should generate valid JWT token")
         void shouldGenerateValidJwtToken() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "jwtuser", "jwt@example.com", "password123"
+                    "jwtuser", "jwt@example.com", "Password@123"
             );
             userService.registerUser(registrationDto);
 
@@ -55,7 +55,7 @@ public class SecurityTestSuite {
         @DisplayName("Should generate refresh token")
         void shouldGenerateRefreshToken() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "refreshuser", "refresh@example.com", "password123"
+                    "refreshuser", "refresh@example.com", "Password@123"
             );
             userService.registerUser(registrationDto);
 
@@ -93,7 +93,7 @@ public class SecurityTestSuite {
         @DisplayName("Should hash password securely")
         void shouldHashPasswordSecurely() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "secureuser", "secure@example.com", "password123"
+                    "secureuser", "secure@example.com", "Password@123"
             );
 
             var userResponse = userService.registerUser(registrationDto);
@@ -107,12 +107,13 @@ public class SecurityTestSuite {
         @DisplayName("Should authenticate with correct password")
         void shouldAuthenticateWithCorrectPassword() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "authuser", "auth@example.com", "password123"
+                    "authuser", "auth@example.com", "Password@123"
             );
             userService.registerUser(registrationDto);
 
             // authenticateUser returns UserResponseDto, not boolean
-            var userResponse = userService.authenticateUser("authuser", "password123");
+            // authenticate by email per service contract
+            var userResponse = userService.authenticateUser("auth@example.com", "Password@123");
 
             assertThat(userResponse).isNotNull();
             assertThat(userResponse.username()).isEqualTo("authuser");
@@ -122,7 +123,7 @@ public class SecurityTestSuite {
         @DisplayName("Should reject incorrect password")
         void shouldRejectIncorrectPassword() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "rejectuser", "reject@example.com", "password123"
+                    "rejectuser", "reject@example.com", "Password@123"
             );
             userService.registerUser(registrationDto);
 
@@ -151,10 +152,10 @@ public class SecurityTestSuite {
         @DisplayName("Should prevent duplicate email registration")
         void shouldPreventDuplicateEmailRegistration() {
             UserRegistrationDto firstUser = new UserRegistrationDto(
-                    "user1", "duplicate@example.com", "password123"
+                    "user1", "duplicate@example.com", "Password@123"
             );
             UserRegistrationDto secondUser = new UserRegistrationDto(
-                    "user2", "duplicate@example.com", "password456"
+                    "user2", "duplicate@example.com", "Password@123"
             );
 
             userService.registerUser(firstUser);
@@ -167,10 +168,10 @@ public class SecurityTestSuite {
         @DisplayName("Should prevent duplicate username registration")
         void shouldPreventDuplicateUsernameRegistration() {
             UserRegistrationDto firstUser = new UserRegistrationDto(
-                    "duplicateuser", "user1@example.com", "password123"
+                    "duplicateuser", "user1@example.com", "Password@123"
             );
             UserRegistrationDto secondUser = new UserRegistrationDto(
-                    "duplicateuser", "user2@example.com", "password456"
+                    "duplicateuser", "user2@example.com", "Password@123"
             );
 
             userService.registerUser(firstUser);
@@ -183,7 +184,7 @@ public class SecurityTestSuite {
         @DisplayName("Should validate email format")
         void shouldValidateEmailFormat() {
             UserRegistrationDto invalidEmailDto = new UserRegistrationDto(
-                    "invaliduser", "invalid-email", "password123"
+                    "invaliduser", "invalid-email", "Password@123"
             );
 
             assertThatThrownBy(() -> userService.registerUser(invalidEmailDto))
@@ -194,7 +195,7 @@ public class SecurityTestSuite {
         @DisplayName("Should validate username length")
         void shouldValidateUsernameLength() {
             UserRegistrationDto shortUsernameDto = new UserRegistrationDto(
-                    "ab", "short@example.com", "password123"
+                    "ab", "short@example.com", "Password@123"
             );
 
             assertThatThrownBy(() -> userService.registerUser(shortUsernameDto))
@@ -210,7 +211,7 @@ public class SecurityTestSuite {
         @DisplayName("Should work with H2 database")
         void shouldWorkWithH2Database() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "h2user", "h2@example.com", "password123"
+                    "h2user", "h2@example.com", "Password@123"
             );
 
             var userResponse = userService.registerUser(registrationDto);
@@ -226,10 +227,10 @@ public class SecurityTestSuite {
         void shouldHandleConcurrentUserRegistrations() {
             // This test simulates concurrent registration attempts
             UserRegistrationDto user1 = new UserRegistrationDto(
-                    "concurrent1", "concurrent1@example.com", "password123"
+                    "concurrent1", "concurrent1@example.com", "Password@123"
             );
             UserRegistrationDto user2 = new UserRegistrationDto(
-                    "concurrent2", "concurrent2@example.com", "password456"
+                    "concurrent2", "concurrent2@example.com", "Password@123"
             );
 
             var result1 = userService.registerUser(user1);
@@ -244,7 +245,7 @@ public class SecurityTestSuite {
         @DisplayName("Should maintain data integrity during security operations")
         void shouldMaintainDataIntegrityDuringSecurityOperations() {
             UserRegistrationDto registrationDto = new UserRegistrationDto(
-                    "integrityuser", "integrity@example.com", "password123"
+                    "integrityuser", "integrity@example.com", "Password@123"
             );
 
             var userResponse = userService.registerUser(registrationDto);
