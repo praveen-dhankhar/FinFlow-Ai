@@ -16,6 +16,7 @@ public enum Category {
     HOUSING("Housing"),
     FOOD("Food & Dining"),
     TRANSPORTATION("Transportation"),
+    TRANSPORT("Transport"), // Alias for TRANSPORTATION
     HEALTHCARE("Healthcare"),
     ENTERTAINMENT("Entertainment"),
     EDUCATION("Education"),
@@ -40,7 +41,7 @@ public enum Category {
 
     @Override
     public String toString() {
-        return displayName;
+        return name(); // Return the enum name instead of display name for API consistency
     }
 
     /**

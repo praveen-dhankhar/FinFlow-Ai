@@ -76,12 +76,11 @@ class JsonSerializationTest {
     void financialDataCreateDto_serialization_shouldWork() throws JsonProcessingException {
         // Given
         FinancialDataCreateDto dto = new FinancialDataCreateDto(
-            1L,
             LocalDate.now(),
             new BigDecimal("100.50"),
-            Category.SALARY,
+            "SALARY",
             "Monthly salary",
-            TransactionType.INCOME
+            "INCOME"
         );
         
         // When
@@ -102,9 +101,9 @@ class JsonSerializationTest {
             1L,
             LocalDate.now(),
             new BigDecimal("100.50"),
-            Category.SALARY,
+            "SALARY",
             "Monthly salary",
-            TransactionType.INCOME,
+            "INCOME",
             fixedTime,
             fixedTime
         );

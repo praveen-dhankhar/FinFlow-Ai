@@ -263,8 +263,8 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "AND (:dateTo IS NULL OR fd.date <= :dateTo) " +
            "ORDER BY fd.date DESC")
     List<FinancialData> findByUserIdAndFilters(@Param("userId") Long userId,
-                                              @Param("type") String type,
-                                              @Param("category") String category,
+                                              @Param("type") TransactionType type,
+                                              @Param("category") Category category,
                                               @Param("dateFrom") LocalDate dateFrom,
                                               @Param("dateTo") LocalDate dateTo);
 
@@ -294,7 +294,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
      * Find financial data by user ID and type
      */
     @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.type = :type")
-    List<FinancialData> findByUserIdAndType(@Param("userId") Long userId, @Param("type") String type);
+    List<FinancialData> findByUserIdAndType(@Param("userId") Long userId, @Param("type") TransactionType type);
 
     /**
      * Find financial data by ID and user ID
@@ -310,7 +310,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "AND (:startDate IS NULL OR fd.date >= :startDate) " +
            "AND (:endDate IS NULL OR fd.date <= :endDate)")
     BigDecimal getTotalAmountByTypeAndDateRange(@Param("userId") Long userId,
-                                              @Param("type") String type,
+                                              @Param("type") TransactionType type,
                                               @Param("startDate") LocalDate startDate,
                                               @Param("endDate") LocalDate endDate);
 
@@ -322,9 +322,9 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "AND (:startDate IS NULL OR fd.date >= :startDate) " +
            "AND (:endDate IS NULL OR fd.date <= :endDate)")
     Long getCountByTypeAndDateRange(@Param("userId") Long userId,
-                                   @Param("type") String type,
-                                   @Param("startDate") LocalDate startDate,
-                                   @Param("endDate") LocalDate endDate);
+                                  @Param("type") TransactionType type,
+                                  @Param("startDate") LocalDate startDate,
+                                  @Param("endDate") LocalDate endDate);
 
     /**
      * Get average amount by date range
@@ -359,7 +359,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "GROUP BY fd.category, fd.type " +
            "ORDER BY SUM(fd.amount) DESC")
     List<Object[]> getCategoryAggregations(@Param("userId") Long userId,
-                                         @Param("type") String type,
+                                         @Param("type") TransactionType type,
                                          @Param("startDate") LocalDate startDate,
                                          @Param("endDate") LocalDate endDate);
 
@@ -373,7 +373,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "GROUP BY YEAR(fd.date), MONTH(fd.date) " +
            "ORDER BY YEAR(fd.date) DESC, MONTH(fd.date) DESC")
     List<Object[]> getMonthlyTrends(@Param("userId") Long userId,
-                                   @Param("type") String type,
+                                   @Param("type") TransactionType type,
                                    @Param("startDate") LocalDate startDate,
                                    @Param("endDate") LocalDate endDate);
 
@@ -388,7 +388,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "GROUP BY fd.category " +
            "ORDER BY SUM(fd.amount) DESC")
     List<Object[]> getTopCategoriesByAmount(@Param("userId") Long userId,
-                                          @Param("type") String type,
+                                          @Param("type") TransactionType type,
                                           @Param("startDate") LocalDate startDate,
                                           @Param("endDate") LocalDate endDate,
                                           Pageable pageable);
@@ -396,22 +396,27 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
     /**
      * Get trends by period (daily, weekly, monthly, yearly)
      */
-    @Query(value = "SELECT " +
+    @Query("SELECT " +
            "CASE " +
-           "WHEN :period = 'daily' THEN DATE(fd.date) " +
-           "WHEN :period = 'weekly' THEN DATE_TRUNC('week', fd.date) " +
-           "WHEN :period = 'monthly' THEN DATE_TRUNC('month', fd.date) " +
-           "WHEN :period = 'yearly' THEN DATE_TRUNC('year', fd.date) " +
+           "WHEN :period = 'daily' THEN CAST(fd.date AS string) " +
+           "WHEN :period = 'weekly' THEN CONCAT(YEAR(fd.date), '-W', WEEK(fd.date)) " +
+           "WHEN :period = 'monthly' THEN CONCAT(YEAR(fd.date), '-', MONTH(fd.date)) " +
+           "WHEN :period = 'yearly' THEN CAST(YEAR(fd.date) AS string) " +
            "END as period, " +
            "SUM(fd.amount) as total_amount, " +
            "COUNT(fd.id) as transaction_count " +
-           "FROM financial_data fd WHERE fd.user_id = :userId " +
+           "FROM FinancialData fd WHERE fd.user.id = :userId " +
            "AND (:type IS NULL OR fd.type = :type) " +
-           "GROUP BY period " +
-           "ORDER BY period DESC " +
-           "LIMIT :limit", nativeQuery = true)
+           "GROUP BY " +
+           "CASE " +
+           "WHEN :period = 'daily' THEN CAST(fd.date AS string) " +
+           "WHEN :period = 'weekly' THEN CONCAT(YEAR(fd.date), '-W', WEEK(fd.date)) " +
+           "WHEN :period = 'monthly' THEN CONCAT(YEAR(fd.date), '-', MONTH(fd.date)) " +
+           "WHEN :period = 'yearly' THEN CAST(YEAR(fd.date) AS string) " +
+           "END " +
+           "ORDER BY period DESC")
     List<Object[]> getTrendsByPeriod(@Param("userId") Long userId,
                                     @Param("period") String period,
-                                    @Param("type") String type,
-                                    @Param("limit") int limit);
+                                    @Param("type") TransactionType type,
+                                    Pageable pageable);
 }

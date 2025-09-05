@@ -22,6 +22,6 @@ public enum TransactionType {
 
     @Override
     public String toString() {
-        return displayName;
+        return name(); // Return the enum name instead of display name for API consistency
     }
 }

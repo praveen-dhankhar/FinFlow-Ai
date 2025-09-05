@@ -64,8 +64,8 @@ class FinancialDataServiceIntegrationTest {
         // Create test financial data
         testFinancialData = new FinancialData();
         testFinancialData.setUser(testUser);
-        testFinancialData.setType("EXPENSE");
-        testFinancialData.setCategory("FOOD");
+        testFinancialData.setType(com.financeapp.entity.enums.TransactionType.EXPENSE);
+        testFinancialData.setCategory(com.financeapp.entity.enums.Category.FOOD);
         testFinancialData.setAmount(new BigDecimal("25.50"));
         testFinancialData.setDate(LocalDate.now());
         testFinancialData.setDescription("Lunch at restaurant");
@@ -180,11 +180,15 @@ class FinancialDataServiceIntegrationTest {
     @DisplayName("Should create new financial data")
     void createFinancialData_WithValidData_ShouldCreateFinancialData() {
         FinancialDataDto dto = new FinancialDataDto(
-                "INCOME",
-                "SALARY",
-                new BigDecimal("5000.00"),
+                1L,
+                1L,
                 LocalDate.now(),
-                "Monthly salary"
+                new BigDecimal("5000.00"),
+                "SALARY",
+                "Monthly salary",
+                "INCOME",
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
         );
 
         FinancialDataResponseDto result = financialDataService.createFinancialData(dto);
@@ -206,11 +210,15 @@ class FinancialDataServiceIntegrationTest {
     @DisplayName("Should update existing financial data")
     void updateFinancialData_WithValidData_ShouldUpdateFinancialData() {
         FinancialDataDto dto = new FinancialDataDto(
-                "EXPENSE",
-                "ENTERTAINMENT",
-                new BigDecimal("50.00"),
+                1L,
+                1L,
                 LocalDate.now(),
-                "Movie tickets"
+                new BigDecimal("50.00"),
+                "ENTERTAINMENT",
+                "Movie tickets",
+                "EXPENSE",
+                OffsetDateTime.now(),
+                OffsetDateTime.now()
         );
 
         Optional<FinancialDataResponseDto> result = financialDataService.updateFinancialData(testFinancialData.getId(), dto);
@@ -245,9 +253,9 @@ class FinancialDataServiceIntegrationTest {
     @DisplayName("Should perform bulk create")
     void bulkCreateFinancialData_WithValidData_ShouldCreateMultipleRecords() {
         List<FinancialDataDto> dtoList = List.of(
-                new FinancialDataDto("EXPENSE", "FOOD", new BigDecimal("15.00"), LocalDate.now(), "Breakfast"),
-                new FinancialDataDto("EXPENSE", "TRANSPORT", new BigDecimal("5.00"), LocalDate.now(), "Bus fare"),
-                new FinancialDataDto("INCOME", "BONUS", new BigDecimal("1000.00"), LocalDate.now(), "Performance bonus")
+                new FinancialDataDto(1L, 1L, LocalDate.now(), new BigDecimal("15.00"), "FOOD", "Breakfast", "EXPENSE", OffsetDateTime.now(), OffsetDateTime.now()),
+                new FinancialDataDto(2L, 1L, LocalDate.now(), new BigDecimal("5.00"), "TRANSPORT", "Bus fare", "EXPENSE", OffsetDateTime.now(), OffsetDateTime.now()),
+                new FinancialDataDto(3L, 1L, LocalDate.now(), new BigDecimal("1000.00"), "BONUS", "Performance bonus", "INCOME", OffsetDateTime.now(), OffsetDateTime.now())
         );
 
         Map<String, Object> result = financialDataService.bulkCreateFinancialData(dtoList);
@@ -499,8 +507,8 @@ class FinancialDataServiceIntegrationTest {
         for (int i = 0; i < count; i++) {
             FinancialData data = new FinancialData();
             data.setUser(testUser);
-            data.setType("EXPENSE");
-            data.setCategory("FOOD");
+            data.setType(com.financeapp.entity.enums.TransactionType.EXPENSE);
+            data.setCategory(com.financeapp.entity.enums.Category.FOOD);
             data.setAmount(new BigDecimal(10 + i * 5));
             data.setDate(LocalDate.now().minusDays(i));
             data.setDescription("Test expense " + i);
@@ -514,8 +522,8 @@ class FinancialDataServiceIntegrationTest {
         for (int i = 0; i < count; i++) {
             FinancialData data = new FinancialData();
             data.setUser(testUser);
-            data.setType(type);
-            data.setCategory(category);
+            data.setType(com.financeapp.entity.enums.TransactionType.valueOf(type));
+            data.setCategory(com.financeapp.entity.enums.Category.valueOf(category));
             data.setAmount(new BigDecimal(10 + i * 5));
             data.setDate(LocalDate.now().minusDays(i));
             data.setDescription("Test " + type.toLowerCase() + " " + i);
@@ -529,8 +537,8 @@ class FinancialDataServiceIntegrationTest {
         for (int i = 0; i < count; i++) {
             FinancialData data = new FinancialData();
             data.setUser(testUser);
-            data.setType("EXPENSE");
-            data.setCategory("FOOD");
+            data.setType(com.financeapp.entity.enums.TransactionType.EXPENSE);
+            data.setCategory(com.financeapp.entity.enums.Category.FOOD);
             data.setAmount(new BigDecimal(10 + i * 5));
             data.setDate(date);
             data.setDescription("Test expense on " + date);
@@ -544,8 +552,8 @@ class FinancialDataServiceIntegrationTest {
         for (int i = 0; i < count; i++) {
             FinancialData data = new FinancialData();
             data.setUser(testUser);
-            data.setType("EXPENSE");
-            data.setCategory("FOOD");
+            data.setType(com.financeapp.entity.enums.TransactionType.EXPENSE);
+            data.setCategory(com.financeapp.entity.enums.Category.FOOD);
             data.setAmount(amount);
             data.setDate(LocalDate.now());
             data.setDescription("Test expense with amount " + amount);
@@ -559,8 +567,8 @@ class FinancialDataServiceIntegrationTest {
         for (int i = 0; i < count; i++) {
             FinancialData data = new FinancialData();
             data.setUser(testUser);
-            data.setType("EXPENSE");
-            data.setCategory(category);
+            data.setType(com.financeapp.entity.enums.TransactionType.EXPENSE);
+            data.setCategory(com.financeapp.entity.enums.Category.valueOf(category));
             data.setAmount(amount);
             data.setDate(LocalDate.now());
             data.setDescription("Test expense with amount " + amount);

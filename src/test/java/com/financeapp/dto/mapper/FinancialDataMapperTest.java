@@ -88,12 +88,11 @@ class FinancialDataMapperTest {
     void toEntity_validCreateDto_shouldReturnFinancialData() {
         // Given
         FinancialDataCreateDto dto = new FinancialDataCreateDto(
-            1L,
             LocalDate.now(),
             new BigDecimal("100.50"),
-            Category.SALARY,
+            "SALARY",
             "Monthly salary",
-            TransactionType.INCOME
+            "INCOME"
         );
         
         // When
@@ -115,8 +114,8 @@ class FinancialDataMapperTest {
     void toEntity_nullDtoOrUser_shouldReturnNull() {
         // Given
         FinancialDataCreateDto dto = new FinancialDataCreateDto(
-            1L, LocalDate.now(), new BigDecimal("100.50"), 
-            Category.SALARY, "Test", TransactionType.INCOME
+            LocalDate.now(), new BigDecimal("100.50"), 
+            "SALARY", "Test", "INCOME"
         );
         
         // When
@@ -145,9 +144,9 @@ class FinancialDataMapperTest {
         FinancialDataUpdateDto dto = new FinancialDataUpdateDto(
             LocalDate.now(),
             new BigDecimal("200.00"),
-            Category.ENTERTAINMENT,
+            "ENTERTAINMENT",
             "New description",
-            TransactionType.EXPENSE
+            "EXPENSE"
         );
         
         // When
@@ -156,9 +155,9 @@ class FinancialDataMapperTest {
         // Then
         assertThat(financialData.getDate()).isEqualTo(dto.date());
         assertThat(financialData.getAmount()).isEqualTo(dto.amount());
-        assertThat(financialData.getCategory()).isEqualTo(dto.category());
+        assertThat(financialData.getCategory().toString()).isEqualTo(dto.category());
         assertThat(financialData.getDescription()).isEqualTo(dto.description());
-        assertThat(financialData.getType()).isEqualTo(dto.type());
+        assertThat(financialData.getType().toString()).isEqualTo(dto.type());
         assertThat(financialData.getUpdatedAt()).isAfter(financialData.getCreatedAt());
     }
     
@@ -199,7 +198,7 @@ class FinancialDataMapperTest {
         // Given
         FinancialData financialData = new FinancialData();
         FinancialDataUpdateDto dto = new FinancialDataUpdateDto(
-            LocalDate.now(), new BigDecimal("100.00"), Category.SALARY, "Test", TransactionType.INCOME
+            LocalDate.now(), new BigDecimal("100.00"), "SALARY", "Test", "INCOME"
         );
         
         // When & Then

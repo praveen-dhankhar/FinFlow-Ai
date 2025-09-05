@@ -212,8 +212,12 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         logger.info("Exporting financial data in {} format", format);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = (type != null && !type.trim().isEmpty()) 
+                ? TransactionType.valueOf(type.toUpperCase()) : null;
+        Category categoryEnum = (category != null && !category.trim().isEmpty()) 
+                ? Category.valueOf(category.toUpperCase()) : null;
         List<FinancialData> financialDataList = financialDataRepository.findByUserIdAndFilters(
-                currentUserId, type, category, dateFrom, dateTo);
+                currentUserId, transactionType, categoryEnum, dateFrom, dateTo);
         
         if ("csv".equalsIgnoreCase(format)) {
             return exportToCsv(financialDataList);
@@ -233,9 +237,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         
         // Use database-optimized queries
         BigDecimal totalIncome = financialDataRepository.getTotalAmountByTypeAndDateRange(
-                currentUserId, "INCOME", dateFrom, dateTo);
+                currentUserId, TransactionType.INCOME, dateFrom, dateTo);
         BigDecimal totalExpense = financialDataRepository.getTotalAmountByTypeAndDateRange(
-                currentUserId, "EXPENSE", dateFrom, dateTo);
+                currentUserId, TransactionType.EXPENSE, dateFrom, dateTo);
         Long totalTransactions = financialDataRepository.getCountByTypeAndDateRange(
                 currentUserId, null, dateFrom, dateTo);
         BigDecimal averageAmount = financialDataRepository.getAverageAmountByDateRange(
@@ -261,8 +265,10 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         logger.info("Fetching category aggregations - type: {}, dateFrom: {}, dateTo: {}", type, dateFrom, dateTo);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = (type != null && !type.trim().isEmpty()) 
+                ? TransactionType.valueOf(type.toUpperCase()) : null;
         List<Object[]> results = financialDataRepository.getCategoryAggregations(
-                currentUserId, type, dateFrom, dateTo);
+                currentUserId, transactionType, dateFrom, dateTo);
         
         List<Map<String, Object>> aggregations = results.stream()
                 .map(row -> {
@@ -289,8 +295,10 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         LocalDate endDate = LocalDate.now();
         LocalDate startDate = endDate.minusMonths(months - 1).withDayOfMonth(1);
         
+        TransactionType transactionType = (type != null && !type.trim().isEmpty()) 
+                ? TransactionType.valueOf(type.toUpperCase()) : null;
         List<Object[]> results = financialDataRepository.getMonthlyTrends(
-                currentUserId, type, startDate, endDate);
+                currentUserId, transactionType, startDate, endDate);
         
         List<Map<String, Object>> trends = results.stream()
                 .map(row -> {
@@ -395,8 +403,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         logger.info("Fetching financial data by type: {}", type);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = TransactionType.valueOf(type.toUpperCase());
         List<FinancialData> financialDataList = financialDataRepository.findByUserIdAndType(
-                currentUserId, type);
+                currentUserId, transactionType);
         
         return financialDataList.stream()
                 .map(financialDataMapper::toResponseDto)
@@ -410,8 +419,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
                    type, startDate, endDate);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = TransactionType.valueOf(type.toUpperCase());
         BigDecimal total = financialDataRepository.getTotalAmountByTypeAndDateRange(
-                currentUserId, type, startDate, endDate);
+                currentUserId, transactionType, startDate, endDate);
         
         return total != null ? total : BigDecimal.ZERO;
     }
@@ -436,8 +446,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
                    type, startDate, endDate);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = TransactionType.valueOf(type.toUpperCase());
         Long count = financialDataRepository.getCountByTypeAndDateRange(
-                currentUserId, type, startDate, endDate);
+                currentUserId, transactionType, startDate, endDate);
         
         return count != null ? count : 0L;
     }
@@ -449,8 +460,10 @@ public class FinancialDataServiceImpl implements FinancialDataService {
                    type, startDate, endDate, limit);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = (type != null && !type.trim().isEmpty()) 
+                ? TransactionType.valueOf(type.toUpperCase()) : null;
         List<Object[]> results = financialDataRepository.getTopCategoriesByAmount(
-                currentUserId, type, startDate, endDate, PageRequest.of(0, limit));
+                currentUserId, transactionType, startDate, endDate, PageRequest.of(0, limit));
         
         return results.stream()
                 .map(row -> {
@@ -469,8 +482,10 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         logger.info("Fetching trends by period - period: {}, type: {}, limit: {}", period, type, limit);
         
         Long currentUserId = getCurrentUserId();
+        TransactionType transactionType = (type != null && !type.trim().isEmpty()) 
+                ? TransactionType.valueOf(type.toUpperCase()) : null;
         List<Object[]> results = financialDataRepository.getTrendsByPeriod(
-                currentUserId, period, type, limit);
+                currentUserId, period, transactionType, PageRequest.of(0, limit));
         
         return results.stream()
                 .map(row -> {
@@ -556,6 +571,7 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         
         try {
             com.fasterxml.jackson.databind.ObjectMapper mapper = new com.fasterxml.jackson.databind.ObjectMapper();
+            mapper.registerModule(new com.fasterxml.jackson.datatype.jsr310.JavaTimeModule());
             return mapper.writeValueAsString(jsonData);
         } catch (Exception e) {
             logger.error("Error converting to JSON", e);
