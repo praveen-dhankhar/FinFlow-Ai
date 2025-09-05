@@ -68,6 +68,23 @@ logging:
   level:
     root: INFO
     org.springframework: INFO
+    com.financeapp: DEBUG
+
+# JWT Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:finance-forecast-app-super-secret-key-for-jwt-token-generation-2024}
+    expiration: ${JWT_EXPIRATION:86400000} # 24 hours in milliseconds
+    refresh-expiration: ${JWT_REFRESH_EXPIRATION:604800000} # 7 days in milliseconds
+
+# Security Configuration
+security:
+  cors:
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:3000,http://localhost:8080}
+    allowed-methods: GET,POST,PUT,DELETE,OPTIONS,PATCH
+    allowed-headers: "*"
+    allow-credentials: true
+    max-age: 3600
 
 ---
 spring:
