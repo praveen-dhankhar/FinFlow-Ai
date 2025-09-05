@@ -29,13 +29,13 @@ public record FinancialDataDto(
     BigDecimal amount,
     
     @JsonProperty("category")
-    Category category,
+    String category,
     
     @JsonProperty("description")
     String description,
     
     @JsonProperty("type")
-    TransactionType type,
+    String type,
     
     @JsonProperty("createdAt")
     OffsetDateTime createdAt,
@@ -57,11 +57,11 @@ public record FinancialDataDto(
         if (amount == null || amount.compareTo(BigDecimal.ZERO) <= 0) {
             throw new IllegalArgumentException("Amount must be positive");
         }
-        if (category == null) {
-            throw new IllegalArgumentException("Category cannot be null");
+        if (category == null || category.trim().isEmpty()) {
+            throw new IllegalArgumentException("Category cannot be null or empty");
         }
-        if (type == null) {
-            throw new IllegalArgumentException("Type cannot be null");
+        if (type == null || type.trim().isEmpty()) {
+            throw new IllegalArgumentException("Type cannot be null or empty");
         }
     }
 }

@@ -1,8 +1,6 @@
 package com.financeapp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.financeapp.entity.enums.Category;
-import com.financeapp.entity.enums.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
@@ -23,29 +21,14 @@ public record FinancialDataUpdateDto(
     BigDecimal amount,
     
     @JsonProperty("category")
-    Category category,
+    @Size(max = 50, message = "Category must not exceed 50 characters")
+    String category,
     
     @JsonProperty("description")
     @Size(max = 500, message = "Description must not exceed 500 characters")
     String description,
     
     @JsonProperty("type")
-    TransactionType type
-) {
-    public FinancialDataUpdateDto {
-        if (amount != null && amount.compareTo(BigDecimal.ZERO) <= 0) {
-            throw new IllegalArgumentException("Amount must be positive");
-        }
-        if (description != null) {
-            description = description.trim();
-        }
-    }
-    
-    /**
-     * Check if any field is being updated
-     */
-    public boolean hasUpdates() {
-        return date != null || amount != null || category != null || 
-               description != null || type != null;
-    }
-}
+    @Size(max = 20, message = "Type must not exceed 20 characters")
+    String type
+) {}

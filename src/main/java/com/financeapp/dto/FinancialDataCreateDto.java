@@ -1,9 +1,8 @@
 package com.financeapp.dto;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.financeapp.entity.enums.Category;
-import com.financeapp.entity.enums.TransactionType;
 import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.PastOrPresent;
 import jakarta.validation.constraints.Size;
@@ -15,10 +14,6 @@ import java.time.LocalDate;
  * DTO for creating financial data
  */
 public record FinancialDataCreateDto(
-    @JsonProperty("userId")
-    @NotNull(message = "User ID is required")
-    Long userId,
-    
     @JsonProperty("date")
     @NotNull(message = "Date is required")
     @PastOrPresent(message = "Date cannot be in the future")
@@ -30,20 +25,16 @@ public record FinancialDataCreateDto(
     BigDecimal amount,
     
     @JsonProperty("category")
-    @NotNull(message = "Category is required")
-    Category category,
+    @NotBlank(message = "Category is required")
+    @Size(max = 50, message = "Category must not exceed 50 characters")
+    String category,
     
     @JsonProperty("description")
     @Size(max = 500, message = "Description must not exceed 500 characters")
     String description,
     
     @JsonProperty("type")
-    @NotNull(message = "Type is required")
-    TransactionType type
-) {
-    public FinancialDataCreateDto {
-        if (description != null) {
-            description = description.trim();
-        }
-    }
-}
+    @NotBlank(message = "Type is required")
+    @Size(max = 20, message = "Type must not exceed 20 characters")
+    String type
+) {}

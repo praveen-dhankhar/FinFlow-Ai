@@ -7,6 +7,7 @@ import com.financeapp.entity.enums.TransactionType;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -21,7 +22,7 @@ import java.util.Optional;
  * Repository interface for FinancialData entity with comprehensive query methods
  */
 @Repository
-public interface FinancialDataRepository extends JpaRepository<FinancialData, Long> {
+public interface FinancialDataRepository extends JpaRepository<FinancialData, Long>, JpaSpecificationExecutor<FinancialData> {
 
     /**
      * Find all financial data for a specific user
@@ -249,4 +250,168 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
                                       @Param("minAmount") BigDecimal minAmount,
                                       @Param("maxAmount") BigDecimal maxAmount,
                                       Pageable pageable);
+
+    // Additional methods for FinancialDataService
+
+    /**
+     * Find financial data by user ID and filters for export
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND (:category IS NULL OR fd.category = :category) " +
+           "AND (:dateFrom IS NULL OR fd.date >= :dateFrom) " +
+           "AND (:dateTo IS NULL OR fd.date <= :dateTo) " +
+           "ORDER BY fd.date DESC")
+    List<FinancialData> findByUserIdAndFilters(@Param("userId") Long userId,
+                                              @Param("type") String type,
+                                              @Param("category") String category,
+                                              @Param("dateFrom") LocalDate dateFrom,
+                                              @Param("dateTo") LocalDate dateTo);
+
+    /**
+     * Find financial data by user ID and date range
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.date BETWEEN :startDate AND :endDate")
+    List<FinancialData> findByUserIdAndDateBetween(@Param("userId") Long userId,
+                                                  @Param("startDate") LocalDate startDate,
+                                                  @Param("endDate") LocalDate endDate);
+
+    /**
+     * Find financial data by user ID and amount range
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.amount BETWEEN :minAmount AND :maxAmount")
+    List<FinancialData> findByUserIdAndAmountBetween(@Param("userId") Long userId,
+                                                    @Param("minAmount") BigDecimal minAmount,
+                                                    @Param("maxAmount") BigDecimal maxAmount);
+
+    /**
+     * Find financial data by user ID and category
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.category = :category")
+    List<FinancialData> findByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category);
+
+    /**
+     * Find financial data by user ID and type
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.type = :type")
+    List<FinancialData> findByUserIdAndType(@Param("userId") Long userId, @Param("type") String type);
+
+    /**
+     * Find financial data by ID and user ID
+     */
+    @Query("SELECT fd FROM FinancialData fd WHERE fd.id = :id AND fd.user.id = :userId")
+    Optional<FinancialData> findByIdAndUserId(@Param("id") Long id, @Param("userId") Long userId);
+
+    /**
+     * Get total amount by type and date range
+     */
+    @Query("SELECT SUM(fd.amount) FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate)")
+    BigDecimal getTotalAmountByTypeAndDateRange(@Param("userId") Long userId,
+                                              @Param("type") String type,
+                                              @Param("startDate") LocalDate startDate,
+                                              @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get count by type and date range
+     */
+    @Query("SELECT COUNT(fd) FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate)")
+    Long getCountByTypeAndDateRange(@Param("userId") Long userId,
+                                   @Param("type") String type,
+                                   @Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get average amount by date range
+     */
+    @Query("SELECT AVG(fd.amount) FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate)")
+    BigDecimal getAverageAmountByDateRange(@Param("userId") Long userId,
+                                         @Param("startDate") LocalDate startDate,
+                                         @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get average amount by category and date range
+     */
+    @Query("SELECT AVG(fd.amount) FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND fd.category = :category " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate)")
+    BigDecimal getAverageAmountByCategoryAndDateRange(@Param("userId") Long userId,
+                                                    @Param("category") String category,
+                                                    @Param("startDate") LocalDate startDate,
+                                                    @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get category aggregations
+     */
+    @Query("SELECT fd.category, fd.type, SUM(fd.amount), COUNT(fd), AVG(fd.amount) " +
+           "FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate) " +
+           "GROUP BY fd.category, fd.type " +
+           "ORDER BY SUM(fd.amount) DESC")
+    List<Object[]> getCategoryAggregations(@Param("userId") Long userId,
+                                         @Param("type") String type,
+                                         @Param("startDate") LocalDate startDate,
+                                         @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get monthly trends
+     */
+    @Query("SELECT YEAR(fd.date), MONTH(fd.date), SUM(fd.amount), COUNT(fd), AVG(fd.amount) " +
+           "FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND fd.date >= :startDate AND fd.date <= :endDate " +
+           "GROUP BY YEAR(fd.date), MONTH(fd.date) " +
+           "ORDER BY YEAR(fd.date) DESC, MONTH(fd.date) DESC")
+    List<Object[]> getMonthlyTrends(@Param("userId") Long userId,
+                                   @Param("type") String type,
+                                   @Param("startDate") LocalDate startDate,
+                                   @Param("endDate") LocalDate endDate);
+
+    /**
+     * Get top categories by amount
+     */
+    @Query("SELECT fd.category, SUM(fd.amount), COUNT(fd) " +
+           "FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "AND (:startDate IS NULL OR fd.date >= :startDate) " +
+           "AND (:endDate IS NULL OR fd.date <= :endDate) " +
+           "GROUP BY fd.category " +
+           "ORDER BY SUM(fd.amount) DESC")
+    List<Object[]> getTopCategoriesByAmount(@Param("userId") Long userId,
+                                          @Param("type") String type,
+                                          @Param("startDate") LocalDate startDate,
+                                          @Param("endDate") LocalDate endDate,
+                                          Pageable pageable);
+
+    /**
+     * Get trends by period (daily, weekly, monthly, yearly)
+     */
+    @Query(value = "SELECT " +
+           "CASE " +
+           "WHEN :period = 'daily' THEN DATE(fd.date) " +
+           "WHEN :period = 'weekly' THEN DATE_TRUNC('week', fd.date) " +
+           "WHEN :period = 'monthly' THEN DATE_TRUNC('month', fd.date) " +
+           "WHEN :period = 'yearly' THEN DATE_TRUNC('year', fd.date) " +
+           "END as period, " +
+           "SUM(fd.amount) as total_amount, " +
+           "COUNT(fd.id) as transaction_count " +
+           "FROM financial_data fd WHERE fd.user_id = :userId " +
+           "AND (:type IS NULL OR fd.type = :type) " +
+           "GROUP BY period " +
+           "ORDER BY period DESC " +
+           "LIMIT :limit", nativeQuery = true)
+    List<Object[]> getTrendsByPeriod(@Param("userId") Long userId,
+                                    @Param("period") String period,
+                                    @Param("type") String type,
+                                    @Param("limit") int limit);
 }
