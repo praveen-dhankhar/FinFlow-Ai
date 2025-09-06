@@ -70,9 +70,9 @@ class FinancialDataMapperTest {
         assertThat(result.userId()).isEqualTo(1L);
         assertThat(result.date()).isEqualTo(financialData.getDate());
         assertThat(result.amount()).isEqualTo(financialData.getAmount());
-        assertThat(result.category()).isEqualTo(financialData.getCategory());
+        assertThat(result.category()).isEqualTo(financialData.getCategory().toString());
         assertThat(result.description()).isEqualTo(financialData.getDescription());
-        assertThat(result.type()).isEqualTo(financialData.getType());
+        assertThat(result.type()).isEqualTo(financialData.getType().toString());
     }
     
     @Test
@@ -103,9 +103,9 @@ class FinancialDataMapperTest {
         assertThat(result.getUser()).isEqualTo(testUser);
         assertThat(result.getDate()).isEqualTo(dto.date());
         assertThat(result.getAmount()).isEqualTo(dto.amount());
-        assertThat(result.getCategory()).isEqualTo(dto.category());
+        assertThat(result.getCategory().toString()).isEqualTo(dto.category());
         assertThat(result.getDescription()).isEqualTo(dto.description());
-        assertThat(result.getType()).isEqualTo(dto.type());
+        assertThat(result.getType().toString()).isEqualTo(dto.type());
         assertThat(result.getCreatedAt()).isNotNull();
         assertThat(result.getUpdatedAt()).isNotNull();
     }
@@ -226,9 +226,9 @@ class FinancialDataMapperTest {
         assertThat(result).isNotNull();
         assertThat(result.date()).isEqualTo(financialData.getDate());
         assertThat(result.amount()).isEqualTo(financialData.getAmount());
-        assertThat(result.category()).isEqualTo(financialData.getCategory());
+        assertThat(result.category()).isEqualTo(financialData.getCategory().toString());
         assertThat(result.description()).isEqualTo(financialData.getDescription());
-        assertThat(result.type()).isEqualTo(financialData.getType());
+        assertThat(result.type()).isEqualTo(financialData.getType().toString());
     }
     
     @Test

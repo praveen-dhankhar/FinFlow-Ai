@@ -231,7 +231,7 @@ class FinancialDataServiceIntegrationTest {
         // Verify data was updated
         FinancialData updatedData = financialDataRepository.findById(testFinancialData.getId()).orElse(null);
         assertThat(updatedData).isNotNull();
-        assertThat(updatedData.getCategory()).isEqualTo("ENTERTAINMENT");
+        assertThat(updatedData.getCategory().toString()).isEqualTo("ENTERTAINMENT");
         assertThat(updatedData.getAmount()).isEqualTo(new BigDecimal("50.00"));
     }
 

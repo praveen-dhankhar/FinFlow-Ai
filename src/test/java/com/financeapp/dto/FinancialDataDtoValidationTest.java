@@ -61,10 +61,9 @@ class FinancialDataDtoValidationTest {
         Set<ConstraintViolation<FinancialDataCreateDto>> violations = validator.validate(dto);
         
         // Then
-        assertThat(violations).hasSize(6);
+        assertThat(violations).hasSize(5);
         assertThat(violations).extracting("message")
             .contains(
-                "User ID is required",
                 "Date cannot be in the future",
                 "Amount must be greater than 0",
                 "Category is required",

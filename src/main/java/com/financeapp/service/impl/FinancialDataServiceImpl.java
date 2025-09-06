@@ -389,8 +389,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         logger.info("Fetching financial data by category: {}", category);
         
         Long currentUserId = getCurrentUserId();
+        Category categoryEnum = Category.valueOf(category.toUpperCase());
         List<FinancialData> financialDataList = financialDataRepository.findByUserIdAndCategory(
-                currentUserId, category);
+                currentUserId, categoryEnum);
         
         return financialDataList.stream()
                 .map(financialDataMapper::toResponseDto)
@@ -433,8 +434,9 @@ public class FinancialDataServiceImpl implements FinancialDataService {
                    category, startDate, endDate);
         
         Long currentUserId = getCurrentUserId();
+        Category categoryEnum = Category.valueOf(category.toUpperCase());
         BigDecimal average = financialDataRepository.getAverageAmountByCategoryAndDateRange(
-                currentUserId, category, startDate, endDate);
+                currentUserId, categoryEnum, startDate, endDate);
         
         return average != null ? average : BigDecimal.ZERO;
     }

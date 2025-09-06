@@ -1,6 +1,7 @@
 package com.financeapp.controller;
 
 import com.financeapp.dto.FinancialDataDto;
+import com.financeapp.dto.FinancialDataCreateDto;
 import com.financeapp.entity.FinancialData;
 import com.financeapp.entity.User;
 import com.financeapp.repository.FinancialDataRepository;
@@ -227,16 +228,12 @@ class FinancialDataControllerIntegrationTest {
     @WithMockUser(username = "testuser", roles = "USER")
     @DisplayName("Should return 400 for invalid financial data")
     void createFinancialData_WithInvalidData_ShouldReturn400() throws Exception {
-        FinancialDataDto dto = new FinancialDataDto(
-                1L,
-                1L,
+        FinancialDataCreateDto dto = new FinancialDataCreateDto(
                 LocalDate.now(),
                 new BigDecimal("-10.00"), // Invalid amount
                 "FOOD",
                 "Invalid data",
-                "", // Invalid type
-                OffsetDateTime.now(),
-                OffsetDateTime.now()
+                "" // Invalid type
         );
 
         mockMvc.perform(post("/api/v1/financial-data")
@@ -272,7 +269,7 @@ class FinancialDataControllerIntegrationTest {
         // Verify data was updated
         FinancialData updatedData = financialDataRepository.findById(testFinancialData.getId()).orElse(null);
         assertThat(updatedData).isNotNull();
-        assertThat(updatedData.getCategory()).isEqualTo("ENTERTAINMENT");
+        assertThat(updatedData.getCategory().toString()).isEqualTo("ENTERTAINMENT");
         assertThat(updatedData.getAmount()).isEqualTo(new BigDecimal("50.00"));
     }
 

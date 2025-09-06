@@ -288,7 +288,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
      * Find financial data by user ID and category
      */
     @Query("SELECT fd FROM FinancialData fd WHERE fd.user.id = :userId AND fd.category = :category")
-    List<FinancialData> findByUserIdAndCategory(@Param("userId") Long userId, @Param("category") String category);
+    List<FinancialData> findByUserIdAndCategory(@Param("userId") Long userId, @Param("category") Category category);
 
     /**
      * Find financial data by user ID and type
@@ -344,7 +344,7 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
            "AND (:startDate IS NULL OR fd.date >= :startDate) " +
            "AND (:endDate IS NULL OR fd.date <= :endDate)")
     BigDecimal getAverageAmountByCategoryAndDateRange(@Param("userId") Long userId,
-                                                    @Param("category") String category,
+                                                    @Param("category") Category category,
                                                     @Param("startDate") LocalDate startDate,
                                                     @Param("endDate") LocalDate endDate);
 

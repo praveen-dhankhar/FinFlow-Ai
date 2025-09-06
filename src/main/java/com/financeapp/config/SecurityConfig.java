@@ -66,7 +66,7 @@ public class SecurityConfig {
                 .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 
                 // H2 Console access (development only)
-                .requestMatchers("/h2-console/**").hasRole("DEVELOPER")
+                .requestMatchers("/h2-console/**").permitAll()
                 
                 // Swagger/OpenAPI documentation
                 .requestMatchers("/swagger-ui/**", "/v3/api-docs/**", "/swagger-resources/**").permitAll()

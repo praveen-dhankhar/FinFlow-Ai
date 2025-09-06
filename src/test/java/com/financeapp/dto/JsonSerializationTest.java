@@ -89,7 +89,7 @@ class JsonSerializationTest {
         
         // Then
         assertThat(deserialized).isEqualTo(dto);
-        assertThat(json).contains("userId", "date", "amount", "category", "description", "type");
+        assertThat(json).contains("date", "amount", "category", "description", "type");
     }
     
     @Test

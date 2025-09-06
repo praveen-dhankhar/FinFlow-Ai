@@ -94,14 +94,14 @@ public interface FinancialDataService {
     List<FinancialDataResponseDto> getFinancialDataByAmountRange(java.math.BigDecimal minAmount, java.math.BigDecimal maxAmount);
 
     /**
-     * Get financial data by category
-     */
-    List<FinancialDataResponseDto> getFinancialDataByCategory(String category);
-
-    /**
      * Get financial data by type
      */
     List<FinancialDataResponseDto> getFinancialDataByType(String type);
+
+    /**
+     * Get financial data by category
+     */
+    List<FinancialDataResponseDto> getFinancialDataByCategory(String category);
 
     /**
      * Get total amount by type and date range

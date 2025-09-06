@@ -24,8 +24,8 @@ CREATE INDEX IF NOT EXISTS idx_financial_data_user_type_date ON financial_data(u
 -- User + Category + Date
 CREATE INDEX IF NOT EXISTS idx_financial_data_user_category_date ON financial_data(user_id, category, date);
 
--- User + Date range queries
-CREATE INDEX IF NOT EXISTS idx_financial_data_user_date_range ON financial_data(user_id, date) WHERE date >= CURRENT_DATE - INTERVAL '1 year';
+-- User + Date range queries (H2 compatible)
+CREATE INDEX IF NOT EXISTS idx_financial_data_user_date_range ON financial_data(user_id, date);
 
 -- User + Amount range queries
 CREATE INDEX IF NOT EXISTS idx_financial_data_user_amount_range ON financial_data(user_id, amount);
@@ -37,11 +37,12 @@ CREATE INDEX IF NOT EXISTS idx_financial_data_user_type_category ON financial_da
 CREATE INDEX IF NOT EXISTS idx_financial_data_description ON financial_data(description);
 
 -- Created/Updated timestamp indexes for audit queries
-CREATE INDEX IF NOT EXISTS idx_financial_data_created_at ON financial_data(created_at);
-CREATE INDEX IF NOT EXISTS idx_financial_data_updated_at ON financial_data(updated_at);
+-- These will be created after the audit fields are added in V8
+-- CREATE INDEX IF NOT EXISTS idx_financial_data_created_at ON financial_data(created_at);
+-- CREATE INDEX IF NOT EXISTS idx_financial_data_updated_at ON financial_data(updated_at);
 
--- Composite index for recent data queries
-CREATE INDEX IF NOT EXISTS idx_financial_data_user_created_desc ON financial_data(user_id, created_at DESC);
+-- Composite index for recent data queries (H2 compatible)
+-- CREATE INDEX IF NOT EXISTS idx_financial_data_user_created_desc ON financial_data(user_id, created_at);
 
 -- Partial indexes for active data (if soft delete is implemented)
 -- CREATE INDEX IF NOT EXISTS idx_financial_data_active ON financial_data(user_id, date) WHERE deleted_at IS NULL;
