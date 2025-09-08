@@ -1,4 +1,12 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
@@ -27,7 +35,12 @@ management:
       show-details: when_authorized
 
 server:
+  port: 0
   shutdown: immediate
+
+management:
+  server:
+    port: 0
 
 logging:
   level:

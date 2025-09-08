@@ -1,4 +1,12 @@
 spring:
+  main:
+    allow-bean-definition-overriding: true
+    allow-circular-references: true
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.SecurityFilterAutoConfiguration
+      - org.springframework.boot.autoconfigure.security.servlet.UserDetailsServiceAutoConfiguration
   datasource:
     driver-class-name: org.testcontainers.jdbc.ContainerDatabaseDriver
     url: jdbc:tc:postgresql:16:///financeapp?TC_TMPFS=/var/lib/postgresql/data:rw
@@ -28,7 +36,12 @@ management:
       show-details: when_authorized
 
 server:
+  port: 0
   shutdown: immediate
+
+management:
+  server:
+    port: 0
 
 logging:
   level:
