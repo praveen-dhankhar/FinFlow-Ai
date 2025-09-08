@@ -6,6 +6,7 @@ import com.financeapp.repository.ForecastResultRepository;
 import com.financeapp.repository.UserRepository;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.condition.EnabledIfSystemProperty;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.ActiveProfiles;
@@ -16,7 +17,8 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @ActiveProfiles("test-postgres")
-@Disabled("Enable when running with test-postgres profile and TestContainers")
+@EnabledIfSystemProperty(named = "it.pg", matches = "true")
+@Disabled("Enable with -Dit.pg=true and test-postgres profile")
 public class ForecastServicePostgresIT {
 
     @Autowired
