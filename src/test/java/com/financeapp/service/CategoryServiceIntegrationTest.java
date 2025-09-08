@@ -47,7 +47,7 @@ class CategoryServiceIntegrationTest {
         testUser = new User();
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPassword("password123");
+        testUser.setPasswordHash("password123");
         testUser = userRepository.save(testUser);
     }
 

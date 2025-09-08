@@ -59,7 +59,7 @@ public class CategoryMapper {
         category.setDescription(dto.description());
         category.setColor(dto.color());
         category.setIcon(dto.icon());
-        category.setParentId(dto.parentId());
+        // parentId will be set automatically when parent is set
         category.setSortOrder(dto.sortOrder() != null ? dto.sortOrder() : 0);
         category.setIsActive(dto.isActive() != null ? dto.isActive() : true);
         category.setIsSystem(false);

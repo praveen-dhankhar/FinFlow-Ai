@@ -15,8 +15,8 @@ CREATE TABLE IF NOT EXISTS categories (
     usage_count INTEGER NOT NULL DEFAULT 0,
     last_used_at TIMESTAMP WITH TIME ZONE,
     metadata TEXT, -- JSON metadata column
-    created_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at TIMESTAMP WITH TIME ZONE NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    created_at TIMESTAMP WITH TIME ZONE NOT NULL,
+    updated_at TIMESTAMP WITH TIME ZONE NOT NULL,
     
     CONSTRAINT fk_categories_user FOREIGN KEY (user_id) REFERENCES users(id) ON DELETE CASCADE,
     CONSTRAINT fk_categories_parent FOREIGN KEY (parent_id) REFERENCES categories(id) ON DELETE CASCADE
@@ -102,7 +102,7 @@ COMMENT ON COLUMN categories.last_used_at IS 'Timestamp of last usage';
 COMMENT ON COLUMN categories.sort_order IS 'Order for displaying categories';
 
 -- Insert some default system categories
-INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order) 
+INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order, created_at, updated_at) 
 SELECT 
     'Food & Dining',
     'Restaurants, groceries, and food-related expenses',
@@ -111,14 +111,16 @@ SELECT
     u.id,
     true,
     true,
-    1
+    1,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM categories c 
     WHERE c.name = 'Food & Dining' AND c.user_id = u.id
 );
 
-INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order) 
+INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order, created_at, updated_at) 
 SELECT 
     'Transportation',
     'Gas, public transport, car maintenance',
@@ -127,14 +129,16 @@ SELECT
     u.id,
     true,
     true,
-    2
+    2,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM categories c 
     WHERE c.name = 'Transportation' AND c.user_id = u.id
 );
 
-INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order) 
+INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order, created_at, updated_at) 
 SELECT 
     'Entertainment',
     'Movies, games, hobbies, and entertainment',
@@ -143,14 +147,16 @@ SELECT
     u.id,
     true,
     true,
-    3
+    3,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM categories c 
     WHERE c.name = 'Entertainment' AND c.user_id = u.id
 );
 
-INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order) 
+INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order, created_at, updated_at) 
 SELECT 
     'Salary',
     'Regular salary and employment income',
@@ -159,14 +165,16 @@ SELECT
     u.id,
     true,
     true,
-    4
+    4,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM categories c 
     WHERE c.name = 'Salary' AND c.user_id = u.id
 );
 
-INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order) 
+INSERT INTO categories (name, description, color, icon, user_id, is_system, is_active, sort_order, created_at, updated_at) 
 SELECT 
     'Savings',
     'Money saved for future use',
@@ -175,7 +183,9 @@ SELECT
     u.id,
     true,
     true,
-    5
+    5,
+    CURRENT_TIMESTAMP,
+    CURRENT_TIMESTAMP
 FROM users u
 WHERE NOT EXISTS (
     SELECT 1 FROM categories c 

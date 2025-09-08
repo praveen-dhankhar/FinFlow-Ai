@@ -48,11 +48,11 @@ public class Category {
     @Column(length = 50)
     private String icon;
 
-    @Column(name = "parent_id")
+    @Column(name = "parent_id", insertable = false, updatable = false)
     private Long parentId;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "parent_id", insertable = false, updatable = false, foreignKey = @ForeignKey(name = "fk_categories_parent"))
+    @JoinColumn(name = "parent_id", foreignKey = @ForeignKey(name = "fk_categories_parent"))
     private Category parent;
 
     @OneToMany(mappedBy = "parent", cascade = CascadeType.ALL, fetch = FetchType.LAZY)

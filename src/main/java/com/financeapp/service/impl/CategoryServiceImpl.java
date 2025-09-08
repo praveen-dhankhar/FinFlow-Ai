@@ -54,13 +54,14 @@ public class CategoryServiceImpl implements CategoryService {
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         // Check name uniqueness
-        if (categoryRepository.existsByNameForUser(createDto.name(), currentUserId, null)) {
+        if (categoryRepository.countByNameForUser(createDto.name(), currentUserId, null) > 0) {
             throw new RuntimeException("Category name already exists");
         }
 
         // Validate parent category if provided
+        Category parentCategory = null;
         if (createDto.parentId() != null) {
-            Category parentCategory = categoryRepository.findById(createDto.parentId())
+            parentCategory = categoryRepository.findById(createDto.parentId())
                     .orElseThrow(() -> new RuntimeException("Parent category not found"));
             
             if (!parentCategory.getUser().getId().equals(currentUserId)) {
@@ -74,11 +75,16 @@ public class CategoryServiceImpl implements CategoryService {
 
         Category category = categoryMapper.toEntity(createDto);
         category.setUser(user);
+        category.setParent(parentCategory);
         
         Category savedCategory = categoryRepository.save(category);
         log.info("Created category with ID: {}", savedCategory.getId());
         
-        return categoryMapper.toDto(savedCategory);
+        // Fetch the saved category to get populated relationships
+        Category fetchedCategory = categoryRepository.findById(savedCategory.getId())
+                .orElseThrow(() -> new RuntimeException("Failed to fetch created category"));
+        
+        return categoryMapper.toDto(fetchedCategory);
     }
 
     @Override
@@ -179,7 +185,7 @@ public class CategoryServiceImpl implements CategoryService {
         
         // Check name uniqueness if being updated
         if (updateDto.name() != null) {
-            if (categoryRepository.existsByNameForUser(updateDto.name(), getCurrentUserId(), categoryId)) {
+            if (categoryRepository.countByNameForUser(updateDto.name(), getCurrentUserId(), categoryId) > 0) {
                 throw new RuntimeException("Category name already exists");
             }
         }
@@ -325,6 +331,7 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
+    @Transactional
     public void incrementUsageCount(Long categoryId) {
         log.info("Incrementing usage count for category ID: {}", categoryId);
         
@@ -350,7 +357,7 @@ public class CategoryServiceImpl implements CategoryService {
         log.info("Checking category name availability: {} for category ID: {}", name, categoryId);
         
         Long currentUserId = getCurrentUserId();
-        return !categoryRepository.existsByNameForUser(name, currentUserId, categoryId);
+        return categoryRepository.countByNameForUser(name, currentUserId, categoryId) == 0;
     }
 
     @Override

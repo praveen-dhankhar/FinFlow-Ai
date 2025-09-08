@@ -64,7 +64,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Check email uniqueness if provided
         if (createDto.email() != null && !createDto.email().trim().isEmpty()) {
-            if (userProfileRepository.existsByEmailForOtherUser(createDto.email(), currentUserId)) {
+            if (userProfileRepository.countByEmailForOtherUser(createDto.email(), currentUserId) > 0) {
                 throw new RuntimeException("Email already exists for another user");
             }
         }
@@ -105,7 +105,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Check email uniqueness if being updated
         if (updateDto.email() != null && !updateDto.email().trim().isEmpty()) {
-            if (userProfileRepository.existsByEmailForOtherUser(updateDto.email(), userProfile.getUser().getId())) {
+            if (userProfileRepository.countByEmailForOtherUser(updateDto.email(), userProfile.getUser().getId()) > 0) {
                 throw new RuntimeException("Email already exists for another user");
             }
         }
@@ -126,7 +126,7 @@ public class UserProfileServiceImpl implements UserProfileService {
 
         // Check email uniqueness if being updated
         if (updateDto.email() != null && !updateDto.email().trim().isEmpty()) {
-            if (userProfileRepository.existsByEmailForOtherUser(updateDto.email(), userId)) {
+            if (userProfileRepository.countByEmailForOtherUser(updateDto.email(), userId) > 0) {
                 throw new RuntimeException("Email already exists for another user");
             }
         }
@@ -259,6 +259,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     }
 
     @Override
+    @Transactional
     public void updateLastLogin(Long userId) {
         log.info("Updating last login for user ID: {}", userId);
         
@@ -275,7 +276,7 @@ public class UserProfileServiceImpl implements UserProfileService {
     public boolean isEmailAvailable(String email, Long userId) {
         log.info("Checking email availability: {} for user ID: {}", email, userId);
         
-        return !userProfileRepository.existsByEmailForOtherUser(email, userId);
+        return userProfileRepository.countByEmailForOtherUser(email, userId) == 0;
     }
 
     @Override

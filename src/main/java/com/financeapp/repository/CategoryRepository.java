@@ -4,6 +4,7 @@ import com.financeapp.entity.Category;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -121,6 +122,7 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Update category usage count and last used time
      * Database-agnostic update query
      */
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE Category c SET c.usageCount = c.usageCount + 1, c.lastUsedAt = :usedAt WHERE c.id = :categoryId")
     int incrementUsageCount(@Param("categoryId") Long categoryId, @Param("usedAt") OffsetDateTime usedAt);
 
@@ -142,8 +144,8 @@ public interface CategoryRepository extends JpaRepository<Category, Long> {
      * Check if category name exists for user
      * Optimized query for name uniqueness validation
      */
-    @Query("SELECT COUNT(c) > 0 FROM Category c WHERE c.name = :name AND c.user.id = :userId AND c.id != :categoryId")
-    boolean existsByNameForUser(@Param("name") String name, @Param("userId") Long userId, @Param("categoryId") Long categoryId);
+    @Query("SELECT COUNT(c) FROM Category c WHERE c.name = :name AND c.user.id = :userId AND (:categoryId IS NULL OR c.id != :categoryId)")
+    long countByNameForUser(@Param("name") String name, @Param("userId") Long userId, @Param("categoryId") Long categoryId);
 
     /**
      * Find categories for bulk operations

@@ -46,7 +46,7 @@ class UserProfileServiceIntegrationTest {
         testUser = new User();
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPassword("password123");
+        testUser.setPasswordHash("password123");
         testUser = userRepository.save(testUser);
     }
 
@@ -214,7 +214,13 @@ class UserProfileServiceIntegrationTest {
     @WithMockUser(username = "testuser")
     void isEmailAvailable_WithExistingEmail_ShouldReturnFalse() {
         // Given
-        UserProfile userProfile = new UserProfile(testUser, "David", "Lee");
+        User anotherUser = new User();
+        anotherUser.setUsername("anotheruser");
+        anotherUser.setEmail("another@example.com");
+        anotherUser.setPasswordHash("password123");
+        anotherUser = userRepository.save(anotherUser);
+
+        UserProfile userProfile = new UserProfile(anotherUser, "David", "Lee");
         userProfile.setEmail("existing@example.com");
         userProfileRepository.save(userProfile);
 
@@ -235,7 +241,14 @@ class UserProfileServiceIntegrationTest {
         userProfile1.setLoginCount(10);
         userProfileRepository.save(userProfile1);
 
-        UserProfile userProfile2 = new UserProfile(testUser, "User2", "Test2");
+        // Create a different user for the second profile
+        User anotherUser = new User();
+        anotherUser.setUsername("anotheruser");
+        anotherUser.setEmail("another@example.com");
+        anotherUser.setPasswordHash("password123");
+        anotherUser = userRepository.save(anotherUser);
+
+        UserProfile userProfile2 = new UserProfile(anotherUser, "User2", "Test2");
         userProfile2.setIsPublic(false);
         userProfile2.setEmailNotifications(false);
         userProfile2.setLoginCount(5);

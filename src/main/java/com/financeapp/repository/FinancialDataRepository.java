@@ -394,6 +394,16 @@ public interface FinancialDataRepository extends JpaRepository<FinancialData, Lo
                                           Pageable pageable);
 
     /**
+     * Get daily totals for a user between dates (DB-agnostic)
+     * Returns: [LocalDate, BigDecimal total]
+     */
+    @Query("SELECT fd.date, SUM(fd.amount) FROM FinancialData fd WHERE fd.user.id = :userId " +
+           "AND fd.date BETWEEN :from AND :to GROUP BY fd.date ORDER BY fd.date")
+    List<Object[]> getDailyTotals(@Param("userId") Long userId,
+                                  @Param("from") LocalDate from,
+                                  @Param("to") LocalDate to);
+
+    /**
      * Get trends by period (daily, weekly, monthly, yearly)
      */
     @Query("SELECT " +

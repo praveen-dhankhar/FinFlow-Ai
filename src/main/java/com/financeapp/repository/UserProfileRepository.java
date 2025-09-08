@@ -4,6 +4,7 @@ import com.financeapp.entity.UserProfile;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
@@ -128,6 +129,7 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
      * Update last login time and increment login count
      * Database-agnostic update query
      */
+    @Modifying(clearAutomatically = true)
     @Query("UPDATE UserProfile up SET up.lastLoginAt = :loginTime, up.loginCount = up.loginCount + 1 WHERE up.user.id = :userId")
     int updateLastLogin(@Param("userId") Long userId, @Param("loginTime") OffsetDateTime loginTime);
 
@@ -142,8 +144,8 @@ public interface UserProfileRepository extends JpaRepository<UserProfile, Long> 
      * Check if email exists for other users
      * Optimized query for email uniqueness validation
      */
-    @Query("SELECT COUNT(up) > 0 FROM UserProfile up WHERE up.email = :email AND up.user.id != :userId")
-    boolean existsByEmailForOtherUser(@Param("email") String email, @Param("userId") Long userId);
+    @Query("SELECT COUNT(up) FROM UserProfile up WHERE up.email = :email AND up.user.id != :userId")
+    long countByEmailForOtherUser(@Param("email") String email, @Param("userId") Long userId);
 
     /**
      * PostgreSQL-specific JSON query (commented for H2 compatibility)
