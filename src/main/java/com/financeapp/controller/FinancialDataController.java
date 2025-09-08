@@ -1,6 +1,7 @@
 package com.financeapp.controller;
 
 import com.financeapp.dto.FinancialDataDto;
+import com.financeapp.dto.FinancialDataCreateDto;
 import com.financeapp.dto.FinancialDataResponseDto;
 import com.financeapp.dto.mapper.FinancialDataMapper;
 import com.financeapp.entity.FinancialData;
@@ -88,12 +89,9 @@ public class FinancialDataController {
     @Operation(summary = "Create new financial data")
     @PostMapping
     @PreAuthorize("hasRole('USER')")
-    public ResponseEntity<FinancialDataResponseDto> createFinancialData(@Valid @RequestBody FinancialDataDto financialDataDto) {
-        logger.info("Creating new financial data - type: {}, category: {}, amount: {}", 
-                   financialDataDto.type(), financialDataDto.category(), financialDataDto.amount());
-        
-        FinancialDataResponseDto result = financialDataService.createFinancialData(financialDataDto);
-        
+    public ResponseEntity<FinancialDataResponseDto> createFinancialData(@Valid @RequestBody FinancialDataCreateDto dto) {
+        logger.info("Creating new financial data - type: {}, category: {}, amount: {}", dto.type(), dto.category(), dto.amount());
+        FinancialDataResponseDto result = financialDataService.createFinancialData(dto);
         logger.info("Financial data created successfully with ID: {}", result.id());
         return ResponseEntity.status(HttpStatus.CREATED).body(result);
     }

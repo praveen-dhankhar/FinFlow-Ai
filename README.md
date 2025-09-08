@@ -1,58 +1,60 @@
 # Finance Forecast App
 
-Spring Boot 3 application for personal finance forecasting.
+Production-ready Spring Boot application with multi-database support: H2 for rapid development and PostgreSQL for production.
 
-## Tech stack
-- Java 17+
-- Spring Boot (Web, Data JPA, Security, Actuator)
-- H2 Database (all profiles)
-- Flyway migrations
-- Testcontainers (integration tests)
+## Quick Start
 
-## Run (dev)
-```bash
-mvn spring-boot:run -Dspring-boot.run.profiles=dev
-```
+- Dev (H2):
+  - Prereqs: Java 21, Maven, Docker (optional)
+  - Local: `mvn spring-boot:run -Dspring-boot.run.profiles=dev`
+  - Docker: `docker compose up -d --build`
+- Prod (PostgreSQL):
+  - Docker: `docker compose -f docker-compose.prod.yml up -d --build`
 
-### H2 Console Access
-- URL: `http://localhost:8080/h2-console`
-- JDBC URL: `jdbc:h2:mem:ffadb`
-- Username: `user`
-- Password: `user123`
+Health: `http://localhost:8080/actuator/health`
 
-## Build
-```bash
-mvn clean package
-```
+OpenAPI: `http://localhost:8080/swagger-ui/index.html`
 
-## Profiles
-- dev: H2 in-memory, `ddl-auto=update`, H2 console enabled
-- test: H2 with PostgreSQL mode, Flyway enabled, `ddl-auto=update`
-- prod: H2 in-memory, Flyway enabled, `ddl-auto=update`
+## Databases
 
-## Database Migrations
+- H2 (dev/test): In-memory; fastest feedback. See `application.yml` dev/test profiles
+- PostgreSQL (prod): Reliable, scalable. See `docker-compose.prod.yml`
 
-The application uses Flyway for database migrations. Migration scripts are located in `src/main/resources/db/migration/`:
+See also:
+- Database selection: `docs/database/selection.md`
+- Migration H2 → PostgreSQL: `docs/database/migration-h2-to-postgres.md`
+- Testing strategy: `TESTING.md`
 
-- `V1__create_base_tables.sql`: Creates core tables (users, financial_data, forecasts)
-- `V2__enhance_base_tables.sql`: Adds constraints, indexes, and checks
-- `V3__add_categories_and_settings.sql`: Adds categories and user settings tables
-- `V4__add_jpa_entity_tables.sql`: Adds JPA entity tables (accounts, transactions, budgets, financial_goals)
-- `V999__seed_test_data.sql`: Seeds test data for development
+## Running Tests
 
-### Migration Rollback
-To rollback migrations:
-1. Use Flyway CLI: `flyway migrate -target=2` (rolls back to version 2)
-2. Or manually drop and recreate database for development
+- H2 suite: `mvn verify`
+- PostgreSQL (TestContainers): `mvn -P integration-test -Dspring.profiles.active=integration-test verify`
 
-### Future PostgreSQL Migration
-To switch to PostgreSQL:
-1. Uncomment PostgreSQL configuration in `application.yml`
-2. Set environment variables: `DB_USERNAME` and `DB_PASSWORD`
-3. Update `spring.jpa.hibernate.ddl-auto` to `validate` for production
-4. Ensure PostgreSQL is running and accessible
+## Deployment
 
-## Actuator
-Health and info exposed in dev: `/actuator/health`, `/actuator/info`
+- Dev: `ops/scripts/deploy.sh dev`
+- Prod: `ops/scripts/deploy.sh prod`
+- Rollback: `ops/scripts/rollback.sh`
+
+PostgreSQL backup/restore:
+- Backup: `ops/scripts/backup_postgres.sh`
+- Restore: `ops/scripts/restore_postgres.sh <backup.sql.gz>`
+
+More details:
+- Production deployment guide: `docs/deployment/production.md`
+- Operations runbooks: `docs/operations/runbooks.md`
+- Developer workflow: `docs/development/workflow.md`
+- Performance: `docs/performance/guide.md`
+- Readiness checklist: `docs/readiness/checklist.md`
+
+## Observability
+
+- Actuator, Micrometer metrics, logs configured in `application.yml`
+- Postgres exporter exposed at `:9187` in prod compose
+
+## Security
+
+- Externalize secrets via env vars in prod
+- See `docs/deployment/production.md` and readiness checklist
 
 

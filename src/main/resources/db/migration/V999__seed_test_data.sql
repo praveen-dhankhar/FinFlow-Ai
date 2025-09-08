@@ -6,11 +6,11 @@ INSERT INTO users (username, email, password_hash)
 VALUES ('demo', 'demo@example.com', 'hashed-password-123');
 
 -- Seed categories for demo user
-INSERT INTO categories (name, type, color, user_id)
-SELECT 'FOOD', 'EXPENSE', '#43a047', id FROM users WHERE username = 'demo';
+INSERT INTO categories (name, type, color, user_id, is_system, is_active, sort_order, created_at, updated_at)
+SELECT 'FOOD', 'EXPENSE', '#43a047', id, false, true, 1, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP FROM users WHERE username = 'demo';
 
-INSERT INTO categories (name, type, color, user_id)
-SELECT 'SALARY', 'INCOME', '#1e88e5', id FROM users WHERE username = 'demo';
+INSERT INTO categories (name, type, color, user_id, is_system, is_active, sort_order, created_at, updated_at)
+SELECT 'SALARY', 'INCOME', '#1e88e5', id, false, true, 2, CURRENT_TIMESTAMP, CURRENT_TIMESTAMP FROM users WHERE username = 'demo';
 
 -- Seed financial data
 INSERT INTO financial_data (user_id, date, amount, category, description, type)

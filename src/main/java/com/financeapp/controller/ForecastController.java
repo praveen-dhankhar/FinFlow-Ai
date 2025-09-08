@@ -2,6 +2,7 @@ package com.financeapp.controller;
 
 import com.financeapp.entity.ForecastConfig;
 import com.financeapp.entity.ForecastResult;
+import com.financeapp.dto.ForecastDtos;
 import com.financeapp.service.ForecastService;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
@@ -38,10 +39,12 @@ public class ForecastController {
     @PostMapping("/generate")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
     public CompletableFuture<ResponseEntity<Map<Long, List<ForecastResult>>>> batchGenerate(
-            @RequestParam Long userId,
-            @RequestBody List<ForecastConfig> configs,
-            @RequestParam(defaultValue = "7") int horizonDays) {
-        return forecastService.batchGenerateForecasts(userId, configs, LocalDate.now().plusDays(1), horizonDays)
+            @RequestBody ForecastDtos.BatchGenerateRequest request) {
+        Long userId = request.userId;
+        int horizonDays = request.horizonDays != null ? request.horizonDays : 7;
+        LocalDate startDate = request.startDate != null ? request.startDate : LocalDate.now().plusDays(1);
+        List<ForecastConfig> configs = request.configs;
+        return forecastService.batchGenerateForecasts(userId, configs, startDate, horizonDays)
                 .thenApply(ResponseEntity::ok);
     }
 
@@ -60,12 +63,12 @@ public class ForecastController {
 
     @GetMapping("/insights")
     @PreAuthorize("hasRole('USER') or hasRole('ADMIN')")
-    public ResponseEntity<Map<String, Object>> insights() {
-        // Placeholder for advanced analytics responses
-        return ResponseEntity.ok(Map.of(
-                "topModels", List.of("LR", "SMA"),
-                "notes", "Enable PostgreSQL features for deeper insights"
-        ));
+    public ResponseEntity<ForecastDtos.InsightsDto> insights() {
+        ForecastDtos.InsightsDto dto = new ForecastDtos.InsightsDto();
+        dto.topModels = List.of("LINEAR_REGRESSION", "SMA");
+        dto.aggregates = Map.of("countConfigs", 0, "countResults", 0);
+        dto.notes = "Enable PostgreSQL features for deeper insights";
+        return ResponseEntity.ok(dto);
     }
 }
 

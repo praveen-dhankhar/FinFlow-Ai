@@ -41,7 +41,8 @@ CREATE INDEX IF NOT EXISTS idx_user_profiles_timezone ON user_profiles(timezone)
 
 -- Create unique constraint for email per user (if email is provided)
 -- Note: This allows multiple users to have the same email, but each user can only have one profile
-CREATE UNIQUE INDEX IF NOT EXISTS uk_user_profiles_user_email ON user_profiles(user_id, email) WHERE email IS NOT NULL;
+-- H2 and PostgreSQL both allow multiple NULLs in unique indexes; no WHERE needed
+CREATE UNIQUE INDEX IF NOT EXISTS uk_user_profiles_user_email ON user_profiles(user_id, email);
 
 -- Add constraints for data validation
 ALTER TABLE user_profiles ADD CONSTRAINT chk_user_profiles_email_format 

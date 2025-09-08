@@ -1,6 +1,7 @@
 package com.financeapp.service;
 
 import com.financeapp.dto.FinancialDataDto;
+import com.financeapp.dto.FinancialDataCreateDto;
 import com.financeapp.dto.FinancialDataResponseDto;
 import com.financeapp.entity.FinancialData;
 import org.springframework.data.domain.Page;
@@ -32,6 +33,8 @@ public interface FinancialDataService {
      * Create new financial data
      */
     FinancialDataResponseDto createFinancialData(FinancialDataDto financialDataDto);
+
+    FinancialDataResponseDto createFinancialData(FinancialDataCreateDto financialDataCreateDto);
 
     /**
      * Update financial data

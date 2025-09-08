@@ -1,6 +1,7 @@
 package com.financeapp.service.impl;
 
 import com.financeapp.dto.FinancialDataDto;
+import com.financeapp.dto.FinancialDataCreateDto;
 import com.financeapp.dto.FinancialDataResponseDto;
 import com.financeapp.dto.mapper.FinancialDataMapper;
 import com.financeapp.entity.FinancialData;
@@ -97,6 +98,45 @@ public class FinancialDataServiceImpl implements FinancialDataService {
         
         logger.info("Financial data created successfully with ID: {}", savedFinancialData.getId());
         return financialDataMapper.toResponseDto(savedFinancialData);
+    }
+
+    @Override
+    public FinancialDataResponseDto createFinancialData(FinancialDataCreateDto financialDataCreateDto) {
+        logger.info("Creating new financial data (create DTO) - type: {}, category: {}, amount: {}",
+                financialDataCreateDto.type(), financialDataCreateDto.category(), financialDataCreateDto.amount());
+
+        if (financialDataCreateDto == null) {
+            throw new ValidationException("Financial data cannot be null");
+        }
+        if (financialDataCreateDto.amount() == null || financialDataCreateDto.amount().compareTo(BigDecimal.ZERO) <= 0) {
+            throw new ValidationException("Amount must be greater than zero");
+        }
+        if (financialDataCreateDto.type() == null || financialDataCreateDto.type().trim().isEmpty()) {
+            throw new ValidationException("Type is required");
+        }
+        if (financialDataCreateDto.category() == null || financialDataCreateDto.category().trim().isEmpty()) {
+            throw new ValidationException("Category is required");
+        }
+        if (financialDataCreateDto.date() == null) {
+            throw new ValidationException("Date is required");
+        }
+
+        Long currentUserId = getCurrentUserId();
+        User user = userRepository.findById(currentUserId)
+                .orElseThrow(() -> new ValidationException("User not found"));
+
+        FinancialData financialData = new FinancialData();
+        financialData.setUser(user);
+        financialData.setDate(financialDataCreateDto.date());
+        financialData.setAmount(financialDataCreateDto.amount());
+        financialData.setCategory(Category.valueOf(financialDataCreateDto.category()));
+        financialData.setDescription(financialDataCreateDto.description());
+        financialData.setType(TransactionType.valueOf(financialDataCreateDto.type()));
+        financialData.setCreatedAt(java.time.OffsetDateTime.now());
+        financialData.setUpdatedAt(java.time.OffsetDateTime.now());
+
+        FinancialData saved = financialDataRepository.save(financialData);
+        return financialDataMapper.toResponseDto(saved);
     }
 
     @Override

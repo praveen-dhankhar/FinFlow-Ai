@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+  app:
+    build:
+      context: .
+    image: finance-forecast-app:dev
+    environment:
+      - SPRING_PROFILES_ACTIVE=dev
+      - JAVA_OPTS=-Xms256m -Xmx512m
+    ports:
+      - "8080:8080"
+    depends_on:
+      app-wait:
+        condition: service_completed_successfully
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 5s
+      retries: 5
+  app-wait:
+    image: alpine:3.20
+    command: ["sh","-c","echo H2 dev mode ready"]
+  # H2 is embedded; no separate container. App runs with in-memory H2.
