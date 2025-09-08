@@ -29,5 +29,15 @@ jobs:
         with:
           name: surefire-${{ matrix.profile }}
           path: target/surefire-reports
+      - name: Print failing tests summary
+        if: failure()
+        run: |
+          if ls target/surefire-reports/*.txt >/dev/null 2>&1; then
+            echo "=== Matching errors in surefire reports ==="
+            grep -nE "Failed to load ApplicationContext|DuplicateKeyException|Caused by|Exception" target/surefire-reports/*.txt || true
+            echo "=== First 120 lines of each report ==="
+            for f in target/surefire-reports/*.txt; do
+              echo "--- $f"; head -n 120 "$f"; done || true
+          fi
 
 
