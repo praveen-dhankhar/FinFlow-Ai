@@ -12,6 +12,7 @@ jobs:
       DB_SSLMODE: "disable"
       TESTCONTAINERS_RYUK_DISABLED: "true"
     strategy:
+      fail-fast: false
       matrix:
         profile: [test, integration-test]
     steps:
@@ -21,6 +22,11 @@ jobs:
         with:
           distribution: temurin
           java-version: '21'
+          cache: 'maven'
+      - name: Show Java and Maven versions
+        run: |
+          java -version
+          mvn -v
       - name: Build & Test (${{ matrix.profile }})
         run: mvn -B -DfailIfNoTests=false -Dspring.profiles.active=${{ matrix.profile }} verify
       - name: Archive surefire reports
