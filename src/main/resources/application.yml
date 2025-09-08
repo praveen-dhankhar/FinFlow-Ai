@@ -15,8 +15,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:ffadb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
     driver-class-name: org.h2.Driver
-    username: user
-    password: user123
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: update
@@ -87,6 +87,8 @@ logging:
     root: INFO
     org.springframework: INFO
     com.financeapp: DEBUG
+  pattern:
+    level: "%5p [cid:%X{correlationId}]"
 
 # JWT Configuration
 app:
@@ -117,8 +119,8 @@ spring:
   datasource:
     url: jdbc:h2:mem:testdb;DB_CLOSE_DELAY=-1
     driver-class-name: org.h2.Driver
-    username: sa
-    password: sa
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
   jpa:
     hibernate:
       ddl-auto: create-drop
@@ -193,7 +195,7 @@ spring:
     activate:
       on-profile: prod
   datasource:
-    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:financeapp}
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:financeapp}?sslmode=${DB_SSLMODE:require}
     driver-class-name: org.postgresql.Driver
     username: ${DB_USERNAME:postgres}
     password: ${DB_PASSWORD:postgres}
@@ -220,6 +222,12 @@ spring:
 
 server:
   port: 8080
+  shutdown: graceful
+  forward-headers-strategy: native
+
+spring:
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 
 ---

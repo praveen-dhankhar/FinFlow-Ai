@@ -1,11 +1,13 @@
-version: "3.9"
 services:
   db:
     image: postgres:16
+    secrets:
+      - pg_user
+      - pg_password
     environment:
       - POSTGRES_DB=finance
-      - POSTGRES_USER=finance
-      - POSTGRES_PASSWORD=finance
+      - POSTGRES_USER_FILE=/run/secrets/pg_user
+      - POSTGRES_PASSWORD_FILE=/run/secrets/pg_password
     ports:
       - "5432:5432"
     volumes:
@@ -23,10 +25,23 @@ services:
     environment:
       - SPRING_PROFILES_ACTIVE=prod
       - JAVA_OPTS=-Xms512m -Xmx1024m
-      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/finance
-      - SPRING_DATASOURCE_USERNAME=finance
-      - SPRING_DATASOURCE_PASSWORD=finance
+      - SPRING_DATASOURCE_URL=jdbc:postgresql://db:5432/finance?sslmode=${DB_SSLMODE:-disable}
+      - SPRING_DATASOURCE_USERNAME_FILE=/run/secrets/pg_user
+      - SPRING_DATASOURCE_PASSWORD_FILE=/run/secrets/pg_password
       - SPRING_JPA_HIBERNATE_DDL_AUTO=validate
+      - SERVER_SHUTDOWN=graceful
+      - SPRING_LIFECYCLE_TIMEOUT_PER_SHUTDOWN_PHASE=30s
+    secrets:
+      - pg_user
+      - pg_password
+    deploy:
+      resources:
+        limits:
+          cpus: "1.0"
+          memory: 1024M
+        reservations:
+          cpus: "0.25"
+          memory: 512M
     ports:
       - "8080:8080"
     depends_on:
@@ -49,4 +64,10 @@ services:
 
 volumes:
   db-data:
+
+secrets:
+  pg_user:
+    file: ./ops/secrets/pg_user.txt
+  pg_password:
+    file: ./ops/secrets/pg_password.txt
 
