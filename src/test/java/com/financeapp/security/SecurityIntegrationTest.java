@@ -18,6 +18,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
+import com.financeapp.testsupport.TestDataUtil;
 import org.springframework.web.context.WebApplicationContext;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -51,6 +52,7 @@ public class SecurityIntegrationTest {
 
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
+    private String seededUsername;
 
     @BeforeEach
     void setUp() {
@@ -61,11 +63,11 @@ public class SecurityIntegrationTest {
         objectMapper = new ObjectMapper();
         userRepository.deleteAll();
 
-        // Seed a known test user for realistic authentication using real components
-        if (!userRepository.existsByUsername("testuser")) {
-            UserRegistrationDto dto = new UserRegistrationDto("testuser", "test@example.com", "Password@123");
-            userService.registerUser(dto);
-        }
+        // Seed a unique test user for realistic authentication using real components
+        String uniqueUsername = TestDataUtil.generateUniqueUsername("testuser");
+        this.seededUsername = uniqueUsername;
+        UserRegistrationDto dto = new UserRegistrationDto(uniqueUsername, uniqueUsername + "@example.com", "Password@123");
+        userService.registerUser(dto);
         userRepository.flush();
     }
 
@@ -112,10 +114,10 @@ public class SecurityIntegrationTest {
         // Then login
         String loginRequest = """
                 {
-                    "emailOrUsername": "testuser",
+                    "emailOrUsername": "%s",
                     "password": "Password@123"
                 }
-                """;
+                """.formatted(seededUsername);
 
         mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -124,7 +126,7 @@ public class SecurityIntegrationTest {
                 .andExpect(jsonPath("$.token.accessToken").exists())
                 .andExpect(jsonPath("$.token.refreshToken").exists())
                 .andExpect(jsonPath("$.token.tokenType").value("Bearer"))
-                .andExpect(jsonPath("$.user.username").value("testuser"));
+                .andExpect(jsonPath("$.user.username").value(seededUsername));
     }
 
     @Test
@@ -148,10 +150,10 @@ public class SecurityIntegrationTest {
         // Login to get a token
         String loginRequest = """
                 {
-                    "emailOrUsername": "testuser",
+                    "emailOrUsername": "%s",
                     "password": "Password@123"
                 }
-                """;
+                """.formatted(seededUsername);
 
         String response = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)
@@ -166,7 +168,7 @@ public class SecurityIntegrationTest {
 
         // Test that the token is valid
         assert jwtTokenProvider.validateToken(token);
-        assert "testuser".equals(jwtTokenProvider.getUsernameFromJWT(token));
+        assert seededUsername.equals(jwtTokenProvider.getUsernameFromJWT(token));
     }
 
     @Test
@@ -174,10 +176,10 @@ public class SecurityIntegrationTest {
         // Login to get tokens
         String loginRequest = """
                 {
-                    "emailOrUsername": "testuser",
+                    "emailOrUsername": "%s",
                     "password": "Password@123"
                 }
-                """;
+                """.formatted(seededUsername);
 
         String response = mockMvc.perform(post("/api/auth/login")
                 .contentType(MediaType.APPLICATION_JSON)

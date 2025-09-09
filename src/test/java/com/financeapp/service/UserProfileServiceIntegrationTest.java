@@ -14,6 +14,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.financeapp.testsupport.TestDatabaseCleaner;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -38,15 +40,22 @@ class UserProfileServiceIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TestDatabaseCleaner cleaner;
+
     private User testUser;
 
     @BeforeEach
     void setUp() {
+        cleaner.clean();
         // Create a test user
         testUser = new User();
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPasswordHash("password123");
+        testUser.setPasswordHash(passwordEncoder.encode("TestPass123!"));
         testUser = userRepository.save(testUser);
     }
 

@@ -15,6 +15,9 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import com.financeapp.testsupport.TestDataUtil;
+import com.financeapp.testsupport.TestDatabaseCleaner;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.List;
 import java.util.Optional;
@@ -40,10 +43,13 @@ class CategoryServiceIntegrationTest {
     private UserRepository userRepository;
 
     private User testUser;
+    @Autowired
+    private TestDatabaseCleaner cleaner;
 
     @BeforeEach
     void setUp() {
-        // Create a test user
+        cleaner.clean();
+        // Create a fixed test user matching @WithMockUser
         testUser = new User();
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");

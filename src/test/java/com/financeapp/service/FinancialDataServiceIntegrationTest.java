@@ -19,6 +19,8 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import com.financeapp.testsupport.TestDatabaseCleaner;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -43,20 +45,25 @@ class FinancialDataServiceIntegrationTest {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private TestDatabaseCleaner cleaner;
+
     private User testUser;
     private FinancialData testFinancialData;
 
     @BeforeEach
     void setUp() {
-        // Clean up database
-        financialDataRepository.deleteAll();
-        userRepository.deleteAll();
+        // Clean all tables in FK-safe order to avoid cross-class residue
+        cleaner.clean();
 
         // Create test user
         testUser = new User();
         testUser.setUsername("testuser");
         testUser.setEmail("test@example.com");
-        testUser.setPasswordHash("$2a$10$test");
+        testUser.setPasswordHash(passwordEncoder.encode("TestPass123!"));
         testUser.setCreatedAt(OffsetDateTime.now());
         testUser.setUpdatedAt(OffsetDateTime.now());
         testUser = userRepository.save(testUser);

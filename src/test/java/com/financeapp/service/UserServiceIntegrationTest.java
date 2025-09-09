@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.security.test.context.support.WithMockUser;
+import com.financeapp.testsupport.TestDatabaseCleaner;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -45,14 +46,17 @@ class UserServiceIntegrationTest {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private TestDatabaseCleaner cleaner;
+
     private User testUser;
     private UserRegistrationDto testRegistrationDto;
     private UserUpdateDto testUpdateDto;
 
     @BeforeEach
     void setUp() {
-        // Clean up database before each test
-        userRepository.deleteAll();
+        // Clean all tables in FK-safe order to avoid cross-class residue
+        cleaner.clean();
 
         // Create test user
         testUser = new User();
