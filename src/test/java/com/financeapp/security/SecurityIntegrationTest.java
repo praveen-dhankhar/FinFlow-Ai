@@ -12,11 +12,14 @@ import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureWebM
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 // import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.context.WebApplicationContext;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 // import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
@@ -25,7 +28,10 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureWebMvc
 @ActiveProfiles("test")
-@Transactional
+@TestPropertySource(properties = {
+        "test.security.permissive=false",
+        "test.auth.bypass-manager=false"
+})
 public class SecurityIntegrationTest {
 
     @Autowired
@@ -40,6 +46,9 @@ public class SecurityIntegrationTest {
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     private MockMvc mockMvc;
     private ObjectMapper objectMapper;
 
@@ -47,9 +56,17 @@ public class SecurityIntegrationTest {
     void setUp() {
         mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
+                .apply(SecurityMockMvcConfigurers.springSecurity())
                 .build();
         objectMapper = new ObjectMapper();
         userRepository.deleteAll();
+
+        // Seed a known test user for realistic authentication using real components
+        if (!userRepository.existsByUsername("testuser")) {
+            UserRegistrationDto dto = new UserRegistrationDto("testuser", "test@example.com", "Password@123");
+            userService.registerUser(dto);
+        }
+        userRepository.flush();
     }
 
     @Test
@@ -66,38 +83,32 @@ public class SecurityIntegrationTest {
     void testProtectedEndpointsRequireAuthentication() throws Exception {
         // Non-existent protected endpoints may return 404 in tests (no controller), so we assert 404
         mockMvc.perform(get("/api/users"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/api/financial-data"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
 
         mockMvc.perform(get("/api/forecasts"))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isUnauthorized());
     }
 
     @Test
     void testUserRegistration() throws Exception {
         UserRegistrationDto registrationDto = new UserRegistrationDto(
-                "testuser", "test@example.com", "Password@123"
+                "newuser", "new@example.com", "Password@123"
         );
 
         mockMvc.perform(post("/api/auth/register")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(objectMapper.writeValueAsString(registrationDto)))
                 .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.username").value("testuser"))
-                .andExpect(jsonPath("$.email").value("test@example.com"))
+                .andExpect(jsonPath("$.username").value("newuser"))
+                .andExpect(jsonPath("$.email").value("new@example.com"))
                 .andExpect(jsonPath("$.id").exists());
     }
 
     @Test
     void testUserLogin() throws Exception {
-        // First register a user
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-                "testuser", "test@example.com", "Password@123"
-        );
-        userService.registerUser(registrationDto);
-
         // Then login
         String loginRequest = """
                 {
@@ -134,12 +145,7 @@ public class SecurityIntegrationTest {
 
     @Test
     void testJwtTokenValidation() throws Exception {
-        // Register and login to get a token
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-                "testuser", "test@example.com", "Password@123"
-        );
-        userService.registerUser(registrationDto);
-
+        // Login to get a token
         String loginRequest = """
                 {
                     "emailOrUsername": "testuser",
@@ -165,12 +171,7 @@ public class SecurityIntegrationTest {
 
     @Test
     void testRefreshToken() throws Exception {
-        // Register and login to get tokens
-        UserRegistrationDto registrationDto = new UserRegistrationDto(
-                "testuser", "test@example.com", "Password@123"
-        );
-        userService.registerUser(registrationDto);
-
+        // Login to get tokens
         String loginRequest = """
                 {
                     "emailOrUsername": "testuser",

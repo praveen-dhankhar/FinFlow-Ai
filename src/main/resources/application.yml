@@ -219,15 +219,13 @@ spring:
     locations:
       - classpath:db/migration
       - classpath:db/postgresql
+  lifecycle:
+    timeout-per-shutdown-phase: 30s
 
 server:
   port: 8080
   shutdown: graceful
   forward-headers-strategy: native
-
-spring:
-  lifecycle:
-    timeout-per-shutdown-phase: 30s
 
 
 ---

@@ -2,6 +2,7 @@ spring:
   main:
     allow-bean-definition-overriding: true
     allow-circular-references: true
+    lazy-initialization: true
   autoconfigure:
     exclude:
       - org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration
@@ -26,7 +27,13 @@ spring:
       - classpath:db/migration
       - classpath:db/postgresql
 
+server:
+  port: 0
+  shutdown: immediate
+
 management:
+  server:
+    port: 0
   endpoints:
     web:
       exposure:
@@ -35,16 +42,10 @@ management:
     health:
       show-details: when_authorized
 
-server:
-  port: 0
-  shutdown: immediate
-
-management:
-  server:
-    port: 0
-
 logging:
   level:
     root: INFO
-    com.financeapp: INFO
+    org.springframework: DEBUG
+    com.financeapp: DEBUG
+    org.testcontainers: INFO
 
