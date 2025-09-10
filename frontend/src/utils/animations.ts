@@ -1,4 +1,5 @@
-const anime = require('animejs');
+import * as Anime from 'animejs';
+const anime: any = (Anime as any).default ?? Anime;
 
 // Fade animations
 export const fadeIn = (targets: string | Element | NodeList, options?: any) => {
@@ -182,7 +183,7 @@ export const countUp = (targets: string | Element | NodeList, endValue: number, 
     round: 1,
     update: function(anim: any) {
       if (targets instanceof Element) {
-        targets.innerHTML = Math.floor(anim.animatables[0].target.innerHTML).toString();
+        (targets as Element).innerHTML = Math.floor((anim as any).animatables[0].target.innerHTML).toString();
       }
     },
     ...options,

@@ -2,19 +2,12 @@ import { defineConfig } from 'vite'
 import react from '@vitejs/plugin-react'
 import path from 'path'
 
-// https://vite.dev/config/
+// https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
   resolve: {
     alias: {
       '@': path.resolve(__dirname, './src'),
-      '@/components': path.resolve(__dirname, './src/components'),
-      '@/pages': path.resolve(__dirname, './src/pages'),
-      '@/services': path.resolve(__dirname, './src/services'),
-      '@/hooks': path.resolve(__dirname, './src/hooks'),
-      '@/utils': path.resolve(__dirname, './src/utils'),
-      '@/types': path.resolve(__dirname, './src/types'),
-      '@/animations': path.resolve(__dirname, './src/animations'),
     },
   },
   server: {
@@ -35,6 +28,8 @@ export default defineConfig({
         manualChunks: {
           vendor: ['react', 'react-dom'],
           router: ['react-router-dom'],
+          query: ['@tanstack/react-query'],
+          ui: ['@headlessui/react', '@heroicons/react'],
           charts: ['recharts'],
           animations: ['animejs'],
         },
@@ -42,6 +37,6 @@ export default defineConfig({
     },
   },
   optimizeDeps: {
-    include: ['react', 'react-dom', 'react-router-dom', 'recharts', 'animejs'],
+    include: ['react', 'react-dom', 'react-router-dom', '@tanstack/react-query'],
   },
 })

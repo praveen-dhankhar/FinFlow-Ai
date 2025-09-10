@@ -1,65 +1,41 @@
 import { useState, useCallback } from 'react';
-import type { LoadingState } from '@/types';
+import type { UseApiReturn } from '../types';
 
-interface UseApiState<T> {
-  data: T | null;
-  loading: LoadingState;
-  error: string | null;
-}
+export function useApi<T>(
+  apiFunction: () => Promise<T>,
+  dependencies: any[] = []
+): UseApiReturn<T> {
+  const [data, setData] = useState<T | null>(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-export function useApi<T = any>(
-  apiCall: (...args: any[]) => Promise<T>
-) {
-  const [state, setState] = useState<UseApiState<T>>({
-    data: null,
-    loading: 'idle',
-    error: null,
-  });
-
-  const execute = useCallback(async (...args: any[]) => {
+  const execute = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    
     try {
-      setState(prev => ({ ...prev, loading: 'loading', error: null }));
-      
-      const result = await apiCall(...args);
-      
-      setState({
-        data: result,
-        loading: 'success',
-        error: null,
-      });
-      
+      const result = await apiFunction();
+      setData(result);
       return result;
-    } catch (error: any) {
-      const errorMessage = error.message || 'An error occurred';
-      setState(prev => ({
-        ...prev,
-        loading: 'error',
-        error: errorMessage,
-      }));
-      throw error;
+    } catch (err: any) {
+      const errorMessage = err?.message || 'An error occurred';
+      setError(errorMessage);
+      throw err;
+    } finally {
+      setLoading(false);
     }
-  }, [apiCall]);
+  }, dependencies);
 
-  const reset = useCallback(() => {
-    setState({
-      data: null,
-      loading: 'idle',
-      error: null,
-    });
-  }, []);
-
-  const clearError = useCallback(() => {
-    setState(prev => ({ ...prev, error: null }));
-  }, []);
+  const refetch = useCallback(() => {
+    return execute();
+  }, [execute]);
 
   return {
-    ...state,
-    execute,
-    reset,
-    clearError,
-    isLoading: state.loading === 'loading',
-    isSuccess: state.loading === 'success',
-    isError: state.loading === 'error',
-    isIdle: state.loading === 'idle',
+    data,
+    loading,
+    error,
+    refetch,
   };
 }
+
+export default useApi;

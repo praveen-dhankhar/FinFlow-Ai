@@ -1,22 +1,23 @@
 # Finance Forecast App - Frontend
 
-A modern React frontend for the Finance Forecast App built with Vite, TypeScript, and Tailwind CSS.
+A modern React 18+ frontend application for the Finance Forecast App, built with Vite, TypeScript, and Tailwind CSS.
 
 ## 🚀 Features
 
-- **Vite** - Lightning fast build tool and dev server
-- **TypeScript** - Type-safe development with strict mode
-- **Tailwind CSS** - Utility-first CSS framework with custom design system
-- **React Router** - Client-side routing
-- **Axios** - HTTP client with interceptors and error handling
-- **Anime.js** - Smooth animations and transitions
-- **Recharts** - Beautiful charts and data visualization
-- **Headless UI** - Accessible UI components
-- **Heroicons** - Beautiful SVG icons
-- **Vitest** - Fast unit testing framework
-- **React Testing Library** - Simple and complete testing utilities
-- **ESLint & Prettier** - Code quality and formatting
-- **Husky** - Git hooks for code quality
+- **React 18+** with TypeScript for type safety
+- **Vite** for fast development and modern bundling
+- **Tailwind CSS** for utility-first styling
+- **React Router DOM** for client-side routing
+- **TanStack Query** for server state management
+- **React Hook Form** for form handling
+- **Axios** for HTTP requests with interceptors
+- **Anime.js** for smooth animations
+- **Recharts** for data visualization
+- **Headless UI** for accessible components
+- **Heroicons** for beautiful icons
+- **Vitest** for unit testing
+- **MSW** for API mocking
+- **ESLint & Prettier** for code quality
 
 ## 📁 Project Structure
 
@@ -24,19 +25,20 @@ A modern React frontend for the Finance Forecast App built with Vite, TypeScript
 src/
 ├── components/          # Reusable UI components
 ├── pages/              # Page components
-├── services/           # API service layer
 ├── hooks/              # Custom React hooks
-├── utils/              # Utility functions
+├── services/           # API services
 ├── types/              # TypeScript type definitions
-├── animations/         # Anime.js animation utilities
-└── test/               # Test setup and utilities
+├── utils/              # Utility functions
+├── contexts/           # React contexts
+├── assets/             # Static assets
+└── test/               # Test utilities and mocks
 ```
 
 ## 🛠️ Development
 
 ### Prerequisites
 
-- Node.js 20.19+ or 22.12+ (Vite requirement)
+- Node.js 20.19+ or 22.12+
 - npm or yarn
 
 ### Installation
@@ -53,7 +55,7 @@ npm run dev
 
 The app will be available at `http://localhost:3000`
 
-### Build
+### Building for Production
 
 ```bash
 npm run build
@@ -88,16 +90,6 @@ npm run format
 npm run format:check
 ```
 
-## 🎨 Design System
-
-The app uses a custom color palette and design tokens:
-
-- **Primary**: Blue tones for main actions
-- **Secondary**: Gray tones for secondary elements
-- **Success**: Green tones for positive actions
-- **Warning**: Yellow/Orange tones for warnings
-- **Error**: Red tones for errors
-
 ## 🔧 Configuration
 
 ### Environment Variables
@@ -105,81 +97,55 @@ The app uses a custom color palette and design tokens:
 Copy `env.example` to `.env.local` and configure:
 
 ```env
-VITE_API_BASE_URL=http://localhost:8080/api
+VITE_API_BASE_URL=http://localhost:8080
 VITE_API_TIMEOUT=10000
 VITE_APP_NAME=Finance Forecast App
 VITE_APP_VERSION=1.0.0
+VITE_DEBUG=true
+VITE_MOCK_API=false
 ```
 
-### API Proxy
+### API Integration
 
-The development server proxies `/api` requests to the Spring Boot backend at `http://localhost:8080`.
+The frontend is configured to proxy API requests to the Spring Boot backend running on port 8080. The proxy configuration is set up in `vite.config.ts`.
 
-## 📦 Key Dependencies
+## 🎨 Styling
 
-- **React 19** - Latest React with concurrent features
-- **Vite 7** - Next generation frontend tooling
-- **TypeScript 5** - Type-safe JavaScript
-- **Tailwind CSS 4** - Utility-first CSS framework
-- **React Router 7** - Declarative routing
-- **Axios** - Promise-based HTTP client
-- **Anime.js** - Lightweight animation library
-- **Recharts** - Composable charting library
-- **Date-fns** - Modern date utility library
+The app uses Tailwind CSS with a custom color palette:
+
+- **Primary**: Blue shades for main actions
+- **Secondary**: Gray shades for secondary elements
+- **Success**: Green shades for positive actions
+- **Warning**: Yellow shades for warnings
+- **Error**: Red shades for errors
 
 ## 🧪 Testing
 
-The project uses Vitest for unit testing with React Testing Library for component testing.
+The project uses Vitest for unit testing and React Testing Library for component testing. MSW (Mock Service Worker) is set up for API mocking during development and testing.
 
-### Test Structure
+## 📦 Build Optimization
 
-- Component tests in `*.test.tsx` files
-- Test utilities in `src/test/`
-- Mock data and helpers available
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm test -- --watch
-
-# Run tests with coverage
-npm run test:coverage
-```
-
-## 🚀 Deployment
-
-The app builds to static files in the `dist/` directory and can be deployed to any static hosting service.
-
-### Build Optimization
+The Vite configuration includes:
 
 - Code splitting with manual chunks
 - Tree shaking for unused code
-- Minification and compression
 - Source maps for debugging
+- Optimized dependencies
 
-## 📝 Scripts
+## 🚀 Deployment
 
-- `dev` - Start development server
-- `build` - Build for production
-- `preview` - Preview production build
-- `test` - Run tests
-- `lint` - Lint code
-- `format` - Format code
-- `prepare` - Setup git hooks
+The built application can be deployed to any static hosting service:
 
-## 🔗 Integration
+1. Run `npm run build`
+2. Deploy the `dist` folder to your hosting service
+3. Configure your hosting service to serve `index.html` for all routes (SPA routing)
 
-This frontend integrates with the Spring Boot backend:
+## 🤝 Contributing
 
-- Authentication via JWT tokens
-- RESTful API communication
-- Real-time data updates
-- Error handling and retry logic
-- Request/response interceptors
+1. Follow the existing code style
+2. Write tests for new features
+3. Ensure all tests pass
+4. Run linting and formatting before committing
 
 ## 📄 License
 
