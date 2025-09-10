@@ -1,6 +1,16 @@
 import '@testing-library/jest-dom'
-import { beforeAll, afterEach, afterAll } from 'vitest'
+import { beforeAll, afterEach, afterAll, vi } from 'vitest'
 import { server } from './mocks/server'
+
+// Mock animejs to be a callable function with needed methods
+vi.mock('animejs', () => {
+  const fn: any = vi.fn(() => ({}))
+  fn.stagger = vi.fn((n: number) => n)
+  fn.remove = vi.fn()
+  fn.pause = vi.fn()
+  fn.play = vi.fn()
+  return { default: fn }
+})
 
 // Establish API mocking before all tests
 beforeAll(() => server.listen())

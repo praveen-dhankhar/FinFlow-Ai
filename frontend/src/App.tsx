@@ -4,6 +4,10 @@ import { QueryProvider } from './contexts/QueryProvider';
 import { AuthProvider } from './contexts/AuthContext';
 import Button from './components/Button';
 import AnimationDemo from './pages/AnimationDemo';
+import ProtectedRoute from './components/auth/ProtectedRoute';
+import AuthLayout from './layouts/AuthLayout';
+import LoginForm from './components/auth/LoginForm';
+import RegisterForm from './components/auth/RegisterForm';
 
 // Placeholder components - these would be actual page components
 const Dashboard = () => (
@@ -33,51 +37,20 @@ const Dashboard = () => (
   </div>
 );
 
-const Login = () => (
-  <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-    <div className="max-w-md w-full space-y-8">
-      <div>
-        <h2 className="mt-6 text-center text-3xl font-extrabold text-gray-900">
-          Sign in to your account
-        </h2>
-      </div>
-      <form className="mt-8 space-y-6">
-        <div className="space-y-4">
-          <div>
-            <label htmlFor="username" className="block text-sm font-medium text-gray-700">
-              Username
-            </label>
-            <input
-              id="username"
-              name="username"
-              type="text"
-              required
-              className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-              placeholder="Enter your username"
-            />
-          </div>
-          <div>
-            <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-              Password
-            </label>
-            <input
-              id="password"
-              name="password"
-              type="password"
-              required
-              className="mt-1 appearance-none relative block w-full px-3 py-2 border border-gray-300 placeholder-gray-500 text-gray-900 rounded-md focus:outline-none focus:ring-primary-500 focus:border-primary-500 focus:z-10 sm:text-sm"
-              placeholder="Enter your password"
-            />
-          </div>
-        </div>
-        <div>
-          <Button type="submit" className="w-full">
-            Sign in
-          </Button>
-        </div>
-      </form>
-    </div>
-  </div>
+const LoginPage = () => (
+  <AuthLayout>
+    <h2 className="text-2xl font-bold text-gray-900 mb-4">Sign in</h2>
+    <LoginForm />
+    <p className="text-sm text-gray-600 mt-4">Don't have an account? <a className="text-blue-600 underline" href="/register">Register</a></p>
+  </AuthLayout>
+);
+
+const RegisterPage = () => (
+  <AuthLayout>
+    <h2 className="text-2xl font-bold text-gray-900 mb-4">Create account</h2>
+    <RegisterForm />
+    <p className="text-sm text-gray-600 mt-4">Already have an account? <a className="text-blue-600 underline" href="/login">Sign in</a></p>
+  </AuthLayout>
 );
 
 const App: React.FC = () => {
@@ -85,14 +58,18 @@ const App: React.FC = () => {
     <QueryProvider>
       <AuthProvider>
         <Router>
-          <div className="App">
-            <Routes>
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Routes>
+            <Route path="/" element={<Navigate to="/dashboard" replace />} />
+            <Route path="/login" element={<LoginPage />} />
+            <Route path="/register" element={<RegisterPage />} />
+
+            <Route element={<ProtectedRoute />}> 
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/login" element={<Login />} />
               <Route path="/animations" element={<AnimationDemo />} />
-            </Routes>
-          </div>
+            </Route>
+
+            <Route path="*" element={<Navigate to="/dashboard" replace />} />
+          </Routes>
         </Router>
       </AuthProvider>
     </QueryProvider>

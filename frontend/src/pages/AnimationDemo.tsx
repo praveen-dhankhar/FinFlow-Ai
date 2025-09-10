@@ -1,4 +1,4 @@
-import React, { useRef } from 'react';
+import React, { useRef, useEffect } from 'react';
 import {
   fadeIn,
   slideInUp,
@@ -20,6 +20,16 @@ const AnimationDemo: React.FC = () => {
   const counterRef = useRef<HTMLDivElement>(null);
   const spinnerRef = useRef<HTMLDivElement>(null);
   const staggerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    // Trigger a quick entrance so the page isn't blank on first load
+    fadeIn('.fade-target');
+    slideInUp('.slide-up-target');
+    slideInDown('.slide-down-target');
+    slideInLeft('.slide-left-target');
+    slideInRight('.slide-right-target');
+    scaleIn('.scale-target');
+  }, []);
 
   const triggerFadeIn = () => {
     fadeIn('.fade-target');
@@ -130,43 +140,43 @@ const AnimationDemo: React.FC = () => {
             <h2 className="text-2xl font-semibold text-gray-800 mb-4">Animation Targets</h2>
             
             {/* Fade Target */}
-            <AnimatedCard className="fade-target opacity-0">
+            <AnimatedCard className="fade-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Fade In Target</h3>
               <p className="text-gray-600">This card will fade in when you click the Fade In button.</p>
             </AnimatedCard>
 
             {/* Slide Up Target */}
-            <AnimatedCard className="slide-up-target opacity-0">
+            <AnimatedCard className="slide-up-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Slide Up Target</h3>
               <p className="text-gray-600">This card will slide up from below when you click the Slide Up button.</p>
             </AnimatedCard>
 
             {/* Slide Down Target */}
-            <AnimatedCard className="slide-down-target opacity-0">
+            <AnimatedCard className="slide-down-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Slide Down Target</h3>
               <p className="text-gray-600">This card will slide down from above when you click the Slide Down button.</p>
             </AnimatedCard>
 
             {/* Slide Left Target */}
-            <AnimatedCard className="slide-left-target opacity-0">
+            <AnimatedCard className="slide-left-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Slide Left Target</h3>
               <p className="text-gray-600">This card will slide in from the left when you click the Slide Left button.</p>
             </AnimatedCard>
 
             {/* Slide Right Target */}
-            <AnimatedCard className="slide-right-target opacity-0">
+            <AnimatedCard className="slide-right-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Slide Right Target</h3>
               <p className="text-gray-600">This card will slide in from the right when you click the Slide Right button.</p>
             </AnimatedCard>
 
             {/* Scale Target */}
-            <AnimatedCard className="scale-target opacity-0">
+            <AnimatedCard className="scale-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Scale Target</h3>
               <p className="text-gray-600">This card will scale in when you click the Scale In button.</p>
             </AnimatedCard>
 
             {/* Bounce Target */}
-            <AnimatedCard className="bounce-target opacity-0">
+            <AnimatedCard className="bounce-target">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Bounce Target</h3>
               <p className="text-gray-600">This card will bounce in when you click the Bounce In button.</p>
             </AnimatedCard>
@@ -186,22 +196,22 @@ const AnimationDemo: React.FC = () => {
             {/* Spinner Target */}
             <AnimatedCard>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Spinner Target</h3>
-              <div ref={spinnerRef} className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full mx-auto"></div>
+              <div ref={spinnerRef} className="w-8 h-8 border-4 border-gray-200 border-t-blue-600 rounded-full mx-auto"></div>
             </AnimatedCard>
 
             {/* Counter Target */}
             <AnimatedCard>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Counter Target</h3>
-              <div ref={counterRef} className="text-3xl font-bold text-primary-600 text-center">0</div>
+              <div ref={counterRef} className="text-3xl font-bold text-blue-600 text-center">0</div>
             </AnimatedCard>
 
             {/* Stagger Target */}
             <div ref={staggerRef} className="space-y-2">
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Stagger Target</h3>
-              <div className="stagger-item opacity-0 bg-primary-100 p-2 rounded">Item 1</div>
-              <div className="stagger-item opacity-0 bg-primary-100 p-2 rounded">Item 2</div>
-              <div className="stagger-item opacity-0 bg-primary-100 p-2 rounded">Item 3</div>
-              <div className="stagger-item opacity-0 bg-primary-100 p-2 rounded">Item 4</div>
+              <div className="stagger-item bg-blue-50 p-2 rounded">Item 1</div>
+              <div className="stagger-item bg-blue-50 p-2 rounded">Item 2</div>
+              <div className="stagger-item bg-blue-50 p-2 rounded">Item 3</div>
+              <div className="stagger-item bg-blue-50 p-2 rounded">Item 4</div>
             </div>
           </div>
         </div>

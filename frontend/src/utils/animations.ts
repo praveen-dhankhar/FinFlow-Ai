@@ -1,5 +1,16 @@
 import * as Anime from 'animejs';
-const anime: any = (Anime as any).default ?? Anime;
+const anime: any = (Anime as any)?.default ?? (Anime as any);
+
+// Auth helpers
+export const focusField = (el: Element) => {
+  return anime({ targets: el, scale: [1, 1.02, 1], duration: 200, easing: 'easeOutQuad' });
+};
+export const showError = (el: Element) => {
+  return anime({ targets: el, translateY: [-6, 0], opacity: [0, 1], duration: 250, easing: 'easeOutBack' });
+};
+export const showSuccess = (el: Element) => {
+  return anime({ targets: el, translateY: [10, 0], opacity: [0, 1], duration: 300, easing: 'easeOutQuad' });
+};
 
 // Fade animations
 export const fadeIn = (targets: string | Element | NodeList, options?: any) => {
@@ -109,7 +120,7 @@ export const staggerIn = (targets: string | Element | NodeList, options?: any) =
     translateY: [50, 0],
     opacity: [0, 1],
     duration: 600,
-    delay: anime.stagger(100),
+    delay: anime.stagger ? anime.stagger(100) : 0,
     easing: 'easeOutQuad',
     ...options,
   });
@@ -192,7 +203,7 @@ export const countUp = (targets: string | Element | NodeList, endValue: number, 
 
 // Timeline utilities
 export const createTimeline = (options?: any) => {
-  return anime.timeline(options);
+  return anime.timeline ? anime.timeline(options) : anime(options);
 };
 
 // Page transition animations
@@ -287,15 +298,15 @@ export const modalOut = (targets: string | Element | NodeList) => {
 
 // Utility function to stop all animations
 export const stopAllAnimations = () => {
-  anime.remove();
+  anime.remove ? anime.remove() : null;
 };
 
 // Utility function to pause all animations
 export const pauseAllAnimations = () => {
-  anime.pause();
+  anime.pause ? anime.pause() : null;
 };
 
 // Utility function to resume all animations
 export const resumeAllAnimations = () => {
-  anime.play();
+  anime.play ? anime.play() : null;
 };
