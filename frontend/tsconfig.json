@@ -41,7 +41,8 @@
         "src/types/*"
       ]
     },
-    "baseUrl": "."
+    "baseUrl": ".",
+    "target": "ES2017"
   },
   "include": [
     "next-env.d.ts",

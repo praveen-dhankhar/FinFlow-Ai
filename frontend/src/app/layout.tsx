@@ -1,16 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
-import localFont from "next/font/local";
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"], variable: "--font-inter" });
-const cal = localFont({
-  src: [
-    { path: "../public/fonts/CalSans-SemiBold.woff2", weight: "600", style: "normal" },
-  ],
-  variable: "--font-cal",
-  display: "swap",
-});
 
 export const metadata: Metadata = {
   title: "Create Next App",
@@ -24,7 +16,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="min-h-full">
-      <body className={`${inter.variable} ${cal.variable} font-sans bg-background text-foreground`}>
+      <body className={`${inter.variable} font-sans bg-background text-foreground`}>
         {children}
       </body>
     </html>
