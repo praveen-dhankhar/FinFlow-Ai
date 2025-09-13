@@ -121,7 +121,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             onChange={handleChange}
             variants={hasError ? shakeVariants : undefined}
             animate={hasError ? 'shake' : undefined}
-            {...props}
+            {...(props as any)}
           />
 
           <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">

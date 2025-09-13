@@ -107,22 +107,16 @@ export const useUser = () => {
   const { setUser, setError } = useAuthActions();
   const storedUser = useAuthUser();
 
-  return useQuery({
+  const query = useQuery({
     queryKey: queryKeys.auth.user,
     queryFn: () => authService.getCurrentUser(),
     enabled: !!storedUser, // Only fetch if we have a stored user
     initialData: storedUser,
-    onSuccess: (user) => {
-      setUser(user);
-    },
-    onError: (error: ApiError) => {
-      setError(error.message);
-    },
     staleTime: 5 * 60 * 1000, // 5 minutes
     retry: (failureCount, error) => {
       // Don't retry on 401 errors
       if (error && typeof error === 'object' && 'statusCode' in error) {
-        const apiError = error as ApiError;
+        const apiError = error as unknown as ApiError;
         if (apiError.statusCode === 401) {
           return false;
         }
@@ -130,6 +124,18 @@ export const useUser = () => {
       return failureCount < 3;
     },
   });
+
+  // Handle success and error with useEffect
+  useEffect(() => {
+    if (query.data) {
+      setUser(query.data);
+    }
+    if (query.error) {
+      setError((query.error as unknown as ApiError).message);
+    }
+  }, [query.data, query.error, setUser, setError]);
+
+  return query;
 };
 
 // Update profile hook

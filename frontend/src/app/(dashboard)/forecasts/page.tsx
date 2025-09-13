@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 
 interface ForecastResult {
   id: number;
@@ -64,11 +64,7 @@ export default function ForecastsPage() {
     }
   ];
 
-  useEffect(() => {
-    loadForecasts();
-  }, []);
-
-  const loadForecasts = async () => {
+  const loadForecasts = useCallback(async () => {
     try {
       setLoading(true);
       
@@ -82,7 +78,11 @@ export default function ForecastsPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadForecasts();
+  }, [loadForecasts]);
 
   if (loading) {
     return (

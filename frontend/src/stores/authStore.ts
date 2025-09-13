@@ -210,6 +210,7 @@ export const useAuthActions = () => useAuthStore((state) => ({
   setError: state.setError,
   updateUser: state.updateUser,
   initializeAuth: state.initializeAuth,
+  checkAuthStatus: state.checkAuthStatus,
   refreshAuth: state.refreshAuth,
 }));
 

@@ -217,4 +217,3 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
   );
 };
 
-export { ToastProvider, useToast };

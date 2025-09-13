@@ -16,7 +16,7 @@ export const QueryProvider: React.FC<QueryProviderProps> = ({ children }) => {
       {enableDevTools && (
         <ReactQueryDevtools 
           initialIsOpen={false}
-          position="bottom-right"
+          position="bottom"
         />
       )}
     </QueryClientProvider>

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { useAuthState } from '@/hooks/useAuth';
@@ -10,7 +10,7 @@ interface AuthLayoutProps {
   children: React.ReactNode;
 }
 
-const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
+const AuthLayoutContent: React.FC<AuthLayoutProps> = ({ children }) => {
   const router = useRouter();
   const { isAuthenticated, isLoading } = useAuthState();
 
@@ -188,6 +188,22 @@ const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
         </motion.footer>
       </div>
     </div>
+  );
+};
+
+const AuthLayout: React.FC<AuthLayoutProps> = ({ children }) => {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 flex items-center justify-center">
+        <div className="text-center space-y-4">
+          <Skeleton className="h-16 w-16 rounded-full mx-auto" />
+          <Skeleton className="h-4 w-32 mx-auto" />
+          <Skeleton className="h-4 w-24 mx-auto" />
+        </div>
+      </div>
+    }>
+      <AuthLayoutContent>{children}</AuthLayoutContent>
+    </Suspense>
   );
 };
 

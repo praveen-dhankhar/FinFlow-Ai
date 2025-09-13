@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect } from 'react';
+import React, { useEffect, Suspense } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthState } from '@/hooks/useAuth';
 import AuthLoading from './AuthLoading';
@@ -10,7 +10,7 @@ interface ProtectedRouteProps {
   fallback?: React.ReactNode;
 }
 
-const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+const ProtectedRouteContent: React.FC<ProtectedRouteProps> = ({ 
   children, 
   fallback 
 }) => {
@@ -37,6 +37,19 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Render protected content
   return <>{children}</>;
+};
+
+const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
+  children, 
+  fallback 
+}) => {
+  return (
+    <Suspense fallback={<AuthLoading message="Loading..." />}>
+      <ProtectedRouteContent fallback={fallback}>
+        {children}
+      </ProtectedRouteContent>
+    </Suspense>
+  );
 };
 
 export default ProtectedRoute;

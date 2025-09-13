@@ -22,7 +22,7 @@ const createApiClient = (): AxiosInstance => {
       }
 
       // Add request timestamp for debugging
-      config.metadata = { startTime: new Date() };
+      // config.metadata = { startTime: new Date() };
 
       return config;
     },
@@ -35,12 +35,12 @@ const createApiClient = (): AxiosInstance => {
   client.interceptors.response.use(
     (response: AxiosResponse) => {
       // Log response time for debugging
-      if (response.config.metadata?.startTime) {
-        const endTime = new Date();
-        const duration = endTime.getTime() - response.config.metadata.startTime.getTime();
-        console.log(`API Request to ${response.config.url} took ${duration}ms`);
-      }
-
+      // if (response.config.metadata?.startTime) {
+      //   const endTime = new Date();
+      //   const duration = endTime.getTime() - response.config.metadata.startTime.getTime();
+      //   console.log(`API Request to ${response.config.url} took ${duration}ms`);
+      // }
+      
       return response;
     },
     async (error: AxiosError) => {
@@ -98,12 +98,12 @@ const createApiClient = (): AxiosInstance => {
 
       // Transform error to consistent format
       const apiError: ApiError = {
-        message: error.response?.data?.message || error.message || 'An unexpected error occurred',
-        code: error.response?.data?.code || error.code || 'UNKNOWN_ERROR',
+        message: (error.response?.data as any)?.message || error.message || 'An unexpected error occurred',
+        code: (error.response?.data as any)?.code || error.code || 'UNKNOWN_ERROR',
         statusCode: error.response?.status || 500,
         timestamp: new Date().toISOString(),
         path: error.config?.url || '',
-        details: error.response?.data?.details,
+        details: (error.response?.data as any)?.details,
       };
 
       return Promise.reject(apiError);
@@ -128,7 +128,7 @@ export const retryRequest = async <T>(
       lastError = error;
       
       // Don't retry on 4xx errors (except 401 which is handled by interceptor)
-      if (error.statusCode && error.statusCode >= 400 && error.statusCode < 500 && error.statusCode !== 401) {
+      if ((error as any).statusCode && (error as any).statusCode >= 400 && (error as any).statusCode < 500 && (error as any).statusCode !== 401) {
         throw error;
       }
 

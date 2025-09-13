@@ -48,7 +48,7 @@ const Skeleton = forwardRef<HTMLDivElement, SkeletonProps>(
           className
         )}
         style={style}
-        {...props}
+        {...(props as any)}
       >
         <motion.div
           className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent dark:via-white/10"

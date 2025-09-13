@@ -23,14 +23,17 @@ export interface ModalContentProps extends Dialog.DialogContentProps {
 
 export interface ModalHeaderProps {
   children?: React.ReactNode;
+  className?: string;
 }
 
 export interface ModalBodyProps {
   children?: React.ReactNode;
+  className?: string;
 }
 
 export interface ModalFooterProps {
   children?: React.ReactNode;
+  className?: string;
 }
 
 const Modal = ({ open, onOpenChange, children }: ModalProps) => {
@@ -125,7 +128,7 @@ const ModalContent = forwardRef<HTMLDivElement, ModalContentProps>(
               initial="hidden"
               animate="visible"
               exit="exit"
-              {...props}
+              {...(props as any)}
             >
               {children}
             </motion.div>
@@ -216,7 +219,7 @@ const ModalClose = forwardRef<HTMLButtonElement, Dialog.DialogCloseProps>(
         )}
         whileHover={{ scale: 1.05 }}
         whileTap={{ scale: 0.95 }}
-        {...props}
+        {...(props as any)}
       >
         {children || <X className="h-4 w-4" />}
       </motion.button>

@@ -5,11 +5,11 @@ import { ApiError } from '@/types/auth';
 const defaultQueryOptions: DefaultOptions = {
   queries: {
     staleTime: 5 * 60 * 1000, // 5 minutes
-    cacheTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 10 * 60 * 1000, // 10 minutes (renamed from cacheTime)
     retry: (failureCount, error) => {
       // Don't retry on 4xx errors (except 401 which is handled by axios interceptor)
       if (error && typeof error === 'object' && 'statusCode' in error) {
-        const apiError = error as ApiError;
+        const apiError = error as unknown as ApiError;
         if (apiError.statusCode >= 400 && apiError.statusCode < 500 && apiError.statusCode !== 401) {
           return false;
         }
@@ -27,7 +27,7 @@ const defaultQueryOptions: DefaultOptions = {
     retry: (failureCount, error) => {
       // Don't retry mutations on 4xx errors
       if (error && typeof error === 'object' && 'statusCode' in error) {
-        const apiError = error as ApiError;
+        const apiError = error as unknown as ApiError;
         if (apiError.statusCode >= 400 && apiError.statusCode < 500) {
           return false;
         }
@@ -74,12 +74,13 @@ const globalErrorHandler = (error: unknown) => {
 // Create query client
 export const queryClient = new QueryClient({
   defaultOptions: defaultQueryOptions,
-  queryCache: {
-    onError: globalErrorHandler,
-  },
-  mutationCache: {
-    onError: globalErrorHandler,
-  },
+  // Global error handling is now done through error boundaries
+  // queryCache: {
+  //   onError: globalErrorHandler,
+  // },
+  // mutationCache: {
+  //   onError: globalErrorHandler,
+  // },
 });
 
 // Query keys factory for consistent key management
@@ -88,6 +89,15 @@ export const queryKeys = {
   auth: {
     user: ['auth', 'user'] as const,
     profile: ['auth', 'profile'] as const,
+  },
+  
+  // Dashboard queries
+  dashboard: {
+    data: ['dashboard', 'data'] as const,
+    spendingCategories: ['dashboard', 'spending-categories'] as const,
+    recentTransactions: ['dashboard', 'recent-transactions'] as const,
+    forecast: ['dashboard', 'forecast'] as const,
+    refresh: ['dashboard', 'refresh'] as const,
   },
   
   // Financial data queries
