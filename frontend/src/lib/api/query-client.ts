@@ -115,6 +115,12 @@ export const queryKeys = {
     all: ['users'] as const,
     user: (id: string) => ['users', id] as const,
   },
+  
+  // Category queries
+  categories: {
+    all: ['categories'] as const,
+    byId: (id: string) => ['categories', id] as const,
+  },
 } as const;
 
 // Utility functions for optimistic updates
