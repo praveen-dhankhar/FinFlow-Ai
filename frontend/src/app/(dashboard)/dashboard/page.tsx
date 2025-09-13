@@ -1,7 +1,6 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import ProtectedRoute from '@/components/auth/ProtectedRoute';
 
 // Types based on backend DTOs
 interface FinancialData {
@@ -226,8 +225,7 @@ export default function Dashboard() {
   }
 
   return (
-    <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <header className="bg-white shadow-sm border-b">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -431,6 +429,5 @@ export default function Dashboard() {
         </div>
       </main>
     </div>
-    </ProtectedRoute>
   );
 }
