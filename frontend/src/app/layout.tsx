@@ -1,65 +1,65 @@
-import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
-import "./globals.css";
-import { ThemeProvider } from "@/components/providers/ThemeProvider";
-import { QueryProvider } from "@/components/providers/QueryProvider";
-import { ToastProvider } from "@/components/ui";
+import type { Metadata } from 'next'
+import { Inter } from 'next/font/google'
+import './globals.css'
+import { Providers } from './providers'
+import { GlobalSearchProvider } from '@/components/search/GlobalSearchProvider'
+import { AccessibilityProvider } from '@/components/accessibility/AccessibilityProvider'
+import { SEOHead } from '@/components/seo/SEOHead'
+import { DefaultStructuredData } from '@/components/seo/SEOHead'
+import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt'
+import { AccessibilityControls } from '@/components/accessibility/AccessibilityControls'
+import { PerformanceMonitor } from '@/components/performance/PerformanceMonitor'
 
-const inter = Inter({ 
-  subsets: ["latin"], 
-  variable: "--font-inter",
-  display: 'swap',
-});
+const inter = Inter({ subsets: ['latin'] })
 
 export const metadata: Metadata = {
-  title: {
-    default: "Finance Forecast - Smart Financial Management",
-    template: "%s | Finance Forecast"
-  },
-  description: "A comprehensive financial management application with AI-powered forecasting, transaction tracking, and intelligent insights to help you take control of your finances.",
+  title: 'Finance Forecast App - Comprehensive Financial Management',
+  description: 'Manage your finances with our comprehensive financial management app. Track transactions, set budgets, achieve goals, and forecast your financial future.',
   keywords: [
-    "finance",
-    "financial management",
-    "budgeting",
-    "expense tracking",
-    "AI forecasting",
-    "personal finance",
-    "money management",
-    "financial planning"
+    'finance',
+    'budget',
+    'money management',
+    'financial planning',
+    'expense tracking',
+    'investment',
+    'savings',
+    'financial forecasting',
+    'personal finance',
+    'financial analytics'
   ],
-  authors: [{ name: "Finance Forecast Team" }],
-  creator: "Finance Forecast",
-  publisher: "Finance Forecast",
+  authors: [{ name: 'Finance Forecast Team' }],
+  creator: 'Finance Forecast Team',
+  publisher: 'Finance Forecast Team',
   formatDetection: {
     email: false,
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'),
+  metadataBase: new URL('https://finance-forecast.app'),
   alternates: {
     canonical: '/',
   },
   openGraph: {
-    type: 'website',
-    locale: 'en_US',
-    url: '/',
-    title: 'Finance Forecast - Smart Financial Management',
-    description: 'A comprehensive financial management application with AI-powered forecasting and intelligent insights.',
-    siteName: 'Finance Forecast',
+    title: 'Finance Forecast App - Comprehensive Financial Management',
+    description: 'Manage your finances with our comprehensive financial management app. Track transactions, set budgets, achieve goals, and forecast your financial future.',
+    url: 'https://finance-forecast.app',
+    siteName: 'Finance Forecast App',
     images: [
       {
-        url: '/og-image.png',
+        url: '/images/og-image.jpg',
         width: 1200,
         height: 630,
-        alt: 'Finance Forecast - Smart Financial Management',
+        alt: 'Finance Forecast App - Financial Management Dashboard',
       },
     ],
+    locale: 'en_US',
+    type: 'website',
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Finance Forecast - Smart Financial Management',
-    description: 'A comprehensive financial management application with AI-powered forecasting and intelligent insights.',
-    images: ['/og-image.png'],
+    title: 'Finance Forecast App - Comprehensive Financial Management',
+    description: 'Manage your finances with our comprehensive financial management app. Track transactions, set budgets, achieve goals, and forecast your financial future.',
+    images: ['/images/og-image.jpg'],
     creator: '@financeforecast',
   },
   robots: {
@@ -74,43 +74,53 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.GOOGLE_SITE_VERIFICATION,
+    google: 'your-google-verification-code',
+    yandex: 'your-yandex-verification-code',
+    yahoo: 'your-yahoo-verification-code',
   },
-};
-
-export const viewport: Viewport = {
-  width: 'device-width',
-  initialScale: 1,
-  maximumScale: 1,
-  userScalable: false,
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
-};
+  category: 'finance',
+}
 
 export default function RootLayout({
   children,
-}: Readonly<{
-  children: React.ReactNode;
-}>) {
+}: {
+  children: React.ReactNode
+}) {
   return (
-    <html lang="en" className="min-h-full" suppressHydrationWarning>
+    <html lang="en" className="h-full">
       <head>
-        <link rel="icon" href="/favicon.ico" sizes="any" />
-        <link rel="icon" href="/icon.svg" type="image/svg+xml" />
-        <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+        <SEOHead />
+        <DefaultStructuredData />
         <link rel="manifest" href="/manifest.json" />
+        <meta name="theme-color" content="#3b82f6" />
+        <meta name="apple-mobile-web-app-capable" content="yes" />
+        <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+        <meta name="apple-mobile-web-app-title" content="Finance Forecast" />
+        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png" />
+        <link rel="icon" type="image/x-icon" href="/favicon.ico" />
+        <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
+        <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
       </head>
-      <body className={`${inter.variable} font-sans bg-background text-foreground antialiased`}>
-        <ThemeProvider>
-          <QueryProvider>
-            <ToastProvider>
-              {children}
-            </ToastProvider>
-          </QueryProvider>
-        </ThemeProvider>
+      <body className={`${inter.className} h-full antialiased`}>
+        <Providers>
+          <AccessibilityProvider>
+            <GlobalSearchProvider>
+              <div className="min-h-full">
+                {children}
+              </div>
+              
+              {/* PWA Components */}
+              <PWAInstallPrompt />
+              
+              {/* Accessibility Controls */}
+              <AccessibilityControls />
+              
+              {/* Performance Monitor */}
+              <PerformanceMonitor />
+            </GlobalSearchProvider>
+          </AccessibilityProvider>
+        </Providers>
       </body>
     </html>
-  );
+  )
 }
