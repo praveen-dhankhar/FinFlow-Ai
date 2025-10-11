@@ -7,6 +7,40 @@ import { mockDashboardData } from '@/lib/api/dashboard'
 const generateId = () => Math.random().toString(36).substr(2, 9)
 const generateDate = () => new Date().toISOString()
 
+// Generate mock forecast data
+const generateMockForecastData = (startDate?: string | null, endDate?: string | null, scenarioId?: string | null) => {
+  const start = startDate ? new Date(startDate) : new Date()
+  const end = endDate ? new Date(endDate) : new Date(Date.now() + 365 * 24 * 60 * 60 * 1000) // 1 year from now
+  
+  const data = []
+  const currentDate = new Date(start)
+  
+  // Historical data (last 6 months)
+  const historicalStart = new Date()
+  historicalStart.setMonth(historicalStart.getMonth() - 6)
+  
+  while (currentDate <= end) {
+    const isHistorical = currentDate <= new Date()
+    const baseAmount = 5000 + Math.sin(currentDate.getTime() / (1000 * 60 * 60 * 24 * 30)) * 1000 // Monthly variation
+    const trend = (currentDate.getTime() - start.getTime()) / (365 * 24 * 60 * 60 * 1000) * 200 // Annual trend
+    
+    const predicted = baseAmount + trend + (Math.random() - 0.5) * 500
+    const confidence = Math.max(0.7, 1 - (currentDate.getTime() - Date.now()) / (365 * 24 * 60 * 60 * 1000)) // Confidence decreases over time
+    
+    data.push({
+      date: currentDate.toISOString().split('T')[0],
+      actual: isHistorical ? predicted + (Math.random() - 0.5) * 200 : undefined,
+      predicted,
+      confidenceLower: predicted * (1 - confidence * 0.2),
+      confidenceUpper: predicted * (1 + confidence * 0.2),
+    })
+    
+    currentDate.setDate(currentDate.getDate() + 7) // Weekly data points
+  }
+  
+  return data
+}
+
 // Mock user data
 const mockUser = {
   id: '1',
@@ -365,31 +399,180 @@ export const handlers = [
   }),
 
   // Forecast endpoints
-  http.get('/api/forecasts', () => {
-    const mockForecasts = [
+  http.get('/api/forecasts', ({ request }) => {
+    const url = new URL(request.url)
+    const startDate = url.searchParams.get('startDate')
+    const endDate = url.searchParams.get('endDate')
+    const scenarioId = url.searchParams.get('scenarioId')
+    
+    // Generate mock forecast data based on parameters
+    const data = generateMockForecastData(startDate, endDate, scenarioId)
+    return HttpResponse.json(data, { status: 200 })
+  }),
+
+  http.get('/api/forecasts/scenarios', () => {
+    const mockScenarios = [
       {
-        id: '1',
-        userId: '1',
-        date: '2024-02-01',
-        predictedAmount: 5200,
-        confidence: 0.85,
-        algorithm: 'LINEAR_REGRESSION',
-        category: 'Salary',
-        type: 'INCOME',
+        id: 'scenario-1',
+        name: 'Conservative',
+        description: 'Conservative growth with minimal changes',
+        incomeAdjustment: 5,
+        expenseAdjustment: -10,
+        isDefault: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
       {
-        id: '2',
-        userId: '1',
-        date: '2024-02-02',
-        predictedAmount: 1250,
-        confidence: 0.92,
-        algorithm: 'SMA',
-        category: 'Rent',
-        type: 'EXPENSE',
+        id: 'scenario-2',
+        name: 'Optimistic',
+        description: 'High growth scenario with increased income',
+        incomeAdjustment: 25,
+        expenseAdjustment: 5,
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+      {
+        id: 'scenario-3',
+        name: 'Pessimistic',
+        description: 'Economic downturn scenario',
+        incomeAdjustment: -20,
+        expenseAdjustment: 15,
+        isDefault: false,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
       },
     ]
+    return HttpResponse.json(mockScenarios, { status: 200 })
+  }),
 
-    return HttpResponse.json(mockForecasts)
+  http.post('/api/forecasts/scenarios', async ({ request }) => {
+    const newScenario = await request.json()
+    const createdScenario = {
+      id: `scenario-${Date.now()}`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      ...newScenario,
+    }
+    return HttpResponse.json(createdScenario, { status: 201 })
+  }),
+
+  http.put('/api/forecasts/scenarios/:id', async ({ params, request }) => {
+    const { id } = params
+    const updates = await request.json()
+    // Mock update - in real app, you'd update the scenario
+    const updatedScenario = {
+      id,
+      ...updates,
+      updatedAt: new Date().toISOString(),
+    }
+    return HttpResponse.json(updatedScenario, { status: 200 })
+  }),
+
+  http.delete('/api/forecasts/scenarios/:id', ({ params }) => {
+    const { id } = params
+    // Mock delete - in real app, you'd remove the scenario
+    return HttpResponse.json(null, { status: 204 })
+  }),
+
+  http.get('/api/forecasts/insights', ({ request }) => {
+    const url = new URL(request.url)
+    const scenarioId = url.searchParams.get('scenarioId')
+    
+    const mockInsights = [
+      {
+        id: 'insight-1',
+        type: 'prediction',
+        title: 'Net Worth Growth',
+        description: 'Your net worth is projected to grow by 15% over the next 12 months based on current trends.',
+        confidence: 85,
+        impact: 'high',
+        timeframe: 'long',
+        actionable: true,
+        category: 'wealth',
+      },
+      {
+        id: 'insight-2',
+        type: 'risk',
+        title: 'Expense Volatility',
+        description: 'High variability in entertainment expenses could impact budget stability.',
+        confidence: 70,
+        impact: 'medium',
+        timeframe: 'short',
+        actionable: true,
+        category: 'expenses',
+      },
+      {
+        id: 'insight-3',
+        type: 'opportunity',
+        title: 'Investment Opportunity',
+        description: 'Consider increasing investment allocation by 5% to maximize long-term returns.',
+        confidence: 80,
+        impact: 'high',
+        timeframe: 'medium',
+        actionable: true,
+        category: 'investments',
+      },
+      {
+        id: 'insight-4',
+        type: 'recommendation',
+        title: 'Emergency Fund',
+        description: 'Build emergency fund to 6 months of expenses for better financial security.',
+        confidence: 95,
+        impact: 'high',
+        timeframe: 'medium',
+        actionable: true,
+        category: 'savings',
+      },
+    ]
+    
+    return HttpResponse.json(mockInsights, { status: 200 })
+  }),
+
+  http.get('/api/forecasts/summary', ({ request }) => {
+    const url = new URL(request.url)
+    const scenarioId = url.searchParams.get('scenarioId')
+    
+    const mockSummary = {
+      totalPredictedIncome: 75000,
+      totalPredictedExpenses: 45000,
+      netWorthProjection: 30000,
+      confidenceScore: 82,
+      riskLevel: 'medium',
+      keyTrends: [
+        'Steady income growth projected',
+        'Expense optimization opportunities identified',
+        'Investment returns improving',
+      ],
+      recommendations: [
+        'Consider increasing emergency fund',
+        'Optimize high-expense categories',
+        'Diversify investment portfolio',
+      ],
+    }
+    
+    return HttpResponse.json(mockSummary, { status: 200 })
+  }),
+
+  http.post('/api/forecasts/export', async ({ request }) => {
+    const { format, filters } = await request.json()
+    
+    if (format === 'csv') {
+      const csvContent = 'Date,Actual,Predicted,Confidence Lower,Confidence Upper\n2024-01-01,5000,5200,4800,5600'
+      return HttpResponse.text(csvContent, { 
+        status: 200, 
+        headers: { 'Content-Type': 'text/csv' } 
+      })
+    } else if (format === 'json') {
+      const data = generateMockForecastData(filters?.startDate, filters?.endDate, filters?.scenarioId)
+      return HttpResponse.json(data, { status: 200 })
+    } else {
+      // Mock PDF
+      return HttpResponse.text('PDF content', { 
+        status: 200, 
+        headers: { 'Content-Type': 'application/pdf' } 
+      })
+    }
   }),
 
   // Error simulation endpoints for testing error handling

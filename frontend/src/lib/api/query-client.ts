@@ -116,11 +116,19 @@ export const queryKeys = {
     user: (id: string) => ['users', id] as const,
   },
   
-  // Category queries
-  categories: {
-    all: ['categories'] as const,
-    byId: (id: string) => ['categories', id] as const,
-  },
+    // Category queries
+    categories: {
+      all: ['categories'] as const,
+      byId: (id: string) => ['categories', id] as const,
+    },
+    // Forecast queries
+    forecasts: {
+      all: ['forecasts'] as const,
+      data: (filters?: any) => ['forecasts', 'data', filters] as const,
+      scenarios: ['forecasts', 'scenarios'] as const,
+      insights: (scenarioId?: string) => ['forecasts', 'insights', scenarioId] as const,
+      summary: (scenarioId?: string) => ['forecasts', 'summary', scenarioId] as const,
+    },
 } as const;
 
 // Utility functions for optimistic updates

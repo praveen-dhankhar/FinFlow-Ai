@@ -1,5 +1,31 @@
 import '@testing-library/jest-dom'
 
+// Mock Request and Response for Node.js environment (must be first)
+global.Request = class MockRequest {
+  constructor(url, options = {}) {
+    this.url = url
+    this.method = options.method || 'GET'
+    this.headers = new Map()
+    this.body = options.body
+  }
+}
+
+global.Response = class MockResponse {
+  constructor(body, options = {}) {
+    this.body = body
+    this.status = options.status || 200
+    this.headers = new Map()
+  }
+  
+  json() {
+    return Promise.resolve(JSON.parse(this.body))
+  }
+  
+  text() {
+    return Promise.resolve(this.body)
+  }
+}
+
 // Mock Next.js router
 jest.mock('next/navigation', () => ({
   useRouter() {
@@ -165,31 +191,6 @@ global.performance = {
   now: jest.fn(() => Date.now()),
 }
 
-// Mock Request and Response for Node.js environment
-global.Request = class MockRequest {
-  constructor(url, options = {}) {
-    this.url = url
-    this.method = options.method || 'GET'
-    this.headers = new Map()
-    this.body = options.body
-  }
-}
-
-global.Response = class MockResponse {
-  constructor(body, options = {}) {
-    this.body = body
-    this.status = options.status || 200
-    this.headers = new Map()
-  }
-  
-  json() {
-    return Promise.resolve(JSON.parse(this.body))
-  }
-  
-  text() {
-    return Promise.resolve(this.body)
-  }
-}
 
 // Mock requestAnimationFrame
 global.requestAnimationFrame = jest.fn(cb => setTimeout(cb, 0))
