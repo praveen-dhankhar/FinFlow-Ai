@@ -1,349 +1,371 @@
 # Testing Guide
 
-This document provides comprehensive information about the testing infrastructure for the Finance Forecast application.
+This document provides a comprehensive guide for testing the Finance Forecast App.
 
-## 🧪 Test Suite Overview
+## Table of Contents
 
-The application includes a comprehensive test suite covering:
+- [Testing Overview](#testing-overview)
+- [Unit Tests](#unit-tests)
+- [Component Tests](#component-tests)
+- [E2E Tests](#e2e-tests)
+- [Performance Tests](#performance-tests)
+- [Running Tests](#running-tests)
+- [Test Coverage](#test-coverage)
+- [CI/CD Integration](#cicd-integration)
 
-- **API Integration Tests** - Testing all API endpoints and data flows
-- **Performance Tests** - Measuring page load times, animations, and memory usage
-- **Component Tests** - Unit tests for React components
-- **End-to-End Tests** - Full user journey testing
+## Testing Overview
 
-## 📁 Test Structure
+Our testing strategy includes:
 
-```
-src/
-├── __tests__/
-│   ├── api/                    # API integration tests
-│   │   ├── dashboard.test.ts
-│   │   ├── transactions.test.ts
-│   │   └── categories.test.ts
-│   ├── performance/            # Performance tests
-│   │   ├── page-load.test.ts
-│   │   ├── animations.test.ts
-│   │   ├── memory-leaks.test.ts
-│   │   └── re-renders.test.ts
-│   ├── setup.test.ts          # Test setup verification
-│   └── test-runner.ts         # Comprehensive test runner
-├── mocks/                      # Mock API server
-│   ├── handlers.ts
-│   ├── server.ts
-│   └── browser.ts
-├── test-utils/                 # Testing utilities
-│   └── test-utils.tsx
-└── utils/
-    └── performance-monitor.ts  # Performance monitoring
-```
+- **Unit Tests**: Test individual functions and utilities
+- **Component Tests**: Test React components in isolation
+- **Integration Tests**: Test component interactions
+- **E2E Tests**: Test complete user workflows
+- **Performance Tests**: Test application performance and bundle size
 
-## 🚀 Running Tests
+## Unit Tests
 
-### Basic Commands
+### Setup
+
+Unit tests use Jest with React Testing Library for component testing.
 
 ```bash
-# Run all tests
-npm test
+# Run unit tests
+npm run test
 
 # Run tests in watch mode
 npm run test:watch
 
 # Run tests with coverage
 npm run test:coverage
+```
 
-# Run tests for CI
+### Test Structure
+
+```
+src/
+├── __tests__/
+│   ├── components/
+│   │   ├── ui/
+│   │   ├── forms/
+│   │   ├── error/
+│   │   └── loading/
+│   ├── hooks/
+│   ├── utils/
+│   └── performance/
+├── test-utils/
+│   └── test-utils.tsx
+└── jest.config.js
+```
+
+### Writing Unit Tests
+
+```typescript
+import { render, screen, fireEvent } from '@/test-utils/test-utils'
+import { Button } from '@/components/ui/Button'
+
+describe('Button', () => {
+  it('renders with default props', () => {
+    render(<Button>Click me</Button>)
+    expect(screen.getByRole('button', { name: 'Click me' })).toBeInTheDocument()
+  })
+
+  it('handles click events', () => {
+    const handleClick = jest.fn()
+    render(<Button onClick={handleClick}>Click me</Button>)
+    
+    fireEvent.click(screen.getByRole('button'))
+    expect(handleClick).toHaveBeenCalledTimes(1)
+  })
+})
+```
+
+## Component Tests
+
+### Test Categories
+
+1. **UI Components**: Button, Input, Card, etc.
+2. **Form Components**: Form validation, input handling
+3. **Error Components**: Error boundaries, error states
+4. **Loading Components**: Skeleton screens, loading states
+5. **Empty States**: Empty state components
+
+### Test Utilities
+
+Our test utilities provide:
+
+- **Custom render function** with all providers
+- **Mock data generators** for consistent test data
+- **Helper functions** for common test operations
+- **Mock API responses** for integration testing
+
+```typescript
+import { render, screen, mockTransaction, testHelpers } from '@/test-utils/test-utils'
+
+describe('TransactionForm', () => {
+  it('should submit valid transaction', async () => {
+    const onSubmit = jest.fn()
+    render(<TransactionForm onSubmit={onSubmit} />)
+    
+    // Fill form
+    await screen.getByLabelText('Amount').fill('100.50')
+    await screen.getByLabelText('Description').fill('Test Transaction')
+    
+    // Submit
+    await screen.getByRole('button', { name: 'Add Transaction' }).click()
+    
+    expect(onSubmit).toHaveBeenCalledWith({
+      amount: '100.50',
+      description: 'Test Transaction'
+    })
+  })
+})
+```
+
+## E2E Tests
+
+### Setup
+
+E2E tests use Playwright for cross-browser testing.
+
+```bash
+# Install Playwright browsers
+npm run test:setup
+
+# Run E2E tests
+npm run test:e2e
+
+# Run E2E tests with UI
+npm run test:e2e:ui
+
+# Run E2E tests in headed mode
+npm run test:e2e:headed
+```
+
+### Test Structure
+
+```
+e2e/
+├── auth.spec.ts          # Authentication flow
+├── transactions.spec.ts  # Transaction CRUD
+├── dashboard.spec.ts     # Dashboard and charts
+└── goals.spec.ts         # Goals management
+```
+
+### Writing E2E Tests
+
+```typescript
+import { test, expect } from '@playwright/test'
+
+test.describe('Authentication Flow', () => {
+  test('should login with valid credentials', async ({ page }) => {
+    await page.goto('/login')
+    
+    await page.getByLabel('Email').fill('test@example.com')
+    await page.getByLabel('Password').fill('password123')
+    await page.getByRole('button', { name: 'Sign in' }).click()
+    
+    await expect(page).toHaveURL('/dashboard')
+    await expect(page.getByRole('heading', { name: 'Dashboard' })).toBeVisible()
+  })
+})
+```
+
+### E2E Test Categories
+
+1. **Authentication**: Login, logout, registration
+2. **Transaction Management**: CRUD operations, filtering, searching
+3. **Dashboard**: Data visualization, metrics display
+4. **Goals Management**: Goal creation, progress tracking
+5. **Budget Management**: Budget creation, tracking
+6. **Settings**: User preferences, account management
+
+## Performance Tests
+
+### Bundle Analysis
+
+```bash
+# Analyze bundle size
+npm run analyze
+
+# Run bundle analysis tests
+npm run test:performance
+```
+
+### Lighthouse CI
+
+```bash
+# Run Lighthouse CI
+npm run lighthouse
+
+# Run Lighthouse CI with upload
+npm run lighthouse:ci
+```
+
+### Performance Metrics
+
+- **Bundle Size**: < 500KB main bundle, < 2MB total
+- **First Contentful Paint**: < 2s
+- **Largest Contentful Paint**: < 2.5s
+- **Cumulative Layout Shift**: < 0.1
+- **Total Blocking Time**: < 300ms
+
+## Running Tests
+
+### All Tests
+
+```bash
+# Run all tests (unit + E2E + performance)
+npm run test:all
+```
+
+### Individual Test Suites
+
+```bash
+# Unit tests only
+npm run test
+
+# E2E tests only
+npm run test:e2e
+
+# Performance tests only
+npm run test:performance
+```
+
+### Test Modes
+
+```bash
+# Watch mode (unit tests)
+npm run test:watch
+
+# Coverage report
+npm run test:coverage
+
+# CI mode (no watch)
 npm run test:ci
 ```
 
-### Specific Test Suites
+## Test Coverage
 
-```bash
-# Run only API tests
-npm test -- --testPathPatterns="api"
+### Coverage Goals
 
-# Run only performance tests
-npm test -- --testPathPatterns="performance"
-
-# Run tests for specific component
-npm test -- --testPathPatterns="CategoryCard"
-```
-
-## 📊 API Integration Tests
-
-### Dashboard API Tests
-- ✅ Dashboard stats load from API
-- ✅ Error handling for API failures
-- ✅ Network timeout handling
-- ✅ Data structure validation
-- ✅ Empty data handling
-
-### Transaction API Tests
-- ✅ Transactions list with pagination
-- ✅ Add new transaction
-- ✅ Edit existing transaction
-- ✅ Delete transaction
-- ✅ Bulk operations work
-- ✅ Data exports work (CSV/JSON)
-- ✅ Filtering and search
-- ✅ Date range filtering
-- ✅ Category filtering
-
-### Category API Tests
-- ✅ Categories CRUD operations
-- ✅ Category insights
-- ✅ Category spending data
-- ✅ Reorder categories
-- ✅ Filter categories
-- ✅ Search categories
-
-## ⚡ Performance Tests
-
-### Page Load Performance
-- ✅ Dashboard page loads within 3 seconds
-- ✅ Transactions page loads within 3 seconds
-- ✅ Categories page loads within 3 seconds
-- ✅ Forecasts page loads within 3 seconds
-- ✅ Large dataset handling
-- ✅ Slow API response handling
-
-### Animation Performance
-- ✅ Maintains 60fps during animations
-- ✅ Multiple simultaneous animations
-- ✅ No layout thrashing
-- ✅ Rapid animation triggers
-- ✅ Large dataset animations
-- ✅ Animation interruptions
-- ✅ Memory leak prevention
-- ✅ Consistent animation timing
-
-### Memory Leak Tests
-- ✅ Component mount/unmount cycles
-- ✅ Large dataset handling
-- ✅ API call memory management
-- ✅ Event listener cleanup
-- ✅ Timer and interval cleanup
-- ✅ React Query cache cleanup
-- ✅ Form input cleanup
-- ✅ Animation cleanup
-- ✅ Navigation cleanup
-
-### Re-render Optimization
-- ✅ Minimize re-renders during state updates
-- ✅ Prevent unnecessary re-renders
-- ✅ Large list optimization
-- ✅ Form interaction optimization
-- ✅ Search operation optimization
-- ✅ Prevent re-render cascades
-- ✅ Context update optimization
-- ✅ API call optimization
-- ✅ Memoized component optimization
-
-## 🛠️ Testing Utilities
-
-### Performance Measurement
-```typescript
-import { measurePerformance, measureRenderTime } from '@/test-utils/test-utils'
-
-// Measure async operation
-const duration = await measurePerformance(async () => {
-  await someAsyncOperation()
-})
-
-// Measure render time
-const renderTime = measureRenderTime(<MyComponent />)
-```
-
-### Memory Leak Detection
-```typescript
-import { checkForMemoryLeaks } from '@/test-utils/test-utils'
-
-const initialMemory = checkForMemoryLeaks()
-// ... perform operations
-const finalMemory = checkForMemoryLeaks()
-const memoryIncrease = finalMemory.heapUsed - initialMemory.heapUsed
-```
-
-### Mock Data Generation
-```typescript
-import { generateMockTransaction, generateMockCategory } from '@/test-utils/test-utils'
-
-const transaction = generateMockTransaction({
-  amount: 1000,
-  category: 'Custom Category'
-})
-```
-
-## 📈 Performance Monitoring
-
-The application includes a comprehensive performance monitoring system:
-
-### Metrics Tracked
-- **Page Load Time** - Time to load complete page
-- **API Response Time** - Time for API calls to complete
-- **Render Time** - Time to render components
-- **Memory Usage** - JavaScript heap usage
-- **Animation Frame Rate** - FPS for animations
-
-### Thresholds
-- Page Load Time: < 3 seconds
-- API Response Time: < 1 second
-- Render Time: < 100ms
-- Memory Usage: < 50MB
-- Animation Frame Rate: > 60fps
-
-### Usage
-```typescript
-import performanceMonitor from '@/utils/performance-monitor'
-
-// Get current metrics
-const metrics = performanceMonitor.getMetrics()
-
-// Generate performance report
-const report = performanceMonitor.generateReport()
-
-// Measure custom operation
-const { result, duration } = await performanceMonitor.measureAsyncOperation(
-  async () => await myAsyncOperation()
-)
-```
-
-## 🎯 Test Coverage
-
-The test suite aims for comprehensive coverage:
-
-- **Statements**: 70%+
-- **Branches**: 70%+
-- **Functions**: 70%+
-- **Lines**: 70%+
+- **Statements**: 80%
+- **Branches**: 80%
+- **Functions**: 80%
+- **Lines**: 80%
 
 ### Coverage Reports
+
 ```bash
 # Generate coverage report
 npm run test:coverage
 
-# View coverage in browser
+# View coverage report
 open coverage/lcov-report/index.html
 ```
 
-## 🔧 Mock API Server
+### Coverage Configuration
 
-The application uses MSW (Mock Service Worker) for API mocking:
-
-### Features
-- ✅ Realistic API responses
-- ✅ Error simulation
-- ✅ Network delay simulation
-- ✅ Request/response logging
-- ✅ Dynamic data generation
-
-### Usage in Tests
-```typescript
-import { server } from '@/mocks/server'
-import { rest } from 'msw'
-
-// Override default handler
-server.use(
-  rest.get('/api/transactions', (req, res, ctx) => {
-    return res(ctx.json({ data: [] }))
-  })
-)
+```javascript
+// jest.config.js
+module.exports = {
+  collectCoverageFrom: [
+    'src/**/*.{js,jsx,ts,tsx}',
+    '!src/**/*.d.ts',
+    '!src/**/*.stories.{js,jsx,ts,tsx}',
+    '!src/**/*.test.{js,jsx,ts,tsx}',
+    '!src/**/*.spec.{js,jsx,ts,tsx}',
+  ],
+  coverageThreshold: {
+    global: {
+      branches: 80,
+      functions: 80,
+      lines: 80,
+      statements: 80,
+    },
+  },
+}
 ```
 
-## 🚨 Troubleshooting
+## CI/CD Integration
+
+### GitHub Actions
+
+```yaml
+name: Tests
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with:
+          node-version: '18'
+      - run: npm ci
+      - run: npm run test:ci
+      - run: npm run test:e2e
+      - run: npm run lighthouse:ci
+```
+
+### Test Reports
+
+- **Unit Tests**: Jest HTML reporter
+- **E2E Tests**: Playwright HTML reporter
+- **Performance**: Lighthouse CI reports
+- **Coverage**: LCOV format for integration
+
+## Best Practices
+
+### Writing Tests
+
+1. **Test Behavior, Not Implementation**: Focus on what the component does, not how it does it
+2. **Use Semantic Queries**: Prefer `getByRole`, `getByLabelText` over `getByTestId`
+3. **Test User Interactions**: Simulate real user behavior
+4. **Keep Tests Simple**: One assertion per test when possible
+5. **Use Descriptive Names**: Test names should describe the behavior being tested
+
+### Test Data
+
+1. **Use Mock Data**: Consistent, predictable test data
+2. **Isolate Tests**: Each test should be independent
+3. **Clean Up**: Reset state between tests
+4. **Use Factories**: Generate test data programmatically
+
+### Performance
+
+1. **Mock Heavy Operations**: Mock API calls, file operations
+2. **Use Virtual DOM**: Test components in isolation
+3. **Avoid Real Timers**: Use fake timers for time-dependent tests
+4. **Optimize Test Data**: Use minimal data sets
+
+## Troubleshooting
 
 ### Common Issues
 
-1. **Request is not defined**
-   - Ensure Jest setup includes Request/Response mocks
-   - Check Jest configuration for proper environment setup
+1. **MSW Not Working**: Ensure handlers are properly imported
+2. **Async Operations**: Use `waitFor` for async operations
+3. **Router Issues**: Mock Next.js router in tests
+4. **Theme Issues**: Provide theme context in tests
 
-2. **Tests timing out**
-   - Increase Jest timeout in configuration
-   - Check for infinite loops in test code
+### Debugging
 
-3. **Memory leaks in tests**
-   - Ensure proper cleanup in afterEach/afterAll
-   - Check for event listener cleanup
-
-4. **Performance tests failing**
-   - Check system performance
-   - Adjust performance thresholds if needed
-
-### Debug Mode
 ```bash
-# Run tests with debug output
-npm test -- --verbose --no-cache
+# Debug E2E tests
+npm run test:e2e:debug
 
-# Run specific test with debug
-npm test -- --testNamePattern="specific test" --verbose
+# Run specific test
+npm run test -- --testNamePattern="Button"
+
+# Run tests in specific file
+npm run test -- src/components/__tests__/Button.test.tsx
 ```
 
-## 📝 Writing Tests
-
-### Best Practices
-
-1. **Test Structure**
-   - Use descriptive test names
-   - Group related tests with `describe`
-   - Use `beforeEach`/`afterEach` for setup/cleanup
-
-2. **Assertions**
-   - Use specific assertions
-   - Test both success and error cases
-   - Verify data structure and types
-
-3. **Performance Tests**
-   - Set realistic thresholds
-   - Test with various data sizes
-   - Include cleanup verification
-
-4. **Mock Data**
-   - Use realistic test data
-   - Test edge cases
-   - Verify data validation
-
-### Example Test
-```typescript
-describe('Transaction API', () => {
-  beforeEach(() => {
-    // Setup test data
-  })
-
-  afterEach(() => {
-    // Cleanup
-  })
-
-  test('should create transaction successfully', async () => {
-    const transaction = generateMockTransaction()
-    const result = await transactionService.createTransaction(transaction)
-    
-    expect(result).toBeDefined()
-    expect(result.id).toBeDefined()
-    expect(result.amount).toBe(transaction.amount)
-  })
-})
-```
-
-## 🎉 Continuous Integration
-
-The test suite is designed to run in CI environments:
-
-```yaml
-# GitHub Actions example
-- name: Run tests
-  run: npm run test:ci
-
-- name: Upload coverage
-  uses: codecov/codecov-action@v3
-```
-
-## 📚 Additional Resources
+## Resources
 
 - [Jest Documentation](https://jestjs.io/docs/getting-started)
-- [Testing Library Documentation](https://testing-library.com/docs/)
+- [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/)
+- [Playwright Documentation](https://playwright.dev/docs/intro)
+- [Lighthouse CI](https://github.com/GoogleChrome/lighthouse-ci)
 - [MSW Documentation](https://mswjs.io/docs/)
-- [Performance Testing Best Practices](https://web.dev/performance-testing/)
-
----
-
-**Note**: This testing infrastructure ensures the Finance Forecast application maintains high quality, performance, and reliability across all features and user interactions.
