@@ -129,6 +129,17 @@ export const queryKeys = {
       insights: (scenarioId?: string) => ['forecasts', 'insights', scenarioId] as const,
       summary: (scenarioId?: string) => ['forecasts', 'summary', scenarioId] as const,
     },
+    // Analytics queries
+    analytics: {
+      all: ['analytics'] as const,
+      spendingTrends: (filters?: any) => ['analytics', 'spending-trends', filters] as const,
+      incomeAnalysis: (filters?: any) => ['analytics', 'income-analysis', filters] as const,
+      savingsGoals: ['analytics', 'savings-goals'] as const,
+      budgetPerformance: (filters?: any) => ['analytics', 'budget-performance', filters] as const,
+      customReports: ['analytics', 'custom-reports'] as const,
+      summary: (filters?: any) => ['analytics', 'summary', filters] as const,
+      seasonalPatterns: (filters?: any) => ['analytics', 'seasonal-patterns', filters] as const,
+    },
 } as const;
 
 // Utility functions for optimistic updates

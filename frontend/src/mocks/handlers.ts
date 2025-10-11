@@ -587,4 +587,253 @@ export const handlers = [
   http.get('/api/test/timeout', () => {
     return new Promise(() => {}) // Never resolves, simulates timeout
   }),
+
+  // Analytics handlers
+  http.get('/api/analytics/spending-trends', () => {
+    const mockSpendingTrends = Array.from({ length: 30 }, (_, i) => ({
+      date: new Date(Date.now() - (29 - i) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      amount: Math.random() * 500 + 100,
+      category: ['Food', 'Transportation', 'Entertainment', 'Shopping', 'Bills'][Math.floor(Math.random() * 5)],
+      categoryId: `cat-${Math.floor(Math.random() * 5) + 1}`,
+      isAnomaly: Math.random() < 0.1,
+      anomalyReason: Math.random() < 0.1 ? 'Unusual spending pattern detected' : undefined,
+    }));
+    return HttpResponse.json(mockSpendingTrends);
+  }),
+
+  http.get('/api/analytics/income', () => {
+    const mockIncomeData = {
+      sources: [
+        {
+          id: 'salary-1',
+          name: 'Primary Salary',
+          amount: 5000,
+          percentage: 70,
+          stability: 'high' as const,
+          growthRate: 3.2,
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: 'freelance-1',
+          name: 'Freelance Work',
+          amount: 1500,
+          percentage: 21,
+          stability: 'medium' as const,
+          growthRate: 8.5,
+          lastUpdated: new Date().toISOString(),
+        },
+        {
+          id: 'investment-1',
+          name: 'Investment Returns',
+          amount: 700,
+          percentage: 9,
+          stability: 'low' as const,
+          growthRate: -2.1,
+          lastUpdated: new Date().toISOString(),
+        },
+      ],
+      summary: {
+        totalIncome: 7200,
+        averageMonthly: 7200,
+        growthRate: 4.2,
+        stability: 85,
+      },
+    };
+    return HttpResponse.json(mockIncomeData);
+  }),
+
+  http.get('/api/analytics/savings-goals', () => {
+    const mockSavingsGoals = [
+      {
+        id: 'goal-1',
+        name: 'Emergency Fund',
+        targetAmount: 10000,
+        currentAmount: 7500,
+        targetDate: new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        monthlyContribution: 500,
+        progress: 75,
+        status: 'on-track' as const,
+        milestones: [
+          { id: 'milestone-1', amount: 2500, achieved: true, achievedDate: new Date(Date.now() - 2 * 30 * 24 * 60 * 60 * 1000).toISOString() },
+          { id: 'milestone-2', amount: 5000, achieved: true, achievedDate: new Date(Date.now() - 1 * 30 * 24 * 60 * 60 * 1000).toISOString() },
+          { id: 'milestone-3', amount: 7500, achieved: true, achievedDate: new Date().toISOString() },
+          { id: 'milestone-4', amount: 10000, achieved: false },
+        ],
+      },
+      {
+        id: 'goal-2',
+        name: 'Vacation Fund',
+        targetAmount: 3000,
+        currentAmount: 1200,
+        targetDate: new Date(Date.now() + 3 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        monthlyContribution: 300,
+        progress: 40,
+        status: 'at-risk' as const,
+        milestones: [
+          { id: 'milestone-5', amount: 1000, achieved: true, achievedDate: new Date(Date.now() - 1 * 30 * 24 * 60 * 60 * 1000).toISOString() },
+          { id: 'milestone-6', amount: 2000, achieved: false },
+          { id: 'milestone-7', amount: 3000, achieved: false },
+        ],
+      },
+    ];
+    return HttpResponse.json(mockSavingsGoals);
+  }),
+
+  http.get('/api/analytics/budget-performance', () => {
+    const mockBudgetPerformance = [
+      {
+        categoryId: 'cat-1',
+        categoryName: 'Food & Dining',
+        budgetedAmount: 800,
+        actualAmount: 750,
+        variance: -50,
+        variancePercentage: -6.25,
+        status: 'under' as const,
+        trend: 'improving' as const,
+        recommendations: [
+          'Great job staying under budget!',
+          'Consider meal planning to maintain this trend',
+        ],
+      },
+      {
+        categoryId: 'cat-2',
+        categoryName: 'Transportation',
+        budgetedAmount: 400,
+        actualAmount: 450,
+        variance: 50,
+        variancePercentage: 12.5,
+        status: 'over' as const,
+        trend: 'declining' as const,
+        recommendations: [
+          'Consider carpooling or public transport',
+          'Review gas prices and optimize routes',
+        ],
+      },
+      {
+        categoryId: 'cat-3',
+        categoryName: 'Entertainment',
+        budgetedAmount: 300,
+        actualAmount: 295,
+        variance: -5,
+        variancePercentage: -1.67,
+        status: 'on-target' as const,
+        trend: 'stable' as const,
+        recommendations: [
+          'Perfect budget management!',
+          'Consider setting aside extra for special events',
+        ],
+      },
+    ];
+    return HttpResponse.json(mockBudgetPerformance);
+  }),
+
+  http.get('/api/analytics/reports', () => {
+    const mockReports = [
+      {
+        id: 'report-1',
+        name: 'Monthly Spending Analysis',
+        description: 'Comprehensive monthly spending breakdown with trends',
+        widgets: [
+          {
+            id: 'widget-1',
+            type: 'chart' as const,
+            title: 'Spending Trends',
+            dataSource: 'spending',
+            config: { chartType: 'line' },
+            position: { x: 0, y: 0, width: 400, height: 300 },
+          },
+          {
+            id: 'widget-2',
+            type: 'table' as const,
+            title: 'Category Breakdown',
+            dataSource: 'categories',
+            config: { sortBy: 'amount' },
+            position: { x: 400, y: 0, width: 300, height: 300 },
+          },
+        ],
+        filters: {
+          dateRange: {
+            start: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            end: new Date().toISOString().split('T')[0],
+          },
+        },
+        schedule: {
+          frequency: 'monthly' as const,
+          time: '09:00',
+          email: 'user@example.com',
+        },
+        createdAt: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    ];
+    return HttpResponse.json(mockReports);
+  }),
+
+  http.get('/api/analytics/summary', () => {
+    const mockSummary = {
+      totalSpending: 2500,
+      totalIncome: 7200,
+      netSavings: 4700,
+      savingsRate: 65.3,
+      topSpendingCategory: 'Food & Dining',
+      biggestVariance: -150,
+      anomalyCount: 3,
+      goalProgress: 75,
+    };
+    return HttpResponse.json(mockSummary);
+  }),
+
+  http.get('/api/analytics/seasonal-patterns', () => {
+    const mockSeasonalPatterns = [
+      {
+        category: 'Food & Dining',
+        pattern: 'cyclical' as const,
+        seasonality: 0.7,
+        peakMonths: [11, 12, 0], // Nov, Dec, Jan
+        lowMonths: [2, 3, 4], // Feb, Mar, Apr
+      },
+      {
+        category: 'Transportation',
+        pattern: 'stable' as const,
+        seasonality: 0.2,
+        peakMonths: [],
+        lowMonths: [],
+      },
+    ];
+    return HttpResponse.json(mockSeasonalPatterns);
+  }),
+
+  http.post('/api/analytics/reports', async ({ request }) => {
+    const body = await request.json();
+    const newReport = {
+      id: `report-${Date.now()}`,
+      ...body,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    };
+    return HttpResponse.json(newReport);
+  }),
+
+  http.put('/api/analytics/reports/:id', async ({ request }) => {
+    const body = await request.json();
+    const updatedReport = {
+      ...body,
+      updatedAt: new Date().toISOString(),
+    };
+    return HttpResponse.json(updatedReport);
+  }),
+
+  http.delete('/api/analytics/reports/:id', () => {
+    return HttpResponse.json(null, { status: 204 });
+  }),
+
+  http.post('/api/analytics/export', () => {
+    const mockCsvData = 'Date,Category,Amount\n2024-01-01,Food,100\n2024-01-02,Transport,50';
+    return HttpResponse.text(mockCsvData, {
+      headers: {
+        'Content-Type': 'text/csv',
+        'Content-Disposition': 'attachment; filename="analytics_export.csv"',
+      },
+    });
+  }),
 ]

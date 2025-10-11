@@ -42,3 +42,7 @@ export {
   SkeletonList,
 } from './Skeleton';
 export type { SkeletonProps } from './Skeleton';
+
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
+
+export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './DropdownMenu';
