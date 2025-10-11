@@ -171,6 +171,19 @@ export const queryKeys = {
       billingSettings: () => ['user', 'settings', 'billing'] as const,
       dataExport: (exportId: string) => ['user', 'data-export', exportId] as const,
     },
+    // Search queries
+    search: {
+      main: (query: string, filters?: any) => ['search', query, filters] as const,
+      quickActions: () => ['search', 'quick-actions'] as const,
+      recent: () => ['search', 'recent'] as const,
+      suggestions: (query: string) => ['search', 'suggestions', query] as const,
+      popular: () => ['search', 'popular'] as const,
+      transactions: (query: string, filters?: any) => ['search', 'transactions', query, filters] as const,
+      categories: (query: string) => ['search', 'categories', query] as const,
+      goals: (query: string) => ['search', 'goals', query] as const,
+      budgets: (query: string) => ['search', 'budgets', query] as const,
+      reports: (query: string) => ['search', 'reports', query] as const,
+    },
 } as const;
 
 // Utility functions for optimistic updates

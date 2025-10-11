@@ -1702,4 +1702,560 @@ export const handlers = [
       const { frequency } = await request.json() as { frequency: string };
       return HttpResponse.json({ message: `Backup scheduled for ${frequency} frequency` });
     }),
+
+    // Search handlers
+    http.get('/api/search', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      // Mock search results based on query
+      const mockResults = [
+        // Navigation results
+        {
+          id: 'nav-dashboard',
+          title: 'Dashboard',
+          description: 'View your financial overview',
+          category: 'navigation',
+          icon: 'Home',
+          url: '/dashboard',
+          keywords: ['dashboard', 'overview', 'home', 'summary'],
+          shortcut: '⌘H'
+        },
+        {
+          id: 'nav-transactions',
+          title: 'Transactions',
+          description: 'View and manage transactions',
+          category: 'navigation',
+          icon: 'CreditCard',
+          url: '/transactions',
+          keywords: ['transactions', 'payments', 'expenses', 'income'],
+          shortcut: '⌘T'
+        },
+        {
+          id: 'nav-categories',
+          title: 'Categories',
+          description: 'Manage spending categories',
+          category: 'navigation',
+          icon: 'Target',
+          url: '/categories',
+          keywords: ['categories', 'spending', 'budget'],
+          shortcut: '⌘C'
+        },
+        {
+          id: 'nav-goals',
+          title: 'Goals',
+          description: 'Track your financial goals',
+          category: 'navigation',
+          icon: 'Target',
+          url: '/goals',
+          keywords: ['goals', 'savings', 'targets'],
+          shortcut: '⌘G'
+        },
+        {
+          id: 'nav-budgets',
+          title: 'Budgets',
+          description: 'Manage your budgets',
+          category: 'navigation',
+          icon: 'Calculator',
+          url: '/budgets',
+          keywords: ['budgets', 'planning', 'limits'],
+          shortcut: '⌘B'
+        },
+        {
+          id: 'nav-analytics',
+          title: 'Analytics',
+          description: 'View financial analytics',
+          category: 'navigation',
+          icon: 'BarChart3',
+          url: '/analytics',
+          keywords: ['analytics', 'reports', 'insights'],
+          shortcut: '⌘A'
+        },
+        {
+          id: 'nav-forecasts',
+          title: 'Forecasts',
+          description: 'Financial forecasting',
+          category: 'navigation',
+          icon: 'TrendingUp',
+          url: '/forecasts',
+          keywords: ['forecasts', 'predictions', 'future'],
+          shortcut: '⌘F'
+        },
+        {
+          id: 'nav-settings',
+          title: 'Settings',
+          description: 'Account settings',
+          category: 'navigation',
+          icon: 'Settings',
+          url: '/settings',
+          keywords: ['settings', 'preferences', 'account'],
+          shortcut: '⌘S'
+        },
+        {
+          id: 'nav-profile',
+          title: 'Profile',
+          description: 'User profile',
+          category: 'navigation',
+          icon: 'User',
+          url: '/profile',
+          keywords: ['profile', 'user', 'account'],
+          shortcut: '⌘P'
+        },
+
+        // Quick actions
+        {
+          id: 'action-add-transaction',
+          title: 'Add Transaction',
+          description: 'Create a new transaction',
+          category: 'action',
+          icon: 'Plus',
+          url: '/transactions?action=add',
+          keywords: ['add', 'new', 'transaction', 'create'],
+          shortcut: '⌘N'
+        },
+        {
+          id: 'action-add-category',
+          title: 'Add Category',
+          description: 'Create a new category',
+          category: 'action',
+          icon: 'Plus',
+          url: '/categories?action=add',
+          keywords: ['add', 'new', 'category', 'create'],
+          shortcut: '⌘⇧N'
+        },
+        {
+          id: 'action-generate-report',
+          title: 'Generate Report',
+          description: 'Create a financial report',
+          category: 'action',
+          icon: 'FileText',
+          url: '/analytics?action=report',
+          keywords: ['report', 'generate', 'export', 'analytics'],
+          shortcut: '⌘R'
+        },
+        {
+          id: 'action-export-data',
+          title: 'Export Data',
+          description: 'Export your financial data',
+          category: 'action',
+          icon: 'Download',
+          url: '/transactions?action=export',
+          keywords: ['export', 'download', 'data', 'backup'],
+          shortcut: '⌘E'
+        },
+
+        // Sample transactions
+        {
+          id: 'transaction-1',
+          title: 'Grocery Store - $85.50',
+          description: 'Whole Foods Market',
+          category: 'transaction',
+          icon: 'CreditCard',
+          url: '/transactions/1',
+          keywords: ['grocery', 'food', 'whole foods', 'shopping'],
+          metadata: { amount: 85.50, date: '2024-01-15', type: 'expense' }
+        },
+        {
+          id: 'transaction-2',
+          title: 'Salary - $5,000.00',
+          description: 'Monthly salary deposit',
+          category: 'transaction',
+          icon: 'CreditCard',
+          url: '/transactions/2',
+          keywords: ['salary', 'income', 'payroll', 'deposit'],
+          metadata: { amount: 5000.00, date: '2024-01-01', type: 'income' }
+        },
+        {
+          id: 'transaction-3',
+          title: 'Coffee Shop - $4.75',
+          description: 'Starbucks',
+          category: 'transaction',
+          icon: 'CreditCard',
+          url: '/transactions/3',
+          keywords: ['coffee', 'starbucks', 'drink', 'food'],
+          metadata: { amount: 4.75, date: '2024-01-14', type: 'expense' }
+        },
+
+        // Sample categories
+        {
+          id: 'category-food',
+          title: 'Food & Dining',
+          description: 'Restaurants, groceries, and food expenses',
+          category: 'category',
+          icon: 'Target',
+          url: '/categories/food',
+          keywords: ['food', 'dining', 'restaurant', 'grocery'],
+          metadata: { spending: 450.00, budget: 500.00 }
+        },
+        {
+          id: 'category-transport',
+          title: 'Transportation',
+          description: 'Gas, public transport, and vehicle expenses',
+          category: 'category',
+          icon: 'Target',
+          url: '/categories/transport',
+          keywords: ['transport', 'gas', 'car', 'public transport'],
+          metadata: { spending: 200.00, budget: 300.00 }
+        },
+        {
+          id: 'category-entertainment',
+          title: 'Entertainment',
+          description: 'Movies, games, and entertainment expenses',
+          category: 'category',
+          icon: 'Target',
+          url: '/categories/entertainment',
+          keywords: ['entertainment', 'movies', 'games', 'fun'],
+          metadata: { spending: 150.00, budget: 200.00 }
+        },
+
+        // Sample goals
+        {
+          id: 'goal-emergency',
+          title: 'Emergency Fund',
+          description: 'Build a 6-month emergency fund',
+          category: 'goal',
+          icon: 'Target',
+          url: '/goals/emergency',
+          keywords: ['emergency', 'fund', 'savings', 'safety'],
+          metadata: { current: 8500, target: 15000, progress: 56.7 }
+        },
+        {
+          id: 'goal-vacation',
+          title: 'Vacation to Japan',
+          description: 'Save for a 2-week vacation',
+          category: 'goal',
+          icon: 'Target',
+          url: '/goals/vacation',
+          keywords: ['vacation', 'japan', 'travel', 'trip'],
+          metadata: { current: 3200, target: 8000, progress: 40 }
+        },
+
+        // Sample budgets
+        {
+          id: 'budget-monthly',
+          title: 'Monthly Budget - December 2024',
+          description: 'Monthly budget for December',
+          category: 'budget',
+          icon: 'Calculator',
+          url: '/budgets/monthly',
+          keywords: ['budget', 'monthly', 'december', 'planning'],
+          metadata: { total: 5000, spent: 3100, remaining: 1900 }
+        },
+
+        // Sample reports
+        {
+          id: 'report-monthly',
+          title: 'Monthly Spending Report',
+          description: 'Comprehensive monthly spending analysis',
+          category: 'report',
+          icon: 'BarChart3',
+          url: '/analytics/reports/monthly',
+          keywords: ['report', 'monthly', 'spending', 'analysis'],
+          metadata: { period: '2024-01', generated: '2024-01-31' }
+        },
+        {
+          id: 'report-category',
+          title: 'Category Breakdown Report',
+          description: 'Detailed category spending analysis',
+          category: 'report',
+          icon: 'BarChart3',
+          url: '/analytics/reports/category',
+          keywords: ['report', 'category', 'breakdown', 'analysis'],
+          metadata: { period: '2024-01', generated: '2024-01-31' }
+        }
+      ];
+
+      // Filter results based on query
+      const filteredResults = query.length > 0 
+        ? mockResults.filter(result => 
+            result.title.toLowerCase().includes(query.toLowerCase()) ||
+            result.description.toLowerCase().includes(query.toLowerCase()) ||
+            result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+          )
+        : mockResults.slice(0, 10); // Show top 10 when no query
+
+      return HttpResponse.json({
+        results: filteredResults,
+        total: filteredResults.length,
+        suggestions: [
+          'transactions',
+          'categories',
+          'goals',
+          'budgets',
+          'reports',
+          'analytics'
+        ],
+        recentSearches: [
+          'grocery',
+          'salary',
+          'emergency fund',
+          'monthly budget'
+        ]
+      });
+    }),
+
+    http.get('/api/search/quick-actions', () => {
+      const mockQuickActions = [
+        {
+          id: 'quick-dashboard',
+          title: 'Go to Dashboard',
+          description: 'View your financial overview',
+          icon: 'Home',
+          action: 'navigate',
+          shortcut: '⌘H',
+          category: 'navigation'
+        },
+        {
+          id: 'quick-add-transaction',
+          title: 'Add Transaction',
+          description: 'Create a new transaction',
+          icon: 'Plus',
+          action: 'add-transaction',
+          shortcut: '⌘N',
+          category: 'action'
+        },
+        {
+          id: 'quick-export',
+          title: 'Export Data',
+          description: 'Download your financial data',
+          icon: 'Download',
+          action: 'export',
+          shortcut: '⌘E',
+          category: 'action'
+        },
+        {
+          id: 'quick-report',
+          title: 'Generate Report',
+          description: 'Create a financial report',
+          icon: 'FileText',
+          action: 'report',
+          shortcut: '⌘R',
+          category: 'report'
+        }
+      ];
+      return HttpResponse.json(mockQuickActions);
+    }),
+
+    http.get('/api/search/recent', () => {
+      const mockRecentSearches = [
+        'grocery',
+        'salary',
+        'emergency fund',
+        'monthly budget',
+        'coffee',
+        'transportation',
+        'entertainment',
+        'vacation'
+      ];
+      return HttpResponse.json(mockRecentSearches);
+    }),
+
+    http.post('/api/search/recent', async ({ request }) => {
+      const { query } = await request.json() as { query: string };
+      // Mock saving search query
+      return HttpResponse.json({ message: 'Search saved successfully' });
+    }),
+
+    http.delete('/api/search/recent', () => {
+      return HttpResponse.json({ message: 'Recent searches cleared' });
+    }),
+
+    http.get('/api/search/suggestions', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockSuggestions = [
+        'transactions',
+        'categories',
+        'goals',
+        'budgets',
+        'reports',
+        'analytics',
+        'dashboard',
+        'settings',
+        'profile',
+        'export',
+        'import',
+        'backup',
+        'restore'
+      ].filter(suggestion => 
+        suggestion.toLowerCase().includes(query.toLowerCase())
+      );
+      
+      return HttpResponse.json(mockSuggestions);
+    }),
+
+    http.get('/api/search/popular', () => {
+      const mockPopularSearches = [
+        'transactions',
+        'budget',
+        'analytics',
+        'goals',
+        'categories',
+        'reports',
+        'export',
+        'dashboard'
+      ];
+      return HttpResponse.json(mockPopularSearches);
+    }),
+
+    http.get('/api/search/transactions', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockTransactionResults = [
+        {
+          id: 'transaction-1',
+          title: 'Grocery Store - $85.50',
+          description: 'Whole Foods Market',
+          category: 'transaction',
+          icon: 'CreditCard',
+          url: '/transactions/1',
+          keywords: ['grocery', 'food', 'whole foods', 'shopping'],
+          metadata: { amount: 85.50, date: '2024-01-15', type: 'expense' }
+        },
+        {
+          id: 'transaction-2',
+          title: 'Salary - $5,000.00',
+          description: 'Monthly salary deposit',
+          category: 'transaction',
+          icon: 'CreditCard',
+          url: '/transactions/2',
+          keywords: ['salary', 'income', 'payroll', 'deposit'],
+          metadata: { amount: 5000.00, date: '2024-01-01', type: 'income' }
+        }
+      ].filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase()) ||
+        result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      return HttpResponse.json(mockTransactionResults);
+    }),
+
+    http.get('/api/search/categories', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockCategoryResults = [
+        {
+          id: 'category-food',
+          title: 'Food & Dining',
+          description: 'Restaurants, groceries, and food expenses',
+          category: 'category',
+          icon: 'Target',
+          url: '/categories/food',
+          keywords: ['food', 'dining', 'restaurant', 'grocery'],
+          metadata: { spending: 450.00, budget: 500.00 }
+        },
+        {
+          id: 'category-transport',
+          title: 'Transportation',
+          description: 'Gas, public transport, and vehicle expenses',
+          category: 'category',
+          icon: 'Target',
+          url: '/categories/transport',
+          keywords: ['transport', 'gas', 'car', 'public transport'],
+          metadata: { spending: 200.00, budget: 300.00 }
+        }
+      ].filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase()) ||
+        result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      return HttpResponse.json(mockCategoryResults);
+    }),
+
+    http.get('/api/search/goals', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockGoalResults = [
+        {
+          id: 'goal-emergency',
+          title: 'Emergency Fund',
+          description: 'Build a 6-month emergency fund',
+          category: 'goal',
+          icon: 'Target',
+          url: '/goals/emergency',
+          keywords: ['emergency', 'fund', 'savings', 'safety'],
+          metadata: { current: 8500, target: 15000, progress: 56.7 }
+        },
+        {
+          id: 'goal-vacation',
+          title: 'Vacation to Japan',
+          description: 'Save for a 2-week vacation',
+          category: 'goal',
+          icon: 'Target',
+          url: '/goals/vacation',
+          keywords: ['vacation', 'japan', 'travel', 'trip'],
+          metadata: { current: 3200, target: 8000, progress: 40 }
+        }
+      ].filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase()) ||
+        result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      return HttpResponse.json(mockGoalResults);
+    }),
+
+    http.get('/api/search/budgets', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockBudgetResults = [
+        {
+          id: 'budget-monthly',
+          title: 'Monthly Budget - December 2024',
+          description: 'Monthly budget for December',
+          category: 'budget',
+          icon: 'Calculator',
+          url: '/budgets/monthly',
+          keywords: ['budget', 'monthly', 'december', 'planning'],
+          metadata: { total: 5000, spent: 3100, remaining: 1900 }
+        }
+      ].filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase()) ||
+        result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      return HttpResponse.json(mockBudgetResults);
+    }),
+
+    http.get('/api/search/reports', ({ request }) => {
+      const url = new URL(request.url);
+      const query = url.searchParams.get('q') || '';
+      
+      const mockReportResults = [
+        {
+          id: 'report-monthly',
+          title: 'Monthly Spending Report',
+          description: 'Comprehensive monthly spending analysis',
+          category: 'report',
+          icon: 'BarChart3',
+          url: '/analytics/reports/monthly',
+          keywords: ['report', 'monthly', 'spending', 'analysis'],
+          metadata: { period: '2024-01', generated: '2024-01-31' }
+        },
+        {
+          id: 'report-category',
+          title: 'Category Breakdown Report',
+          description: 'Detailed category spending analysis',
+          category: 'report',
+          icon: 'BarChart3',
+          url: '/analytics/reports/category',
+          keywords: ['report', 'category', 'breakdown', 'analysis'],
+          metadata: { period: '2024-01', generated: '2024-01-31' }
+        }
+      ].filter(result => 
+        result.title.toLowerCase().includes(query.toLowerCase()) ||
+        result.description.toLowerCase().includes(query.toLowerCase()) ||
+        result.keywords.some(keyword => keyword.toLowerCase().includes(query.toLowerCase()))
+      );
+      
+      return HttpResponse.json(mockReportResults);
+    }),
 ]
