@@ -4,6 +4,7 @@ import './globals.css'
 import { Providers } from './providers'
 import { GlobalSearchProvider } from '@/components/search/GlobalSearchProvider'
 import { AccessibilityProvider } from '@/components/accessibility/AccessibilityProvider'
+import { ErrorHandlingProvider } from '@/components/error/ErrorHandlingProvider'
 import { SEOHead } from '@/components/seo/SEOHead'
 import { DefaultStructuredData } from '@/components/seo/SEOHead'
 import { PWAInstallPrompt } from '@/components/pwa/PWAInstallPrompt'
@@ -104,20 +105,22 @@ export default function RootLayout({
       <body className={`${inter.className} h-full antialiased`}>
         <Providers>
           <AccessibilityProvider>
-            <GlobalSearchProvider>
-              <div className="min-h-full">
-                {children}
-              </div>
-              
-              {/* PWA Components */}
-              <PWAInstallPrompt />
-              
-              {/* Accessibility Controls */}
-              <AccessibilityControls />
-              
-              {/* Performance Monitor */}
-              <PerformanceMonitor />
-            </GlobalSearchProvider>
+            <ErrorHandlingProvider>
+              <GlobalSearchProvider>
+                <div className="min-h-full">
+                  {children}
+                </div>
+                
+                {/* PWA Components */}
+                <PWAInstallPrompt />
+                
+                {/* Accessibility Controls */}
+                <AccessibilityControls />
+                
+                {/* Performance Monitor */}
+                <PerformanceMonitor />
+              </GlobalSearchProvider>
+            </ErrorHandlingProvider>
           </AccessibilityProvider>
         </Providers>
       </body>
