@@ -88,7 +88,7 @@ export default function SettingsPage() {
         <Alert>
           <AlertCircle className="h-4 w-4" />
           <AlertDescription>
-            You have unsaved changes. Click "Save Changes" to apply your settings.
+            You have unsaved changes. Click &quot;Save Changes&quot; to apply your settings.
           </AlertDescription>
         </Alert>
       )}

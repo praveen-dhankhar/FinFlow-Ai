@@ -368,7 +368,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({
                         <div>
                           <p className="font-medium text-red-800">Projected Overspend</p>
                           <p className="text-sm text-red-700">
-                            You're on track to exceed your budget by ${insights.projectedOverspendAmount?.toLocaleString()}.
+                            You&apos;re on track to exceed your budget by ${insights.projectedOverspendAmount?.toLocaleString()}.
                           </p>
                         </div>
                       </div>
@@ -396,7 +396,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({
                         <div>
                           <p className="font-medium text-green-800">On Track</p>
                           <p className="text-sm text-green-700">
-                            You're spending within your budget expectations.
+                            You&apos;re spending within your budget expectations.
                           </p>
                         </div>
                       </div>

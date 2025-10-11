@@ -286,7 +286,7 @@ export function BillingSettings({ onChange }: BillingSettingsProps) {
         <CardHeader>
           <CardTitle>Available Plans</CardTitle>
           <CardDescription>
-            Compare features and choose the plan that's right for you
+            Compare features and choose the plan that&apos;s right for you
           </CardDescription>
         </CardHeader>
         <CardContent>
