@@ -159,6 +159,18 @@ export const queryKeys = {
       optimalAllocations: (totalAmount: number, categories: string[]) => 
         ['budgets', 'optimal-allocations', totalAmount, categories] as const,
     },
+    // User queries
+    user: {
+      profile: () => ['user', 'profile'] as const,
+      stats: () => ['user', 'stats'] as const,
+      activity: (page: number, size: number) => ['user', 'activity', page, size] as const,
+      connectedAccounts: () => ['user', 'connected-accounts'] as const,
+      notificationSettings: () => ['user', 'settings', 'notifications'] as const,
+      securitySettings: () => ['user', 'settings', 'security'] as const,
+      privacySettings: () => ['user', 'settings', 'privacy'] as const,
+      billingSettings: () => ['user', 'settings', 'billing'] as const,
+      dataExport: (exportId: string) => ['user', 'data-export', exportId] as const,
+    },
 } as const;
 
 // Utility functions for optimistic updates

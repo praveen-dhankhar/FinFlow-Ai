@@ -46,3 +46,11 @@ export type { SkeletonProps } from './Skeleton';
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './Tabs';
 
 export { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from './DropdownMenu';
+
+export { Label } from './Label';
+export { Textarea } from './Textarea';
+export { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from './Dialog';
+export { Alert, AlertDescription } from './Alert';
+export { Badge } from './Badge';
+export { Separator } from './Separator';
+export { Avatar, AvatarImage, AvatarFallback } from './Avatar';

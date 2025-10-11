@@ -128,8 +128,8 @@ export const handlers = [
     // Sort transactions
     const [sortField, sortOrder] = sort.split(',')
     filteredTransactions.sort((a, b) => {
-      const aValue = a[sortField as keyof typeof a]
-      const bValue = b[sortField as keyof typeof b]
+      const aValue = a[sortField as keyof typeof a] ?? ''
+      const bValue = b[sortField as keyof typeof b] ?? ''
       
       if (sortOrder === 'desc') {
         return aValue > bValue ? -1 : aValue < bValue ? 1 : 0
@@ -168,20 +168,20 @@ export const handlers = [
   }),
 
   http.post('/api/transactions', async ({ request }) => {
-    const newTransaction = await request.json()
+    const newTransaction = await request.json() as Record<string, any>
     const transaction = {
       id: generateId(),
       ...newTransaction,
       userId: '1',
       createdAt: generateDate(),
       updatedAt: generateDate(),
-    }
+    } as any
     mockTransactions.unshift(transaction)
     return HttpResponse.json(transaction, { status: 201 })
   }),
 
   http.put('/api/transactions/:id', async ({ params, request }) => {
-    const updates = await request.json()
+    const updates = await request.json() as Record<string, any>
     const index = mockTransactions.findIndex(t => t.id === params.id)
     
     if (index === -1) {
@@ -215,7 +215,7 @@ export const handlers = [
   }),
 
   http.post('/api/transactions/bulk-delete', async ({ request }) => {
-    const { ids } = await request.json()
+    const { ids } = await request.json() as { ids: string[] }
     const deletedCount = ids.filter((id: string) => {
       const index = mockTransactions.findIndex(t => t.id === id)
       if (index !== -1) {
@@ -245,7 +245,7 @@ export const handlers = [
       const csvContent = [
         'Date,Description,Amount,Category,Type,Tags,Notes',
         ...transactionsToExport.map(t => 
-          `${t.date},${t.description},${t.amount},${t.category},${t.type},"${t.tags.join(',')}",${t.notes || ''}`
+          `${t.date},${t.description},${t.amount},${t.category},${t.type},"${t.tags?.join(',') || ''}",${t.notes || ''}`
         ).join('\n')
       ].join('\n')
 
@@ -308,7 +308,7 @@ export const handlers = [
   }),
 
   http.post('/api/categories', async ({ request }) => {
-    const newCategory = await request.json()
+    const newCategory = await request.json() as Record<string, any>
     const category = {
       id: generateId(),
       ...newCategory,
@@ -323,12 +323,12 @@ export const handlers = [
       },
       transactionCount: 0,
     }
-    mockCategories.push(category)
+    mockCategories.push(category as any)
     return HttpResponse.json(category, { status: 201 })
   }),
 
   http.put('/api/categories/:id', async ({ params, request }) => {
-    const updates = await request.json()
+    const updates = await request.json() as Record<string, any>
     const index = mockCategories.findIndex(c => c.id === params.id)
     
     if (index === -1) {
@@ -362,7 +362,7 @@ export const handlers = [
   }),
 
   http.post('/api/categories/reorder', async ({ request }) => {
-    const { categoryIds } = await request.json()
+    const { categoryIds } = await request.json() as { categoryIds: string[] }
     
     // Update the order of categories based on the provided IDs
     categoryIds.forEach((id: string, index: number) => {
@@ -447,7 +447,7 @@ export const handlers = [
   }),
 
   http.post('/api/forecasts/scenarios', async ({ request }) => {
-    const newScenario = await request.json()
+    const newScenario = await request.json() as Record<string, any>
     const createdScenario = {
       id: `scenario-${Date.now()}`,
       createdAt: new Date().toISOString(),
@@ -459,7 +459,7 @@ export const handlers = [
 
   http.put('/api/forecasts/scenarios/:id', async ({ params, request }) => {
     const { id } = params
-    const updates = await request.json()
+    const updates = await request.json() as Record<string, any>
     // Mock update - in real app, you'd update the scenario
     const updatedScenario = {
       id,
@@ -555,7 +555,7 @@ export const handlers = [
   }),
 
   http.post('/api/forecasts/export', async ({ request }) => {
-    const { format, filters } = await request.json()
+    const { format, filters } = await request.json() as { format: string; filters?: any }
     
     if (format === 'csv') {
       const csvContent = 'Date,Actual,Predicted,Confidence Lower,Confidence Upper\n2024-01-01,5000,5200,4800,5600'
@@ -804,7 +804,7 @@ export const handlers = [
   }),
 
   http.post('/api/analytics/reports', async ({ request }) => {
-    const body = await request.json();
+    const body = await request.json() as Record<string, any>;
     const newReport = {
       id: `report-${Date.now()}`,
       ...body,
@@ -815,7 +815,7 @@ export const handlers = [
   }),
 
   http.put('/api/analytics/reports/:id', async ({ request }) => {
-    const body = await request.json();
+    const body = await request.json() as Record<string, any>;
     const updatedReport = {
       ...body,
       updatedAt: new Date().toISOString(),
@@ -941,7 +941,7 @@ export const handlers = [
     }),
 
     http.post('/api/goals', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const newGoal = {
         id: `goal-${Date.now()}`,
         ...body,
@@ -953,7 +953,7 @@ export const handlers = [
     }),
 
     http.put('/api/goals/:id', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const updatedGoal = {
         ...body,
         updatedAt: new Date().toISOString(),
@@ -1007,7 +1007,7 @@ export const handlers = [
     }),
 
     http.post('/api/goals/contributions', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const newContribution = {
         id: `contrib-${Date.now()}`,
         ...body,
@@ -1264,7 +1264,7 @@ export const handlers = [
     }),
 
     http.post('/api/budgets', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const newBudget = {
         id: `budget-${Date.now()}`,
         ...body,
@@ -1276,7 +1276,7 @@ export const handlers = [
     }),
 
     http.put('/api/budgets/:id', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const updatedBudget = {
         ...body,
         updatedAt: new Date().toISOString(),
@@ -1289,7 +1289,7 @@ export const handlers = [
     }),
 
     http.post('/api/budgets/optimal-allocations', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as { totalAmount: number; categories: string[] };
       const { totalAmount, categories } = body;
       const mockAllocations = categories.map((categoryId: string, index: number) => ({
         categoryId,
@@ -1303,7 +1303,7 @@ export const handlers = [
     }),
 
     http.post('/api/budgets/:id/duplicate', async ({ request }) => {
-      const body = await request.json();
+      const body = await request.json() as Record<string, any>;
       const duplicatedBudget = {
         id: `budget-${Date.now()}`,
         name: 'Duplicated Budget',
@@ -1333,5 +1333,373 @@ export const handlers = [
         updatedAt: new Date().toISOString(),
       };
       return HttpResponse.json(archivedBudget);
+    }),
+
+    // User Profile handlers
+    http.get('/api/user/profile', () => {
+      const mockProfile = {
+        id: '1',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        phone: '+1 (555) 123-4567',
+        dateOfBirth: '1990-01-15',
+        address: {
+          street: '123 Main St',
+          city: 'San Francisco',
+          state: 'CA',
+          zipCode: '94105',
+          country: 'USA'
+        },
+        preferences: {
+          currency: 'USD',
+          timezone: 'America/Los_Angeles',
+          language: 'en',
+          dateFormat: 'MM/dd/yyyy'
+        },
+        isActive: true,
+        emailVerified: true,
+        phoneVerified: false,
+        createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(mockProfile);
+    }),
+
+    http.put('/api/user/profile', async ({ request }) => {
+      const updates = await request.json() as Record<string, any>;
+      const updatedProfile = {
+        id: '1',
+        email: 'test@example.com',
+        firstName: 'John',
+        lastName: 'Doe',
+        avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+        phone: '+1 (555) 123-4567',
+        dateOfBirth: '1990-01-15',
+        address: {
+          street: '123 Main St',
+          city: 'San Francisco',
+          state: 'CA',
+          zipCode: '94105',
+          country: 'USA'
+        },
+        preferences: {
+          currency: 'USD',
+          timezone: 'America/Los_Angeles',
+          language: 'en',
+          dateFormat: 'MM/dd/yyyy'
+        },
+        isActive: true,
+        emailVerified: true,
+        phoneVerified: false,
+        createdAt: new Date(Date.now() - 365 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+        ...updates,
+      };
+      return HttpResponse.json(updatedProfile);
+    }),
+
+    http.post('/api/user/avatar', async ({ request }) => {
+      const formData = await request.formData();
+      const file = formData.get('avatar') as File;
+      // Mock avatar upload - in real app, you'd upload to cloud storage
+      const mockAvatarUrl = `https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face&t=${Date.now()}`;
+      return HttpResponse.json({ avatar: mockAvatarUrl });
+    }),
+
+    http.post('/api/user/change-password', async ({ request }) => {
+      const { currentPassword, newPassword, confirmPassword } = await request.json() as Record<string, any>;
+      if (newPassword !== confirmPassword) {
+        return HttpResponse.json(
+          { message: 'Passwords do not match' },
+          { status: 400 }
+        );
+      }
+      return HttpResponse.json({ message: 'Password changed successfully' });
+    }),
+
+    http.get('/api/user/stats', () => {
+      const mockStats = {
+        totalTransactions: 1247,
+        totalCategories: 12,
+        totalGoals: 4,
+        totalBudgets: 3,
+        accountAge: 365,
+        lastLogin: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(), // 2 hours ago
+        loginCount: 156,
+        dataExported: true,
+        lastExportDate: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(), // 1 week ago
+      };
+      return HttpResponse.json(mockStats);
+    }),
+
+    http.get('/api/user/activity', ({ request }) => {
+      const url = new URL(request.url);
+      const page = parseInt(url.searchParams.get('page') || '0');
+      const size = parseInt(url.searchParams.get('size') || '20');
+
+      const mockActivities = [
+        {
+          id: 'activity-1',
+          type: 'login' as const,
+          description: 'Successful login from Chrome on Windows',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          timestamp: new Date(Date.now() - 2 * 60 * 60 * 1000).toISOString(),
+          location: 'San Francisco, CA, USA'
+        },
+        {
+          id: 'activity-2',
+          type: 'profile_update' as const,
+          description: 'Updated profile information',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          timestamp: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'San Francisco, CA, USA'
+        },
+        {
+          id: 'activity-3',
+          type: 'password_change' as const,
+          description: 'Password changed successfully',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          timestamp: new Date(Date.now() - 3 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'San Francisco, CA, USA'
+        },
+        {
+          id: 'activity-4',
+          type: 'data_export' as const,
+          description: 'Data export requested',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          timestamp: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'San Francisco, CA, USA'
+        },
+        {
+          id: 'activity-5',
+          type: 'settings_change' as const,
+          description: 'Notification settings updated',
+          ipAddress: '192.168.1.100',
+          userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+          timestamp: new Date(Date.now() - 10 * 24 * 60 * 60 * 1000).toISOString(),
+          location: 'San Francisco, CA, USA'
+        }
+      ];
+
+      const startIndex = page * size;
+      const endIndex = startIndex + size;
+      const paginatedActivities = mockActivities.slice(startIndex, endIndex);
+
+      return HttpResponse.json({
+        data: paginatedActivities,
+        pagination: {
+          totalElements: mockActivities.length,
+          totalPages: Math.ceil(mockActivities.length / size),
+          currentPage: page,
+          pageSize: size,
+          hasNext: endIndex < mockActivities.length,
+          hasPrevious: page > 0,
+        },
+      });
+    }),
+
+    http.get('/api/user/connected-accounts', () => {
+      const mockConnectedAccounts = [
+        {
+          id: 'account-1',
+          provider: 'google' as const,
+          email: 'john.doe@gmail.com',
+          name: 'John Doe',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+          connectedAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          isActive: true
+        },
+        {
+          id: 'account-2',
+          provider: 'github' as const,
+          email: 'johndoe@users.noreply.github.com',
+          name: 'johndoe',
+          avatar: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?w=150&h=150&fit=crop&crop=face',
+          connectedAt: new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString(),
+          isActive: false
+        }
+      ];
+      return HttpResponse.json(mockConnectedAccounts);
+    }),
+
+    http.delete('/api/user/connected-accounts/:id', ({ params }) => {
+      const accountId = params.id;
+      return HttpResponse.json({ message: `Account ${accountId} disconnected successfully` });
+    }),
+
+    // Settings handlers
+    http.get('/api/user/settings/notifications', () => {
+      const mockNotificationSettings = {
+        email: {
+          enabled: true,
+          transactions: true,
+          budgets: true,
+          goals: true,
+          reports: true,
+          security: true,
+          marketing: false
+        },
+        push: {
+          enabled: false,
+          transactions: false,
+          budgets: false,
+          goals: false,
+          security: true
+        },
+        frequency: 'immediate' as const,
+        thresholds: {
+          budgetAlert: 80,
+          goalProgress: 25,
+          unusualSpending: 150
+        }
+      };
+      return HttpResponse.json(mockNotificationSettings);
+    }),
+
+    http.put('/api/user/settings/notifications', async ({ request }) => {
+      const settings = await request.json() as Record<string, any>;
+      return HttpResponse.json(settings);
+    }),
+
+    http.get('/api/user/settings/security', () => {
+      const mockSecuritySettings = {
+        twoFactorEnabled: false,
+        twoFactorMethod: null as 'sms' | 'email' | 'app' | null,
+        backupCodes: [],
+        sessionTimeout: 30,
+        loginNotifications: true,
+        suspiciousActivityAlerts: true
+      };
+      return HttpResponse.json(mockSecuritySettings);
+    }),
+
+    http.put('/api/user/settings/security', async ({ request }) => {
+      const settings = await request.json() as Record<string, any>;
+      return HttpResponse.json(settings);
+    }),
+
+    http.post('/api/user/2fa/enable', async ({ request }) => {
+      const { method } = await request.json() as { method: string };
+      const mockResponse = {
+        qrCode: method === 'app' ? 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==' : undefined,
+        backupCodes: [
+          '12345678',
+          '87654321',
+          '11223344',
+          '44332211',
+          '55667788',
+          '88776655',
+          '99887766',
+          '66778899'
+        ],
+        message: 'Two-factor authentication enabled successfully'
+      };
+      return HttpResponse.json(mockResponse);
+    }),
+
+    http.post('/api/user/2fa/disable', () => {
+      return HttpResponse.json({ message: 'Two-factor authentication disabled successfully' });
+    }),
+
+    http.get('/api/user/settings/privacy', () => {
+      const mockPrivacySettings = {
+        profileVisibility: 'private' as const,
+        dataSharing: {
+          analytics: false,
+          marketing: false,
+          thirdParty: false
+        },
+        dataRetention: {
+          transactionHistory: 7,
+          activityLogs: 30,
+          backupData: 90
+        }
+      };
+      return HttpResponse.json(mockPrivacySettings);
+    }),
+
+    http.put('/api/user/settings/privacy', async ({ request }) => {
+      const settings = await request.json() as Record<string, any>;
+      return HttpResponse.json(settings);
+    }),
+
+    http.get('/api/user/settings/billing', () => {
+      const mockBillingSettings = {
+        plan: 'premium' as const,
+        status: 'active' as const,
+        nextBillingDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        paymentMethod: {
+          type: 'card' as const,
+          last4: '4242',
+          brand: 'visa',
+          expiryMonth: 12,
+          expiryYear: 2025
+        },
+        usage: {
+          transactions: 1247,
+          categories: 12,
+          goals: 4,
+          budgets: 3,
+          limits: {
+            transactions: -1,
+            categories: -1,
+            goals: -1,
+            budgets: -1
+          }
+        }
+      };
+      return HttpResponse.json(mockBillingSettings);
+    }),
+
+    http.put('/api/user/settings/billing', async ({ request }) => {
+      const settings = await request.json() as Record<string, any>;
+      return HttpResponse.json(settings);
+    }),
+
+    // Data management handlers
+    http.post('/api/user/data/export', async ({ request }) => {
+      const exportRequest = await request.json() as Record<string, any>;
+      const mockExportResponse = {
+        id: `export-${Date.now()}`,
+        status: 'pending' as const,
+        downloadUrl: undefined,
+        expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date().toISOString()
+      };
+      return HttpResponse.json(mockExportResponse);
+    }),
+
+    http.get('/api/user/data/export/:id', ({ params }) => {
+      const exportId = params.id;
+      const mockExportStatus = {
+        id: exportId,
+        status: 'completed' as const,
+        downloadUrl: 'https://example.com/download/export.zip',
+        expiresAt: new Date(Date.now() + 6 * 24 * 60 * 60 * 1000).toISOString(),
+        createdAt: new Date(Date.now() - 1 * 60 * 60 * 1000).toISOString()
+      };
+      return HttpResponse.json(mockExportStatus);
+    }),
+
+    http.post('/api/user/delete-account', async ({ request }) => {
+      const { password } = await request.json() as { password: string };
+      if (!password) {
+        return HttpResponse.json(
+          { message: 'Password is required' },
+          { status: 400 }
+        );
+      }
+      return HttpResponse.json({ message: 'Account deletion initiated successfully' });
+    }),
+
+    http.post('/api/user/backup/schedule', async ({ request }) => {
+      const { frequency } = await request.json() as { frequency: string };
+      return HttpResponse.json({ message: `Backup scheduled for ${frequency} frequency` });
     }),
 ]
