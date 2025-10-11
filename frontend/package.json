@@ -22,7 +22,14 @@
     "analyze": "npm run build && npx @next/bundle-analyzer",
     "test:setup": "playwright install",
     "storybook": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "deploy:staging": "vercel --target staging",
+    "deploy:production": "vercel --prod",
+    "deploy:preview": "vercel",
+    "analyze:build": "ANALYZE=true npm run build",
+    "type-check": "tsc --noEmit",
+    "format:check": "prettier --check .",
+    "format:write": "prettier --write ."
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
@@ -50,7 +57,9 @@
     "tailwind-merge": "^2.6.0",
     "use-debounce": "^10.0.6",
     "zod": "^3.25.76",
-    "zustand": "^4.5.7"
+    "zustand": "^4.5.7",
+    "@sentry/nextjs": "^8.0.0",
+    "@sentry/profiling-node": "^8.0.0"
   },
   "devDependencies": {
     "@testing-library/jest-dom": "^6.9.1",

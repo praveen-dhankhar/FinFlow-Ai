@@ -1,0 +1,16 @@
+{
+  "orgId": "your-vercel-org-id",
+  "projectId": "your-vercel-project-id",
+  "settings": {
+    "buildCommand": "cd frontend && npm run build",
+    "outputDirectory": "frontend/.next",
+    "installCommand": "cd frontend && npm ci",
+    "devCommand": "cd frontend && npm run dev",
+    "framework": "nextjs",
+    "nodeVersion": "18.x",
+    "regions": ["iad1", "sfo1", "lhr1"],
+    "functions": {
+      "maxDuration": 30
+    }
+  }
+}
