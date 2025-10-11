@@ -140,6 +140,25 @@ export const queryKeys = {
       summary: (filters?: any) => ['analytics', 'summary', filters] as const,
       seasonalPatterns: (filters?: any) => ['analytics', 'seasonal-patterns', filters] as const,
     },
+    // Goals queries
+    goals: {
+      all: (filters?: any) => ['goals', filters] as const,
+      detail: (id: string) => ['goals', id] as const,
+      progress: (goalId: string) => ['goals', goalId, 'progress'] as const,
+      contributions: (goalId: string) => ['goals', goalId, 'contributions'] as const,
+      categories: ['goals', 'categories'] as const,
+      insights: ['goals', 'insights'] as const,
+    },
+    // Budgets queries
+    budgets: {
+      all: (filters?: any) => ['budgets', filters] as const,
+      detail: (id: string) => ['budgets', id] as const,
+      current: ['budgets', 'current'] as const,
+      insights: (budgetId: string) => ['budgets', budgetId, 'insights'] as const,
+      recommendations: (budgetId: string) => ['budgets', budgetId, 'recommendations'] as const,
+      optimalAllocations: (totalAmount: number, categories: string[]) => 
+        ['budgets', 'optimal-allocations', totalAmount, categories] as const,
+    },
 } as const;
 
 // Utility functions for optimistic updates

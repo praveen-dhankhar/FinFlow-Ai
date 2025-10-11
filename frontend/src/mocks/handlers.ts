@@ -827,13 +827,511 @@ export const handlers = [
     return HttpResponse.json(null, { status: 204 });
   }),
 
-  http.post('/api/analytics/export', () => {
-    const mockCsvData = 'Date,Category,Amount\n2024-01-01,Food,100\n2024-01-02,Transport,50';
-    return HttpResponse.text(mockCsvData, {
-      headers: {
-        'Content-Type': 'text/csv',
-        'Content-Disposition': 'attachment; filename="analytics_export.csv"',
-      },
-    });
-  }),
+    http.post('/api/analytics/export', () => {
+      const mockCsvData = 'Date,Category,Amount\n2024-01-01,Food,100\n2024-01-02,Transport,50';
+      return HttpResponse.text(mockCsvData, {
+        headers: {
+          'Content-Type': 'text/csv',
+          'Content-Disposition': 'attachment; filename="analytics_export.csv"',
+        },
+      });
+    }),
+
+    // Goals handlers
+    http.get('/api/goals', () => {
+      const mockGoals = [
+        {
+          id: 'goal-1',
+          name: 'Emergency Fund',
+          description: 'Build a 6-month emergency fund for unexpected expenses',
+          targetAmount: 15000,
+          currentAmount: 8500,
+          targetDate: new Date(Date.now() + 8 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          category: 'Emergency',
+          categoryId: 'cat-emergency',
+          icon: '🛡️',
+          color: '#3B82F6',
+          status: 'active' as const,
+          priority: 'high' as const,
+          autoSaveAmount: 500,
+          autoSaveFrequency: 'monthly' as const,
+          createdAt: new Date(Date.now() - 3 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'goal-2',
+          name: 'Vacation to Japan',
+          description: 'Save for a 2-week vacation to Japan including flights and accommodation',
+          targetAmount: 8000,
+          currentAmount: 3200,
+          targetDate: new Date(Date.now() + 6 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          category: 'Travel',
+          categoryId: 'cat-travel',
+          icon: '✈️',
+          color: '#10B981',
+          status: 'active' as const,
+          priority: 'medium' as const,
+          autoSaveAmount: 300,
+          autoSaveFrequency: 'monthly' as const,
+          createdAt: new Date(Date.now() - 2 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+        {
+          id: 'goal-3',
+          name: 'New Laptop',
+          description: 'Upgrade to a new MacBook Pro for work',
+          targetAmount: 2500,
+          currentAmount: 2500,
+          targetDate: new Date(Date.now() - 1 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          category: 'Electronics',
+          categoryId: 'cat-electronics',
+          icon: '💻',
+          color: '#8B5CF6',
+          status: 'completed' as const,
+          priority: 'medium' as const,
+          autoSaveAmount: 200,
+          autoSaveFrequency: 'monthly' as const,
+          createdAt: new Date(Date.now() - 4 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date(Date.now() - 1 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          completedAt: new Date(Date.now() - 1 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          id: 'goal-4',
+          name: 'Home Down Payment',
+          description: 'Save for a 20% down payment on a house',
+          targetAmount: 80000,
+          currentAmount: 12000,
+          targetDate: new Date(Date.now() + 24 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          category: 'Housing',
+          categoryId: 'cat-housing',
+          icon: '🏠',
+          color: '#F59E0B',
+          status: 'active' as const,
+          priority: 'high' as const,
+          autoSaveAmount: 1000,
+          autoSaveFrequency: 'monthly' as const,
+          createdAt: new Date(Date.now() - 6 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      return HttpResponse.json(mockGoals);
+    }),
+
+    http.get('/api/goals/:id', ({ params }) => {
+      const goalId = params.id;
+      const mockGoal = {
+        id: goalId,
+        name: 'Emergency Fund',
+        description: 'Build a 6-month emergency fund for unexpected expenses',
+        targetAmount: 15000,
+        currentAmount: 8500,
+        targetDate: new Date(Date.now() + 8 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        category: 'Emergency',
+        categoryId: 'cat-emergency',
+        icon: '🛡️',
+        color: '#3B82F6',
+        status: 'active' as const,
+        priority: 'high' as const,
+        autoSaveAmount: 500,
+        autoSaveFrequency: 'monthly' as const,
+        createdAt: new Date(Date.now() - 3 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(mockGoal);
+    }),
+
+    http.post('/api/goals', async ({ request }) => {
+      const body = await request.json();
+      const newGoal = {
+        id: `goal-${Date.now()}`,
+        ...body,
+        currentAmount: 0,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(newGoal);
+    }),
+
+    http.put('/api/goals/:id', async ({ request }) => {
+      const body = await request.json();
+      const updatedGoal = {
+        ...body,
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(updatedGoal);
+    }),
+
+    http.delete('/api/goals/:id', () => {
+      return HttpResponse.json(null, { status: 204 });
+    }),
+
+    http.get('/api/goals/:id/progress', ({ params }) => {
+      const goalId = params.id;
+      const mockProgress = {
+        goalId,
+        currentAmount: 8500,
+        targetAmount: 15000,
+        progressPercentage: 56.7,
+        daysRemaining: 240,
+        projectedCompletionDate: new Date(Date.now() + 8 * 30 * 24 * 60 * 60 * 1000).toISOString(),
+        isOnTrack: true,
+        monthlyContributionNeeded: 500,
+        weeklyContributionNeeded: 115,
+      };
+      return HttpResponse.json(mockProgress);
+    }),
+
+    http.get('/api/goals/:id/contributions', ({ params }) => {
+      const goalId = params.id;
+      const mockContributions = [
+        {
+          id: 'contrib-1',
+          goalId,
+          amount: 500,
+          date: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+          source: 'auto-save' as const,
+          description: 'Monthly auto-save',
+          createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+        {
+          id: 'contrib-2',
+          goalId,
+          amount: 1000,
+          date: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          source: 'manual' as const,
+          description: 'Bonus contribution',
+          createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        },
+      ];
+      return HttpResponse.json(mockContributions);
+    }),
+
+    http.post('/api/goals/contributions', async ({ request }) => {
+      const body = await request.json();
+      const newContribution = {
+        id: `contrib-${Date.now()}`,
+        ...body,
+        createdAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(newContribution);
+    }),
+
+    http.get('/api/goals/categories', () => {
+      const mockCategories = [
+        { id: 'cat-emergency', name: 'Emergency', icon: '🛡️', color: '#3B82F6' },
+        { id: 'cat-travel', name: 'Travel', icon: '✈️', color: '#10B981' },
+        { id: 'cat-electronics', name: 'Electronics', icon: '💻', color: '#8B5CF6' },
+        { id: 'cat-housing', name: 'Housing', icon: '🏠', color: '#F59E0B' },
+        { id: 'cat-education', name: 'Education', icon: '🎓', color: '#EC4899' },
+        { id: 'cat-vehicle', name: 'Vehicle', icon: '🚗', color: '#06B6D4' },
+        { id: 'cat-health', name: 'Health', icon: '💊', color: '#84CC16' },
+        { id: 'cat-entertainment', name: 'Entertainment', icon: '🎮', color: '#F97316' },
+      ];
+      return HttpResponse.json(mockCategories);
+    }),
+
+    http.get('/api/goals/insights', () => {
+      const mockInsights = {
+        totalGoals: 4,
+        activeGoals: 3,
+        completedGoals: 1,
+        totalSaved: 24200,
+        totalTarget: 105500,
+        averageProgress: 22.9,
+        onTrackGoals: 2,
+        atRiskGoals: 1,
+      };
+      return HttpResponse.json(mockInsights);
+    }),
+
+    // Budgets handlers
+    http.get('/api/budgets', () => {
+      const mockBudgets = [
+        {
+          id: 'budget-1',
+          name: 'Monthly Budget - December 2024',
+          description: 'Monthly budget for December 2024',
+          period: 'monthly' as const,
+          startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+          totalAmount: 5000,
+          categories: [
+            {
+              id: 'budget-cat-1',
+              categoryId: 'cat-food',
+              categoryName: 'Food & Dining',
+              budgetedAmount: 800,
+              spentAmount: 650,
+              remainingAmount: 150,
+              percentage: 16,
+              color: '#3B82F6',
+              icon: '🍕',
+            },
+            {
+              id: 'budget-cat-2',
+              categoryId: 'cat-transport',
+              categoryName: 'Transportation',
+              budgetedAmount: 400,
+              spentAmount: 320,
+              remainingAmount: 80,
+              percentage: 8,
+              color: '#10B981',
+              icon: '🚗',
+            },
+            {
+              id: 'budget-cat-3',
+              categoryId: 'cat-entertainment',
+              categoryName: 'Entertainment',
+              budgetedAmount: 300,
+              spentAmount: 180,
+              remainingAmount: 120,
+              percentage: 6,
+              color: '#8B5CF6',
+              icon: '🎮',
+            },
+            {
+              id: 'budget-cat-4',
+              categoryId: 'cat-bills',
+              categoryName: 'Bills & Utilities',
+              budgetedAmount: 1200,
+              spentAmount: 1200,
+              remainingAmount: 0,
+              percentage: 24,
+              color: '#F59E0B',
+              icon: '⚡',
+            },
+            {
+              id: 'budget-cat-5',
+              categoryId: 'cat-shopping',
+              categoryName: 'Shopping',
+              budgetedAmount: 500,
+              spentAmount: 750,
+              remainingAmount: -250,
+              percentage: 10,
+              color: '#EC4899',
+              icon: '🛍️',
+            },
+          ],
+          status: 'active' as const,
+          createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+          updatedAt: new Date().toISOString(),
+        },
+      ];
+      return HttpResponse.json(mockBudgets);
+    }),
+
+    http.get('/api/budgets/current', () => {
+      const mockCurrentBudget = {
+        id: 'budget-1',
+        name: 'Monthly Budget - December 2024',
+        description: 'Monthly budget for December 2024',
+        period: 'monthly' as const,
+        startDate: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        endDate: new Date(Date.now() + 15 * 24 * 60 * 60 * 1000).toISOString(),
+        totalAmount: 5000,
+        categories: [
+          {
+            id: 'budget-cat-1',
+            categoryId: 'cat-food',
+            categoryName: 'Food & Dining',
+            budgetedAmount: 800,
+            spentAmount: 650,
+            remainingAmount: 150,
+            percentage: 16,
+            color: '#3B82F6',
+            icon: '🍕',
+          },
+          {
+            id: 'budget-cat-2',
+            categoryId: 'cat-transport',
+            categoryName: 'Transportation',
+            budgetedAmount: 400,
+            spentAmount: 320,
+            remainingAmount: 80,
+            percentage: 8,
+            color: '#10B981',
+            icon: '🚗',
+          },
+          {
+            id: 'budget-cat-3',
+            categoryId: 'cat-entertainment',
+            categoryName: 'Entertainment',
+            budgetedAmount: 300,
+            spentAmount: 180,
+            remainingAmount: 120,
+            percentage: 6,
+            color: '#8B5CF6',
+            icon: '🎮',
+          },
+          {
+            id: 'budget-cat-4',
+            categoryId: 'cat-bills',
+            categoryName: 'Bills & Utilities',
+            budgetedAmount: 1200,
+            spentAmount: 1200,
+            remainingAmount: 0,
+            percentage: 24,
+            color: '#F59E0B',
+            icon: '⚡',
+          },
+          {
+            id: 'budget-cat-5',
+            categoryId: 'cat-shopping',
+            categoryName: 'Shopping',
+            budgetedAmount: 500,
+            spentAmount: 750,
+            remainingAmount: -250,
+            percentage: 10,
+            color: '#EC4899',
+            icon: '🛍️',
+          },
+        ],
+        status: 'active' as const,
+        createdAt: new Date(Date.now() - 15 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(mockCurrentBudget);
+    }),
+
+    http.get('/api/budgets/:id/insights', ({ params }) => {
+      const budgetId = params.id;
+      const mockInsights = {
+        totalBudgeted: 5000,
+        totalSpent: 3100,
+        totalRemaining: 1900,
+        overspentCategories: 1,
+        underSpentCategories: 3,
+        averageSpendingRate: 103.33,
+        projectedOverspend: false,
+        daysRemaining: 15,
+        recommendedAdjustments: [],
+      };
+      return HttpResponse.json(mockInsights);
+    }),
+
+    http.get('/api/budgets/:id/recommendations', ({ params }) => {
+      const budgetId = params.id;
+      const mockRecommendations = [
+        {
+          id: 'rec-1',
+          type: 'optimization' as const,
+          title: 'Reduce Shopping Budget',
+          description: 'You\'ve exceeded your shopping budget by $250. Consider reducing discretionary purchases or reallocating funds from other categories.',
+          impact: 'high' as const,
+          potentialSavings: 250,
+          categoryId: 'cat-shopping',
+          categoryName: 'Shopping',
+          actionRequired: true,
+          priority: 9,
+        },
+        {
+          id: 'rec-2',
+          type: 'allocation' as const,
+          title: 'Reallocate Entertainment Funds',
+          description: 'You have $120 remaining in entertainment budget. Consider moving some funds to shopping to cover the overspend.',
+          impact: 'medium' as const,
+          categoryId: 'cat-entertainment',
+          categoryName: 'Entertainment',
+          actionRequired: false,
+          priority: 6,
+        },
+        {
+          id: 'rec-3',
+          type: 'savings' as const,
+          title: 'Optimize Food Spending',
+          description: 'You\'re doing well with food spending. Consider meal planning to maintain this trend and potentially save more.',
+          impact: 'low' as const,
+          potentialSavings: 50,
+          categoryId: 'cat-food',
+          categoryName: 'Food & Dining',
+          actionRequired: false,
+          priority: 3,
+        },
+        {
+          id: 'rec-4',
+          type: 'spending' as const,
+          title: 'Track Transportation Costs',
+          description: 'Your transportation spending is on track. Consider carpooling or public transport to reduce costs further.',
+          impact: 'low' as const,
+          potentialSavings: 30,
+          categoryId: 'cat-transport',
+          categoryName: 'Transportation',
+          actionRequired: false,
+          priority: 2,
+        },
+      ];
+      return HttpResponse.json(mockRecommendations);
+    }),
+
+    http.post('/api/budgets', async ({ request }) => {
+      const body = await request.json();
+      const newBudget = {
+        id: `budget-${Date.now()}`,
+        ...body,
+        status: 'draft' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(newBudget);
+    }),
+
+    http.put('/api/budgets/:id', async ({ request }) => {
+      const body = await request.json();
+      const updatedBudget = {
+        ...body,
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(updatedBudget);
+    }),
+
+    http.delete('/api/budgets/:id', () => {
+      return HttpResponse.json(null, { status: 204 });
+    }),
+
+    http.post('/api/budgets/optimal-allocations', async ({ request }) => {
+      const body = await request.json();
+      const { totalAmount, categories } = body;
+      const mockAllocations = categories.map((categoryId: string, index: number) => ({
+        categoryId,
+        categoryName: `Category ${index + 1}`,
+        currentAllocation: Math.floor(totalAmount / categories.length),
+        recommendedAllocation: Math.floor(totalAmount / categories.length) + (index === 0 ? 100 : -50),
+        difference: index === 0 ? 100 : -50,
+        reason: index === 0 ? 'High spending pattern' : 'Low spending pattern',
+      }));
+      return HttpResponse.json(mockAllocations);
+    }),
+
+    http.post('/api/budgets/:id/duplicate', async ({ request }) => {
+      const body = await request.json();
+      const duplicatedBudget = {
+        id: `budget-${Date.now()}`,
+        name: 'Duplicated Budget',
+        description: 'Duplicated budget',
+        period: 'monthly' as const,
+        ...body,
+        status: 'draft' as const,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(duplicatedBudget);
+    }),
+
+    http.post('/api/budgets/:id/archive', async ({ params }) => {
+      const budgetId = params.id;
+      const archivedBudget = {
+        id: budgetId,
+        name: 'Archived Budget',
+        description: 'Archived budget',
+        period: 'monthly' as const,
+        startDate: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        endDate: new Date().toISOString(),
+        totalAmount: 5000,
+        categories: [],
+        status: 'archived' as const,
+        createdAt: new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      return HttpResponse.json(archivedBudget);
+    }),
 ]

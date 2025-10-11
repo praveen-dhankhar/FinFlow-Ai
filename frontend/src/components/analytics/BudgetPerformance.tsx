@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  LineChart, Line, PieChart, Pie, Cell, ComposedChart, Area, AreaChart
+  LineChart, Line, PieChart, Pie, Cell, ComposedChart, Area, AreaChart, Legend
 } from 'recharts';
 import { format } from 'date-fns';
 import { 
@@ -25,9 +25,7 @@ import {
   CardHeader,
   CardBody,
   Button,
-  Badge,
   Skeleton,
-  Progress,
   DropdownMenu,
   DropdownMenuTrigger,
   DropdownMenuContent,
@@ -433,9 +431,9 @@ const BudgetPerformance: React.FC<BudgetPerformanceProps> = ({
                           </p>
                         </div>
                         <div className="flex items-center space-x-2">
-                          <Badge className={getStatusColor(item.status)}>
+                          <span className={cn("px-2 py-1 rounded-full text-xs font-medium", getStatusColor(item.status))}>
                             {item.status.replace('-', ' ')}
-                          </Badge>
+                          </span>
                           <div className={cn("flex items-center", getTrendColor(item.trend))}>
                             {getTrendIcon(item.trend)}
                           </div>
@@ -453,14 +451,16 @@ const BudgetPerformance: React.FC<BudgetPerformanceProps> = ({
                             ({item.variancePercentage > 0 ? '+' : ''}{item.variancePercentage.toFixed(1)}%)
                           </span>
                         </div>
-                        <Progress 
-                          value={item.efficiency} 
-                          className="h-2"
-                          indicatorClassName={cn(
-                            item.efficiency > 100 ? "bg-red-500" : 
-                            item.efficiency > 90 ? "bg-yellow-500" : "bg-green-500"
-                          )}
-                        />
+                        <div className="w-full bg-gray-200 rounded-full h-2">
+                          <div 
+                            className={cn(
+                              "h-2 rounded-full transition-all duration-300",
+                              item.efficiency > 100 ? "bg-red-500" : 
+                              item.efficiency > 90 ? "bg-yellow-500" : "bg-green-500"
+                            )}
+                            style={{ width: `${Math.min(item.efficiency, 100)}%` }}
+                          />
+                        </div>
                         <div className="flex justify-between text-sm">
                           <span className="text-muted-foreground">Efficiency:</span>
                           <span className="font-medium">{item.efficiency.toFixed(1)}%</span>
