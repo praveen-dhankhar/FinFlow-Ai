@@ -5,6 +5,12 @@ on:
     branches: [main, develop]
     types: [opened, synchronize, reopened]
 
+permissions:
+  contents: write
+  packages: write
+  id-token: write
+  actions: read
+
 env:
   NODE_VERSION: '16.20.2'
 
@@ -16,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -23,6 +31,15 @@ jobs:
           node-version: ${{ env.NODE_VERSION }}
           cache: 'npm'
           cache-dependency-path: frontend/package-lock.json
+
+      - name: Diagnostic: environment and secrets check
+        run: |
+          echo "Node version:" && node --version || true
+          echo "NPM version:" && npm --version || true
+          # Fail early with clear message if key Vercel secrets are missing
+          if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then echo "ERROR: VERCEL_TOKEN must be set in repository secrets"; exit 1; fi
+          if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then echo "ERROR: VERCEL_ORG_ID must be set in repository secrets"; exit 1; fi
+          if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then echo "ERROR: VERCEL_PROJECT_ID must be set in repository secrets"; exit 1; fi
 
       - name: Install dependencies
         working-directory: ./frontend
@@ -63,8 +80,9 @@ jobs:
               issue_number: context.issue.number,
             });
             
+            // Find prior bot comment case-insensitively
             const botComment = comments.find(comment => 
-              comment.user.type === 'Bot' && comment.body.includes('Preview deployment')
+              comment.user.type === 'Bot' && comment.body && comment.body.toLowerCase().includes('preview deployment')
             );
             
             const previewUrl = `https://finance-forecast-git-${context.payload.pull_request.head.ref.replace(/\//g, '-')}-${context.repo.owner}.vercel.app`;
@@ -113,6 +131,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -142,6 +162,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -174,6 +196,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
@@ -213,9 +237,11 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@master
+        uses: aquasecurity/trivy-action@v0
         with:
           scan-type: 'fs'
           scan-ref: '.'
@@ -239,6 +265,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: Setup Node.js
         uses: actions/setup-node@v4
