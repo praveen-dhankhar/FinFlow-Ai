@@ -7,12 +7,6 @@
       "use": "@vercel/next"
     }
   ],
-  "routes": [
-    {
-      "src": "/(.*)",
-      "dest": "frontend/$1"
-    }
-  ],
   "env": {
     "NODE_ENV": "production"
   },
@@ -34,7 +28,7 @@
   },
   "functions": {
     "frontend/src/app/api/**/*.ts": {
-      "runtime": "nodejs18.x",
+      "runtime": "nodejs20.x",
       "maxDuration": 30
     }
   },
