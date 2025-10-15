@@ -35,7 +35,6 @@ jobs:
         run: |
           echo "Node version:" && node --version || true
           echo "NPM version:" && npm --version || true
-          # Fail early with clear message if key Vercel secrets are missing
           if [ -z "${{ secrets.VERCEL_TOKEN }}" ]; then echo "ERROR: VERCEL_TOKEN must be set in repository secrets"; exit 1; fi
           if [ -z "${{ secrets.VERCEL_ORG_ID }}" ]; then echo "ERROR: VERCEL_ORG_ID must be set in repository secrets"; exit 1; fi
           if [ -z "${{ secrets.VERCEL_PROJECT_ID }}" ]; then echo "ERROR: VERCEL_PROJECT_ID must be set in repository secrets"; exit 1; fi
@@ -85,34 +84,29 @@ jobs:
               repo: context.repo.repo,
               issue_number: context.issue.number,
             });
-            
-            // Find prior bot comment case-insensitively
             const botComment = comments.find(comment => 
               comment.user.type === 'Bot' && comment.body && comment.body.toLowerCase().includes('preview deployment')
             );
-            
             const previewUrl = `https://finance-forecast-git-${context.payload.pull_request.head.ref.replace(/\//g, '-')}-${context.repo.owner}.vercel.app`;
-            
             const body = `## 🚀 Preview Deployment
-            
+
             **Preview URL:** ${previewUrl}
-            
+
             **Branch:** \`${context.payload.pull_request.head.ref}\`
             **Commit:** \`${context.payload.pull_request.head.sha.substring(0, 7)}\`
-            
+
             ### 📊 Build Status
             - ✅ Linting passed
             - ✅ Type checking passed  
             - ✅ Tests passed
             - ✅ Build successful
-            
+
             ### 🔗 Links
             - [View Preview](${previewUrl})
             - [View Changes](https://github.com/${context.repo.owner}/${context.repo.repo}/compare/${context.payload.pull_request.base.sha}...${context.payload.pull_request.head.sha})
-            
+
             ---
             *This preview will be automatically updated when you push new commits to this branch.*`;
-            
             if (botComment) {
               await github.rest.issues.updateComment({
                 owner: context.repo.owner,
