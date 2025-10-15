@@ -335,7 +335,7 @@ export function NotificationSettings({ onChange }: NotificationSettingsProps) {
                 </Badge>
               </div>
               <p className="text-sm text-gray-600">
-                Get notified when you've spent this percentage of your budget
+                Get notified when you&apos;ve spent this percentage of your budget
               </p>
             </div>
 

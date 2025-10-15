@@ -176,7 +176,7 @@ function PageErrorFallback({ error, errorId, onRetry, onReload, onGoHome, onRepo
           </div>
           <CardTitle className="text-xl">Something went wrong</CardTitle>
           <CardDescription>
-            We encountered an unexpected error. Don't worry, your data is safe.
+            We encountered an unexpected error. Don&apos;t worry, your data is safe.
           </CardDescription>
         </CardHeader>
         
@@ -238,7 +238,7 @@ function SectionErrorFallback({ error, errorId, onRetry }: SectionErrorFallbackP
           Failed to load section
         </h3>
         <p className="text-red-700 dark:text-red-300 mb-4">
-          This section couldn't be loaded. Your other data is still available.
+          This section couldn&apos;t be loaded. Your other data is still available.
         </p>
         <div className="flex flex-col space-y-2">
           <Button onClick={onRetry} size="sm">

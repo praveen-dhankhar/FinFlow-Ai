@@ -382,7 +382,7 @@ const BudgetPlanner: React.FC<BudgetPlannerProps> = ({
                         <div>
                           <p className="font-medium text-yellow-800">Spending Ahead of Schedule</p>
                           <p className="text-sm text-yellow-700">
-                            You've spent ${(insights.totalSpent - budgetMetrics.expectedSpent).toLocaleString()} more than expected.
+                            You&apos;ve spent ${(insights.totalSpent - budgetMetrics.expectedSpent).toLocaleString()} more than expected.
                           </p>
                         </div>
                       </div>

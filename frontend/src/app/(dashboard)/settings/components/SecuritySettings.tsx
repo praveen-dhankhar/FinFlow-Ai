@@ -461,7 +461,7 @@ export function SecuritySettings({ onChange }: SecuritySettingsProps) {
                 Download Codes
               </Button>
               <Button onClick={() => setShowBackupCodes(false)}>
-                I've Saved These Codes
+                I&apos;ve Saved These Codes
               </Button>
             </div>
           </div>

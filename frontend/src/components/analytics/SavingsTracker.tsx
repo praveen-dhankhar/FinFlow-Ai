@@ -457,7 +457,7 @@ const SavingsTracker: React.FC<SavingsTrackerProps> = ({
                 <div>
                   <h4 className="font-medium text-green-800">Milestone Achieved!</h4>
                   <p className="text-sm text-green-700 mt-1">
-                    Congratulations! You've achieved {insights.achievedMilestones} milestone{insights.achievedMilestones > 1 ? 's' : ''}. 
+                    Congratulations! You&apos;ve achieved {insights.achievedMilestones} milestone{insights.achievedMilestones > 1 ? 's' : ''}. 
                     Keep up the great work toward your financial goals!
                   </p>
                 </div>

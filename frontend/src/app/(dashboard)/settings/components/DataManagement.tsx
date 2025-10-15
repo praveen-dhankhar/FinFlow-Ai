@@ -302,7 +302,7 @@ export function DataManagement() {
               <Clock className="h-4 w-4" />
               <AlertDescription>
                 Backups are stored securely and can be restored if needed. 
-                You'll receive email notifications when backups are completed.
+                You&apos;ll receive email notifications when backups are completed.
               </AlertDescription>
             </Alert>
 

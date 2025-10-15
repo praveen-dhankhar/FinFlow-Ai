@@ -245,7 +245,7 @@ export function EmptySearch({ query, onClearSearch }: {
   return (
     <EmptyState
       title="No results found"
-      description={`We couldn't find anything matching "${query}". Try different keywords or check your spelling.`}
+      description={`We couldn\'t find anything matching "${query}". Try different keywords or check your spelling.`}
       icon={Search}
       action={{
         label: 'Clear Search',
@@ -378,7 +378,7 @@ export function Onboarding({ steps, onComplete, className }: OnboardingProps) {
             className="text-center pt-4 border-t border-gray-200 dark:border-gray-700"
           >
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-4">
-              Great job! You've completed the setup.
+              Great job! You&apos;ve completed the setup.
             </p>
             <Button onClick={onComplete} className="w-full">
               Continue to Dashboard
