@@ -14,7 +14,7 @@ permissions:
   security-events: write
 
 env:
-  NODE_VERSION: '16.20.2'
+  NODE_VERSION: '18.20.0'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
