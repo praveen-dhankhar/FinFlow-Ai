@@ -6,7 +6,7 @@ on:
     types: [opened, synchronize, reopened]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '16.20.2'
 
 jobs:
   # Build and deploy preview
@@ -199,7 +199,7 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Upload visual test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: visual-test-results
@@ -260,7 +260,7 @@ jobs:
           GITHUB_REPOSITORY_OWNER: ${{ github.repository_owner }}
 
       - name: Upload performance results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: performance-results

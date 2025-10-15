@@ -4,7 +4,7 @@ import React, { useState, useMemo, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import {
   LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
-  BarChart, Bar, PieChart, Pie, Cell, RadialBarChart, RadialBar
+  BarChart, Bar, PieChart, Pie, Cell, RadialBarChart, RadialBar, Legend
 } from 'recharts';
 import { format, parseISO, differenceInDays, addDays } from 'date-fns';
 import { 

@@ -105,9 +105,8 @@ export const WithIcons: Story = {
   },
 }
 
-export const PasswordWithToggle: Story = {
-  render: () => {
-    const [showPassword, setShowPassword] = useState(false)
+const PasswordWithToggleComponent = () => {
+  const [showPassword, setShowPassword] = useState(false)
 
     return (
       <div className="relative w-80">
@@ -125,7 +124,10 @@ export const PasswordWithToggle: Story = {
         </button>
       </div>
     )
-  },
+}
+
+export const PasswordWithToggle: Story = {
+  render: () => <PasswordWithToggleComponent />,
   parameters: {
     docs: {
       description: {

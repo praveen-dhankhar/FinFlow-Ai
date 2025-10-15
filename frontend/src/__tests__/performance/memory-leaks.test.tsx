@@ -1,7 +1,34 @@
-import { checkForMemoryLeaks, createLargeDataSet, generateMockTransaction, generateMockCategory } from '@/test-utils/test-utils'
-import { render, screen, waitFor } from '@testing-library/react'
+// Helper functions for testing
+const checkForMemoryLeaks = () => {
+  if (global.gc) {
+    global.gc()
+  }
+  return process.memoryUsage()
+}
+
+const createLargeDataSet = (count: number, generator: () => any) => {
+  return Array.from({ length: count }, generator)
+}
+
+const generateMockTransaction = () => ({
+  id: Math.random().toString(36).substr(2, 9),
+  description: `Transaction ${Math.random()}`,
+  amount: Math.random() * 1000,
+  date: new Date().toISOString(),
+  type: 'expense',
+  category: 'Test Category'
+})
+
+const generateMockCategory = () => ({
+  id: Math.random().toString(36).substr(2, 9),
+  name: `Category ${Math.random()}`,
+  icon: '📁',
+  color: '#3B82F6'
+})
+import { render, screen, waitFor, fireEvent } from '@testing-library/react'
 import { server } from '@/mocks/server'
 import { rest } from 'msw'
+import '@testing-library/jest-dom'
 
 // Establish API mocking before all tests
 beforeAll(() => server.listen())
@@ -309,7 +336,7 @@ describe('Memory Leak Tests', () => {
     const pages = [DashboardPage, TransactionsPage, CategoriesPage]
     
     for (let i = 0; i < 3; i++) {
-      const { unmount } = render(<pages[i] />)
+      const { unmount } = render(pages[i])
       await waitFor(() => {
         expect(screen.getByText(/dashboard|transactions|categories/i)).toBeInTheDocument()
       })

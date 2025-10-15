@@ -7,7 +7,7 @@ on:
     branches: [main, develop]
 
 env:
-  NODE_VERSION: '18'
+  NODE_VERSION: '16.20.2'
   REGISTRY: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
 
@@ -67,11 +67,12 @@ jobs:
         run: npm run test:ci
 
       - name: Upload coverage reports
-        uses: codecov/codecov-action@v3
+        uses: codecov/codecov-action@v4
         with:
-          file: ./frontend/coverage/lcov.info
+          files: ./frontend/coverage/lcov.info
           flags: frontend
           name: frontend-coverage
+          token: ${{ secrets.CODECOV_TOKEN }}
 
   # E2E tests
   e2e:
@@ -105,7 +106,7 @@ jobs:
         run: npm run test:e2e
 
       - name: Upload E2E test results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         if: always()
         with:
           name: e2e-results
@@ -148,6 +149,9 @@ jobs:
   security:
     name: Security Scan
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -161,7 +165,7 @@ jobs:
           output: 'trivy-results.sarif'
 
       - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           sarif_file: 'trivy-results.sarif'
 
@@ -199,11 +203,11 @@ jobs:
             type=sha,prefix={{branch}}-
             type=raw,value=latest,enable={{is_default_branch}}
 
-      - name: Build and push Docker image
+      - name: Build and push Docker image (Backend)
         uses: docker/build-push-action@v5
         with:
-          context: ./frontend
-          file: ./frontend/Dockerfile
+          context: .
+          file: ./Dockerfile
           push: true
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -228,7 +232,19 @@ jobs:
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./frontend
-          vercel-args: '--prod'
+          vercel-args: ''
+
+      - name: Trigger Render Deploy (Backend - Staging)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_BACKEND_SERVICE_ID_STAGING }}
+        run: |
+          curl -fsS -X POST \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            https://api.render.com/v1/services/${SERVICE_ID}/deploys \
+            -d '{"clearCache": true}'
 
   # Deploy to production
   deploy-production:
@@ -249,6 +265,18 @@ jobs:
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./frontend
           vercel-args: '--prod'
+
+      - name: Trigger Render Deploy (Backend - Production)
+        env:
+          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
+          SERVICE_ID: ${{ secrets.RENDER_BACKEND_SERVICE_ID_PRODUCTION }}
+        run: |
+          curl -fsS -X POST \
+            -H "Accept: application/json" \
+            -H "Authorization: Bearer ${RENDER_API_KEY}" \
+            -H "Content-Type: application/json" \
+            https://api.render.com/v1/services/${SERVICE_ID}/deploys \
+            -d '{"clearCache": true}'
 
       - name: Notify deployment
         uses: 8398a7/action-slack@v3
