@@ -1,6 +1,6 @@
 {
-  "orgId": "your-vercel-org-id",
-  "projectId": "your-vercel-project-id",
+  "orgId": "org_2wYg6J0rWpG8tVw7TgWvUHkDvVZz",
+  "projectId": "prj_62U84SsgYUv7QqLTg9lkDcsTiruM",
   "settings": {
     "buildCommand": "cd frontend && npm run build",
     "outputDirectory": "frontend/.next",

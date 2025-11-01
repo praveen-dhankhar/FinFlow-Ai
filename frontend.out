@@ -651,3 +651,137 @@ Error: Your custom PostCSS configuration must export a `plugins` key.
     at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/index.js:124:36
     at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js:86:33
     at async Span.traceAsyncFn (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/trace/trace.js:105:20)
+ ⨯ src/app/layout.tsx
+An error occured in `next/font`.
+
+Error: Your custom PostCSS configuration must export a `plugins` key.
+    at getPostCssPlugins (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js:106:15)
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/index.js:124:36
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js:86:33
+    at async Span.traceAsyncFn (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/trace/trace.js:105:20)
+ ⨯ src/app/layout.tsx
+An error occured in `next/font`.
+
+Error: Your custom PostCSS configuration must export a `plugins` key.
+    at getPostCssPlugins (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js:106:15)
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/index.js:124:36
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js:86:33
+    at async Span.traceAsyncFn (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/trace/trace.js:105:20)
+ ⨯ src/app/layout.tsx
+An error occured in `next/font`.
+
+Error: Your custom PostCSS configuration must export a `plugins` key.
+    at getPostCssPlugins (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/plugins.js:106:15)
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/config/blocks/css/index.js:124:36
+    at async /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/build/webpack/loaders/next-font-loader/index.js:86:33
+    at async Span.traceAsyncFn (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/trace/trace.js:105:20)
+ ⨯ Error: Cannot find module 'critters'
+Require stack:
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:54:36
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at mod.require (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:182:18)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:142:30
+    at postProcessHTML (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:160:29)
+    at async renderToHTMLImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js:957:27)
+    at async doRender (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1274:26)
+    at async cacheEntry.responseCache.get.incrementalCache.incrementalCache (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1454:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1369:28)
+    at async DevServer.pipeImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:834:25)
+    at async DevServer.handleCatchallRenderRequest (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next-server.js:572:17)
+    at async DevServer.handleRequestImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:736:17) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Error: Cannot find module 'critters'
+Require stack:
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:54:36
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at mod.require (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:182:18)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:142:30
+    at postProcessHTML (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:160:29)
+    at async renderToHTMLImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js:957:27)
+    at async doRender (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1274:26)
+    at async cacheEntry.responseCache.get.incrementalCache.incrementalCache (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1454:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1369:28)
+    at async DevServer.pipeImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:834:25)
+    at async DevServer.handleCatchallRenderRequest (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next-server.js:572:17)
+    at async DevServer.handleRequestImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:736:17) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
+Error: Cannot find module 'critters'
+Require stack:
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js
+- /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js
+    at Module._resolveFilename (node:internal/modules/cjs/loader:1207:15)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:54:36
+    at Module._load (node:internal/modules/cjs/loader:1038:27)
+    at Module.require (node:internal/modules/cjs/loader:1289:19)
+    at mod.require (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/require-hook.js:64:28)
+    at require (node:internal/modules/helpers:182:18)
+    at /Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:142:30
+    at postProcessHTML (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js:160:29)
+    at async renderToHTMLImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js:957:27)
+    at async doRender (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1274:26)
+    at async cacheEntry.responseCache.get.incrementalCache.incrementalCache (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1454:28)
+    at async DevServer.renderToResponseWithComponentsImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1369:28)
+    at async pipe.req.req (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:1740:30)
+    at async DevServer.pipeImpl (/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/base-server.js:834:25) {
+  code: 'MODULE_NOT_FOUND',
+  requireStack: [
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/post-process.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/render.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/module.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/future/route-modules/pages/builtin/_error.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/load-default-error-components.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/dev/next-dev-server.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/next.js',
+    '/Users/praveendhankhar/finance-forecast-app/frontend/node_modules/next/dist/server/lib/start-server.js'
+  ]
+}
