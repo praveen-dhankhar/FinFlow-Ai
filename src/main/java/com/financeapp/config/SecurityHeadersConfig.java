@@ -10,7 +10,7 @@ import org.springframework.security.web.SecurityFilterChain;
 
 @Configuration
 @EnableWebSecurity
-@Profile({"!test", "!integration-test"})
+@Profile({"disabled"})  // Disabled: consolidated into SecurityConfig for Spring Boot 3.5
 public class SecurityHeadersConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {

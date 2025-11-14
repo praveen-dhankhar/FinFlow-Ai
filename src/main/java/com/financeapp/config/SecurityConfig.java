@@ -1,32 +1,33 @@
 package com.financeapp.config;
 
-import com.financeapp.security.JwtAuthenticationEntryPoint;
-import com.financeapp.security.JwtAuthenticationFilter;
-import com.financeapp.security.JwtTokenProvider;
-import com.financeapp.security.CustomUserDetailsService;
+import java.util.Arrays;
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
-import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.http.HttpMethod;
+import org.springframework.security.authentication.AuthenticationManager;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
+import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
-import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 
-import java.util.Arrays;
-import java.util.List;
+import com.financeapp.security.CustomUserDetailsService;
+import com.financeapp.security.JwtAuthenticationEntryPoint;
+import com.financeapp.security.JwtAuthenticationFilter;
+import com.financeapp.security.JwtTokenProvider;
 
 @Configuration
 @EnableWebSecurity
@@ -84,9 +85,19 @@ public class SecurityConfig {
             .exceptionHandling(ex -> ex.authenticationEntryPoint(jwtAuthenticationEntryPoint))
             .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
 
+        // Configure security headers (from SecurityHeadersConfig)
+        http.headers(headers -> headers
+            .contentSecurityPolicy(csp -> csp.policyDirectives("default-src 'self'"))
+            .xssProtection(Customizer.withDefaults())
+            .frameOptions(frame -> frame.sameOrigin())
+            .httpStrictTransportSecurity(hsts -> hsts.includeSubDomains(true).maxAgeInSeconds(31536000))
+        );
+
         // H2 Console configuration for development
         if (isDevelopmentProfile()) {
-            http.headers(headers -> headers.frameOptions().disable());
+            http.headers(headers -> headers
+                .frameOptions(frameOptions -> frameOptions.disable())
+            );
         }
 
         return http.build();
