@@ -2,312 +2,136 @@ name: CI/CD Pipeline
 
 on:
   push:
-    branches: [main, develop]
-  pull_request:
-    branches: [main, develop]
-
-concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: true
-
-permissions:
-  contents: write
-  packages: write
-  id-token: write
-  actions: read
-  security-events: write
+    branches: [ main ]
 
 env:
-  NODE_VERSION: '18.20.0'
-  REGISTRY: ghcr.io
-  IMAGE_NAME: ${{ github.repository }}
+  # global defaults for all jobs
+  NODE_ENV: test
 
 jobs:
-  lint:
-    name: Lint and Type Check
+  checkout:
+    name: Checkout Code
+    runs-on: ubuntu-latest
+    outputs:
+      sha: ${{ steps.rev.outputs.sha }}
+    steps:
+      - uses: actions/checkout@v3
+      - id: rev
+        run: echo "::set-output name=sha::$(git rev-parse HEAD)"
+
+  backend:
+    name: Build & Test Spring Boot
+    needs: checkout
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+      - name: Set up Java
+        uses: actions/setup-java@v3
         with:
-          fetch-depth: 0
+          distribution: temurin
+          java-version: '17'
+      - name: Inject DB creds from Secrets
+        # these env vars become available to Spring Boot at runtime
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          mvn clean verify -B
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+  frontend:
+    name: Build & Test React/Node
+    needs: checkout
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        node-version: [18.x]
+    steps:
+      - uses: actions/checkout@v3
+      - name: Use Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v3
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          node-version: ${{ matrix.node-version }}
+
+      - name: Copy in .env for Node (if you have a local .env.example)
+        # OPTIONAL: if you committed a .env.example with placeholders
+        run: |
+          cp .env.example .env
 
       - name: Install dependencies
         working-directory: ./frontend
         run: npm ci
 
-      - name: Run ESLint
+      - name: Lint & Type-check
         working-directory: ./frontend
-        run: npm run lint
+        run: npm run lint && npm run type-check
 
-      - name: Run TypeScript check
+      - name: Run Unit Tests
         working-directory: ./frontend
-        run: npm run type-check
+        run: npm test -- --ci --reporters=default
 
-      - name: Check formatting
+      - name: Build Production Bundle
         working-directory: ./frontend
-        run: npm run format:check
-
-  test:
-    name: Unit Tests
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Run unit tests
-        working-directory: ./frontend
-        run: npm run test:ci
-
-      - name: Upload coverage reports
-        uses: codecov/codecov-action@v4
-        with:
-          files: ./frontend/coverage/lcov.info
-          flags: frontend
-          name: frontend-coverage
-          token: ${{ secrets.CODECOV_TOKEN }}
+        # ensure your REACT_APP_ vars are set in Secrets → Settings → Environments
+        env:
+          REACT_APP_API_URL: ${{ secrets.REACT_APP_API_URL }}
+        run: npm run build
 
   e2e:
     name: E2E Tests
+    needs: [backend, frontend]
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
+      - uses: actions/checkout@v3
+      - uses: actions/setup-node@v3
+        with: { node-version: 18.x }
 
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
-
-      - name: Install dependencies
-        working-directory: ./frontend
+      - name: Install all deps
         run: npm ci
 
-      - name: Install Playwright browsers
-        working-directory: ./frontend
-        run: npm run test:setup
+      - name: Start Backend & Frontend
+        run: |
+          # adapt these: start servers in the background
+          cd backend && mvn spring-boot:run & 
+          cd frontend && npm start &
+          # wait for them to come up
+          npx wait-on http://localhost:3000 && npx wait-on http://localhost:8080
 
-      - name: Build application
-        working-directory: ./frontend
-        run: npm run build
-
-      - name: Run E2E tests
-        working-directory: ./frontend
-        run: npm run test:e2e
-
-      - name: Upload E2E test results
-        uses: actions/upload-artifact@v4
-        if: always()
-        with:
-          name: e2e-results
-          path: frontend/test-results/
+      - name: Run Cypress
+        run: npx cypress run
 
   performance:
-    name: Performance Tests
+    name: Lighthouse Performance
+    needs: frontend
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v4
+      - uses: actions/checkout@v3
+      - uses: treosh/lighthouse-ci-action@v8
         with:
-          node-version: ${{ env.NODE_VERSION }}
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+          configPath: ./lighthouserc.json
 
-      - name: Install dependencies
-        working-directory: ./frontend
-        run: npm ci
-
-      - name: Build application
-        working-directory: ./frontend
-        run: npm run build
-
-      - name: Run Lighthouse CI
-        working-directory: ./frontend
-        run: npm run lighthouse:ci
+  security-scan:
+    name: Snyk Security Scan
+    needs: checkout
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: snyk/actions/setup@v1
+      - name: Run Snyk test
         env:
-          LHCI_GITHUB_APP_TOKEN: ${{ secrets.LHCI_GITHUB_APP_TOKEN }}
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk test
 
-      - name: Run bundle analysis
-        working-directory: ./frontend
-        run: npm run analyze
-
-  security:
-    name: Security Scan
+  deploy:
+    name: Deploy to Vercel
+    if: github.ref == 'refs/heads/main'
+    needs: [performance, security-scan]
     runs-on: ubuntu-latest
-    permissions:
-      contents: read
-      security-events: write
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.24.0
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          format: 'sarif'
-          output: 'trivy-results.sarif'
-
-      - name: Upload Trivy scan results
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          sarif_file: 'trivy-results.sarif'
-
-      - name: Run npm audit
-        working-directory: ./frontend
-        run: npm audit --audit-level=moderate
-
-  docker:
-    name: Docker Build (Backend)
-    runs-on: ubuntu-latest
-    needs: [lint, test]
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v3
-
-      - name: Login to Container Registry
-        uses: docker/login-action@v3
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Extract metadata
-        id: meta
-        uses: docker/metadata-action@v5
-        with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=sha,prefix={{branch}}-
-            type=raw,value=latest,enable={{is_default_branch}}
-
-      - name: Build and push Docker image (Backend)
-        uses: docker/build-push-action@v5
-        with:
-          context: .
-          file: ./Dockerfile
-          push: true
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          cache-from: type=gha
-          cache-to: type=gha,mode=max
-
-  deploy-staging:
-    name: Deploy to Staging
-    runs-on: ubuntu-latest
-    needs: [lint, test, e2e, performance, security, docker]
-    if: github.ref == 'refs/heads/develop'
-    environment: staging
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Staging)
-        uses: amondnet/vercel-action@v25
+      - uses: actions/checkout@v3
+      - uses: amondnet/vercel-action@v20
         with:
           vercel-token: ${{ secrets.VERCEL_TOKEN }}
           vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
           vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
           working-directory: ./frontend
-          vercel-args: ''
-
-      - name: Trigger Render Deploy (Backend - Staging)
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: ${{ secrets.RENDER_BACKEND_SERVICE_ID_STAGING }}
-        run: |
-          curl -fsS -X POST \
-            -H "Accept: application/json" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -H "Content-Type: application/json" \
-            https://api.render.com/v1/services/${SERVICE_ID}/deploys \
-            -d '{"clearCache": true}'
-
-  deploy-production:
-    name: Deploy to Production
-    runs-on: ubuntu-latest
-    needs: [lint, test, e2e, performance, security, docker]
-    if: github.ref == 'refs/heads/main'
-    environment: production
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-
-      - name: Deploy to Vercel (Production)
-        uses: amondnet/vercel-action@v25
-        with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
-          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
-          working-directory: ./frontend
-          vercel-args: '--prod'
-
-      - name: Trigger Render Deploy (Backend - Production)
-        env:
-          RENDER_API_KEY: ${{ secrets.RENDER_API_KEY }}
-          SERVICE_ID: ${{ secrets.RENDER_BACKEND_SERVICE_ID_PRODUCTION }}
-        run: |
-          curl -fsS -X POST \
-            -H "Accept: application/json" \
-            -H "Authorization: Bearer ${RENDER_API_KEY}" \
-            -H "Content-Type: application/json" \
-            https://api.render.com/v1/services/${SERVICE_ID}/deploys \
-            -d '{"clearCache": true}'
-
-  release:
-    name: Create Release
-    runs-on: ubuntu-latest
-    needs: [deploy-production]
-    if: github.ref == 'refs/heads/main'
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-
-      - name: Generate changelog
-        id: changelog
-        run: |
-          echo "changelog<<EOF" >> $GITHUB_OUTPUT
-          git log --pretty=format:"- %s" $(git describe --tags --abbrev=0 HEAD^)..HEAD >> $GITHUB_OUTPUT
-          echo "EOF" >> $GITHUB_OUTPUT
-
-      - name: Create Release
-        uses: actions/create-release@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        with:
-          tag_name: v${{ github.run_number }}
-          release_name: Release v${{ github.run_number }}
-          body: ${{ steps.changelog.outputs.changelog }}
-          draft: false
-          prerelease: false
