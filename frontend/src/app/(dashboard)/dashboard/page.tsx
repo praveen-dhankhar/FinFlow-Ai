@@ -10,6 +10,8 @@ import SpendingChart from '@/components/charts/SpendingChart';
 import RecentTransactions from '@/components/dashboard/RecentTransactions';
 import ForecastPreview from '@/components/dashboard/ForecastPreview';
 import QuickActions from '@/components/dashboard/QuickActions';
+import PageTransition from '@/components/transitions/PageTransition';
+import StaggerContainer, { StaggerItem } from '@/components/transitions/StaggerContainer';
 import { cn } from '@/lib/utils';
 
 const DashboardPage: React.FC = () => {
@@ -144,141 +146,131 @@ const DashboardPage: React.FC = () => {
   }
 
   return (
-    <div className="min-h-screen pb-20">
-      {/* Header */}
-      <div className="sticky top-0 z-40 glass-strong border-b border-white/5">
-        <div className="px-4 py-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-2xl font-bold text-white">
-                Dashboard
-              </h1>
-              <p className="text-sm text-gray-400 flex items-center gap-2">
-                {isOnline ? (
-                  <span className="flex items-center gap-1 text-green-400">
-                    <Wifi className="h-3 w-3" /> Online
-                  </span>
-                ) : (
-                  <span className="flex items-center gap-1 text-red-400">
-                    <WifiOff className="h-3 w-3" /> Offline
-                  </span>
-                )}
-                <span className="text-gray-600">•</span>
-                <span>Updated {lastRefresh.toLocaleTimeString()}</span>
-              </p>
-            </div>
+    <PageTransition>
+      <div className="min-h-screen pb-20">
+        {/* Header */}
+        <div className="sticky top-0 z-40 glass-strong border-b border-white/5">
+          <div className="px-4 py-4 sm:px-6 lg:px-8">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-2xl font-bold text-white">
+                  Dashboard
+                </h1>
+                <p className="text-sm text-gray-400 flex items-center gap-2">
+                  {isOnline ? (
+                    <span className="flex items-center gap-1 text-green-400">
+                      <Wifi className="h-3 w-3" /> Online
+                    </span>
+                  ) : (
+                    <span className="flex items-center gap-1 text-red-400">
+                      <WifiOff className="h-3 w-3" /> Offline
+                    </span>
+                  )}
+                  <span className="text-gray-600">•</span>
+                  <span>Updated {lastRefresh.toLocaleTimeString()}</span>
+                </p>
+              </div>
 
-            {/* Refresh button */}
-            <motion.button
-              whileHover={{ scale: 1.05, rotate: 180 }}
-              whileTap={{ scale: 0.95 }}
-              transition={{ duration: 0.5 }}
-              onClick={handleRefresh}
-              disabled={refreshMutation.isPending || isRefreshing}
-              className={cn(
-                "p-2.5 rounded-xl transition-all",
-                refreshMutation.isPending || isRefreshing
-                  ? "bg-white/5 text-gray-500 cursor-not-allowed"
-                  : "bg-white/5 text-blue-400 hover:bg-white/10 hover:text-blue-300 border border-white/5"
-              )}
-            >
-              <RefreshCw
+              {/* Refresh button */}
+              <motion.button
+                whileHover={{ scale: 1.05, rotate: 180 }}
+                whileTap={{ scale: 0.95 }}
+                transition={{ duration: 0.5 }}
+                onClick={handleRefresh}
+                disabled={refreshMutation.isPending || isRefreshing}
                 className={cn(
-                  "h-5 w-5",
-                  (refreshMutation.isPending || isRefreshing) && "animate-spin"
+                  "p-2.5 rounded-xl transition-all",
+                  refreshMutation.isPending || isRefreshing
+                    ? "bg-white/5 text-gray-500 cursor-not-allowed"
+                    : "bg-white/5 text-blue-400 hover:bg-white/10 hover:text-blue-300 border border-white/5"
                 )}
-              />
-            </motion.button>
+              >
+                <RefreshCw
+                  className={cn(
+                    "h-5 w-5",
+                    (refreshMutation.isPending || isRefreshing) && "animate-spin"
+                  )}
+                />
+              </motion.button>
+            </div>
           </div>
         </div>
-      </div>
 
-      {/* Main content */}
-      <div className="px-4 py-8 sm:px-6 lg:px-8 space-y-8 max-w-7xl mx-auto">
-        {/* Stats Cards */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-        >
-          <StatsCards
-            stats={data.stats}
-            isLoading={isLoading}
-          />
-        </motion.div>
+        {/* Main content */}
+        <div className="px-4 py-8 sm:px-6 lg:px-8 space-y-8 max-w-7xl mx-auto">
+          {/* Stats Cards */}
+          <StaggerContainer>
+            <StaggerItem>
+              <StatsCards
+                stats={data.stats}
+                isLoading={isLoading}
+              />
+            </StaggerItem>
+          </StaggerContainer>
 
-        {/* Charts and Transactions Row */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-          {/* Spending Chart */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.1 }}
-            className="h-[500px]"
-          >
-            <SpendingChart
-              data={data.spendingCategories}
-              isLoading={isLoading}
-              onCategoryClick={handleCategoryClick}
-              onExport={handleExportChart}
-            />
-          </motion.div>
+          {/* Charts and Transactions Row */}
+          <StaggerContainer staggerDelay={0.15}>
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Spending Chart */}
+              <StaggerItem className="h-[500px]">
+                <SpendingChart
+                  data={data.spendingCategories}
+                  isLoading={isLoading}
+                  onCategoryClick={handleCategoryClick}
+                  onExport={handleExportChart}
+                />
+              </StaggerItem>
 
-          {/* Recent Transactions */}
-          <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5, delay: 0.2 }}
-            className="h-[500px]"
-          >
-            <RecentTransactions
-              transactions={data.recentTransactions}
-              isLoading={isLoading}
-              onEdit={(transaction) => handleTransactionAction('edit', transaction)}
-              onDelete={(transaction) => handleTransactionAction('delete', transaction)}
-              onView={(transaction) => handleTransactionAction('view', transaction)}
-              onViewAll={() => console.log('View all transactions')}
-            />
-          </motion.div>
+              {/* Recent Transactions */}
+              <StaggerItem className="h-[500px]">
+                <RecentTransactions
+                  transactions={data.recentTransactions}
+                  isLoading={isLoading}
+                  onEdit={(transaction) => handleTransactionAction('edit', transaction)}
+                  onDelete={(transaction) => handleTransactionAction('delete', transaction)}
+                  onView={(transaction) => handleTransactionAction('view', transaction)}
+                  onViewAll={() => console.log('View all transactions')}
+                />
+              </StaggerItem>
+            </div>
+          </StaggerContainer>
+
+          {/* Forecast Preview */}
+          <StaggerContainer>
+            <StaggerItem>
+              <ForecastPreview
+                data={data.forecastData}
+                isLoading={isLoading}
+                onViewFull={() => console.log('View full forecast')}
+              />
+            </StaggerItem>
+          </StaggerContainer>
         </div>
 
-        {/* Forecast Preview */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}
-        >
-          <ForecastPreview
-            data={data.forecastData}
-            isLoading={isLoading}
-            onViewFull={() => console.log('View full forecast')}
-          />
-        </motion.div>
+        {/* Quick Actions FAB */}
+        <QuickActions
+          onAddTransaction={() => handleQuickAction('add-transaction')}
+          onAddIncome={() => handleQuickAction('add-income')}
+          onSetGoal={() => handleQuickAction('set-goal')}
+          onExportData={() => handleQuickAction('export-data')}
+        />
+
+        {/* Pull to refresh indicator */}
+        <AnimatePresence>
+          {isRefreshing && (
+            <motion.div
+              initial={{ opacity: 0, y: -50 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -50 }}
+              className="fixed top-0 left-0 right-0 z-50 gradient-primary text-white py-3 text-center text-sm font-medium shadow-lg"
+            >
+              <RefreshCw className="h-4 w-4 animate-spin inline mr-2" />
+              Refreshing dashboard...
+            </motion.div>
+          )}
+        </AnimatePresence>
       </div>
-
-      {/* Quick Actions FAB */}
-      <QuickActions
-        onAddTransaction={() => handleQuickAction('add-transaction')}
-        onAddIncome={() => handleQuickAction('add-income')}
-        onSetGoal={() => handleQuickAction('set-goal')}
-        onExportData={() => handleQuickAction('export-data')}
-      />
-
-      {/* Pull to refresh indicator */}
-      <AnimatePresence>
-        {isRefreshing && (
-          <motion.div
-            initial={{ opacity: 0, y: -50 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -50 }}
-            className="fixed top-0 left-0 right-0 z-50 gradient-primary text-white py-3 text-center text-sm font-medium shadow-lg"
-          >
-            <RefreshCw className="h-4 w-4 animate-spin inline mr-2" />
-            Refreshing dashboard...
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
+    </PageTransition>
   );
 };
 
