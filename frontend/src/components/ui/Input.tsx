@@ -13,6 +13,7 @@ export interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> 
   rightIcon?: React.ReactNode;
   mask?: string;
   floatingLabel?: boolean;
+  variant?: 'default' | 'glass';
 }
 
 const Input = forwardRef<HTMLInputElement, InputProps>(
@@ -27,6 +28,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       floatingLabel = true,
       type = 'text',
       className,
+      variant = 'glass',
       ...props
     },
     ref
@@ -56,12 +58,17 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
       props.onChange?.(e);
     };
 
-    const baseStyles = 'w-full px-3 py-2 border rounded-lg transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-1';
-    
+    const baseStyles = 'w-full px-4 py-3 rounded-xl transition-all duration-200 focus:outline-none text-white placeholder-gray-500';
+
+    const variants = {
+      default: 'bg-white border border-gray-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 dark:bg-gray-800 dark:border-gray-700',
+      glass: 'bg-white/5 border border-white/10 focus:bg-white/10 focus:border-blue-500/50 focus:ring-2 focus:ring-blue-500/20 backdrop-blur-sm',
+    };
+
     const stateStyles = {
-      default: 'border-gray-300 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:focus:border-blue-400',
-      error: 'border-red-500 focus:border-red-500 focus:ring-red-500',
-      success: 'border-green-500 focus:border-green-500 focus:ring-green-500',
+      default: '',
+      error: 'border-red-500/50 focus:border-red-500 focus:ring-red-500/20 bg-red-500/5',
+      success: 'border-green-500/50 focus:border-green-500 focus:ring-green-500/20 bg-green-500/5',
     };
 
     const getStateStyle = () => {
@@ -78,21 +85,18 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
     };
 
     return (
-      <div className="relative">
+      <div className="relative group">
         {floatingLabel && label && (
           <motion.label
             className={cn(
-              'absolute left-3 transition-all duration-200 pointer-events-none',
-              'text-gray-500 dark:text-gray-400',
+              'absolute left-4 transition-all duration-200 pointer-events-none z-10',
               hasValue || isFocused
-                ? 'top-1 text-xs text-blue-600 dark:text-blue-400'
-                : 'top-2.5 text-sm'
+                ? 'top-2 text-[10px] text-blue-400 font-medium'
+                : 'top-3.5 text-sm text-gray-400'
             )}
             animate={{
-              y: hasValue || isFocused ? -8 : 0,
-              scale: hasValue || isFocused ? 0.85 : 1,
+              y: hasValue || isFocused ? -4 : 0,
             }}
-            transition={{ duration: 0.2 }}
           >
             {label}
           </motion.label>
@@ -100,7 +104,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
 
         <div className="relative">
           {leftIcon && (
-            <div className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400">
+            <div className={cn(
+              "absolute left-4 top-1/2 transform -translate-y-1/2 transition-colors duration-200",
+              isFocused ? "text-blue-400" : "text-gray-500"
+            )}>
               {leftIcon}
             </div>
           )}
@@ -110,9 +117,10 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             type={inputType}
             className={cn(
               baseStyles,
+              variants[variant],
               getStateStyle(),
-              leftIcon && 'pl-10',
-              (rightIcon || isPassword || hasSuccess || hasError) && 'pr-10',
+              leftIcon && 'pl-11',
+              (rightIcon || isPassword || hasSuccess || hasError) && 'pr-11',
               floatingLabel && label && 'pt-6 pb-2',
               className
             )}
@@ -124,14 +132,14 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
             {...(props as any)}
           />
 
-          <div className="absolute right-3 top-1/2 transform -translate-y-1/2 flex items-center space-x-1">
+          <div className="absolute right-4 top-1/2 transform -translate-y-1/2 flex items-center space-x-2">
             {hasSuccess && (
               <motion.div
                 initial={{ scale: 0, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                <Check className="h-4 w-4 text-green-500" />
+                <Check className="h-4 w-4 text-green-400" />
               </motion.div>
             )}
 
@@ -141,7 +149,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ duration: 0.2 }}
               >
-                <AlertCircle className="h-4 w-4 text-red-500" />
+                <AlertCircle className="h-4 w-4 text-red-400" />
               </motion.div>
             )}
 
@@ -149,7 +157,7 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
               <motion.button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                className="text-gray-400 hover:text-white transition-colors focus:outline-none"
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.9 }}
               >
@@ -172,12 +180,13 @@ const Input = forwardRef<HTMLInputElement, InputProps>(
         <AnimatePresence>
           {error && (
             <motion.p
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: -10, height: 0 }}
+              animate={{ opacity: 1, y: 0, height: 'auto' }}
+              exit={{ opacity: 0, y: -10, height: 0 }}
               transition={{ duration: 0.2 }}
-              className="mt-1 text-sm text-red-600 dark:text-red-400"
+              className="mt-1.5 text-xs text-red-400 ml-1 flex items-center gap-1"
             >
+              <AlertCircle className="h-3 w-3" />
               {error}
             </motion.p>
           )}

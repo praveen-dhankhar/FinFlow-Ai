@@ -56,7 +56,14 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
   return (
     <ProtectedRoute>
-      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+      <div className="min-h-screen bg-[#0f172a] text-white overflow-x-hidden">
+        {/* Background Gradients */}
+        <div className="fixed inset-0 z-0 pointer-events-none">
+          <div className="absolute top-[-10%] left-[-10%] w-[40%] h-[40%] bg-purple-500/10 rounded-full blur-[120px]" />
+          <div className="absolute top-[20%] right-[-5%] w-[30%] h-[30%] bg-blue-500/10 rounded-full blur-[100px]" />
+          <div className="absolute bottom-[-10%] left-[20%] w-[35%] h-[35%] bg-pink-500/10 rounded-full blur-[120px]" />
+        </div>
+
         {/* Sidebar */}
         <Sidebar
           isCollapsed={isSidebarCollapsed}
@@ -71,7 +78,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="fixed inset-0 z-30 bg-black/50 lg:hidden"
+              className="fixed inset-0 z-30 bg-black/60 backdrop-blur-sm lg:hidden"
               onClick={() => setIsMobileMenuOpen(false)}
             />
           )}
@@ -79,26 +86,25 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
 
         {/* Main Content */}
         <div
-          className={`transition-all duration-300 ${
-            isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
-          }`}
+          className={`relative z-10 transition-all duration-300 ${isSidebarCollapsed ? 'lg:ml-20' : 'lg:ml-64'
+            }`}
         >
           {/* Header */}
-          <Header
+          {/* <Header
             onMobileMenuToggle={toggleMobileMenu}
             isMobileMenuOpen={isMobileMenuOpen}
             isSidebarCollapsed={isSidebarCollapsed}
-          />
+          /> */}
 
           {/* Main Content Area */}
           <main className="min-h-screen">
             {/* Breadcrumb */}
-            <div className="px-4 py-3 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+            {/* <div className="px-4 py-3 border-b border-white/5">
               <Breadcrumb />
-            </div>
+            </div> */}
 
             {/* Page Content */}
-            <div className="p-4 pb-20 lg:pb-4">
+            <div className="p-0">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -125,7 +131,7 @@ const DashboardLayout: React.FC<DashboardLayoutProps> = ({ children }) => {
             >
               <Sidebar
                 isCollapsed={false}
-                onToggle={() => {}}
+                onToggle={() => { }}
                 isMobile={true}
               />
             </motion.div>

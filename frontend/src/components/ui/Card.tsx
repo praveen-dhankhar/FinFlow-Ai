@@ -5,7 +5,7 @@ import { motion, HTMLMotionProps } from 'framer-motion';
 import { cn } from '@/lib/utils';
 
 export interface CardProps extends HTMLMotionProps<'div'> {
-  variant?: 'default' | 'glass' | 'gradient';
+  variant?: 'default' | 'glass' | 'gradient' | 'outline';
   hover?: boolean;
   children?: React.ReactNode;
 }
@@ -23,8 +23,8 @@ export interface CardFooterProps extends HTMLMotionProps<'div'> {
 }
 
 const Card = forwardRef<HTMLDivElement, CardProps>(
-  ({ variant = 'default', hover = true, children, className, ...props }, ref) => {
-    const baseStyles = 'rounded-lg border transition-all duration-300';
+  ({ variant = 'glass', hover = true, children, className, ...props }, ref) => {
+    const baseStyles = 'rounded-2xl transition-all duration-300 overflow-hidden';
 
     const variants = {
       default: cn(
@@ -32,27 +32,25 @@ const Card = forwardRef<HTMLDivElement, CardProps>(
         'dark:bg-gray-900 dark:border-gray-800'
       ),
       glass: cn(
-        'bg-white/10 backdrop-blur-md border-white/20 shadow-xl',
-        'dark:bg-gray-900/10 dark:border-gray-800/20'
+        'glass border-white/10 shadow-lg shadow-black/5',
+        'hover:bg-white/10 hover:border-white/20'
       ),
       gradient: cn(
-        'bg-gradient-to-br from-white/20 to-white/5 backdrop-blur-md',
-        'border-white/30 shadow-2xl',
-        'dark:from-gray-900/20 dark:to-gray-900/5',
-        'dark:border-gray-800/30'
+        'gradient-card border-white/10 shadow-xl',
+        'hover:shadow-purple-500/20'
+      ),
+      outline: cn(
+        'bg-transparent border border-gray-200 dark:border-white/10',
+        'hover:bg-gray-50 dark:hover:bg-white/5'
       ),
     };
 
     const hoverVariants = {
-      initial: { 
-        scale: 1,
+      initial: {
         y: 0,
-        boxShadow: '0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1)'
       },
-      hover: { 
-        scale: 1.02,
-        y: -2,
-        boxShadow: '0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1)',
+      hover: {
+        y: -4,
         transition: { duration: 0.3, ease: 'easeOut' }
       },
     };
@@ -76,7 +74,7 @@ const CardHeader = forwardRef<HTMLDivElement, CardHeaderProps>(
   ({ children, className, ...props }, ref) => (
     <motion.div
       ref={ref}
-      className={cn('flex flex-col space-y-1.5 p-6', className)}
+      className={cn('flex flex-col space-y-1.5 p-6 border-b border-white/5', className)}
       {...props}
     >
       {children}
@@ -88,7 +86,7 @@ const CardBody = forwardRef<HTMLDivElement, CardBodyProps>(
   ({ children, className, ...props }, ref) => (
     <motion.div
       ref={ref}
-      className={cn('p-6 pt-0', className)}
+      className={cn('p-6', className)}
       {...props}
     >
       {children}
@@ -100,7 +98,7 @@ const CardFooter = forwardRef<HTMLDivElement, CardFooterProps>(
   ({ children, className, ...props }, ref) => (
     <motion.div
       ref={ref}
-      className={cn('flex items-center p-6 pt-0', className)}
+      className={cn('flex items-center p-6 pt-0 border-t border-white/5 bg-black/20', className)}
       {...props}
     >
       {children}

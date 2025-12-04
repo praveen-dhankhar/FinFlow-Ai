@@ -1,504 +1,223 @@
-# Deployment Guide
+# Deployment Guide: Vercel + Render
 
-This guide covers deploying the Finance Forecast App to various environments and platforms.
+Quick reference guide for deploying FinFlow-AI to production.
 
-## Quick Start
+## 🚀 Quick Start
 
-### Prerequisites
+### Backend (Render)
 
-- Node.js 18.17.0 or higher
-- Docker and Docker Compose
-- Vercel CLI (`npm i -g vercel`)
-- Git
+1. **Create PostgreSQL Database**
+   - Go to [Render Dashboard](https://dashboard.render.com/)
+   - Click "New +" → "PostgreSQL"
+   - Name: `financeapp-db`
+   - Plan: Free (for testing) or Starter ($7/month)
+   - Click "Create Database"
+   - **Save the connection details!**
 
-### Environment Setup
+2. **Deploy Backend**
+   - Click "New +" → "Web Service"
+   - Connect your GitHub repository
+   - Select the repository
+   - Configure:
+     - **Name**: `finflow-backend`
+     - **Environment**: Java
+     - **Build Command**: `mvn clean package -DskipTests`
+     - **Start Command**: `java -Dserver.port=$PORT -jar target/finance-forecast-app-0.0.1-SNAPSHOT.jar`
+     - **Plan**: Free (spins down after inactivity) or Starter ($7/month)
 
-1. **Copy environment template:**
+3. **Add Environment Variables**
+   
+   In Render Dashboard → Your Service → Environment:
+   
    ```bash
-   cp env.production.template .env.production
+   # Database (from your PostgreSQL instance)
+   DB_HOST=<your-postgres-host>.render.com
+   DB_PORT=5432
+   DB_NAME=financeapp
+   DB_USERNAME=<from-postgres-credentials>
+   DB_PASSWORD=<from-postgres-credentials>
+   DB_SSLMODE=require
+   
+   # JWT (CRITICAL: Generate a strong secret!)
+   JWT_SECRET=<generate-256-char-random-string>
+   JWT_EXPIRATION=86400000
+   JWT_REFRESH_EXPIRATION=604800000
+   
+   # CORS (Update after deploying frontend)
+   CORS_ALLOWED_ORIGINS=https://your-app.vercel.app
+   
+   # Spring Profile
+   SPRING_PROFILES_ACTIVE=prod
    ```
 
-2. **Update environment variables:**
-   Edit `.env.production` with your production values.
-
-3. **Install dependencies:**
+4. **Generate JWT Secret**
    ```bash
-   cd frontend
-   npm ci
+   # Run this command to generate a secure secret:
+   openssl rand -base64 64 | tr -d '\n'
    ```
 
-## Deployment Options
+5. **Deploy**
+   - Click "Create Web Service"
+   - Wait for build to complete (~5-10 minutes)
+   - Check logs for "Started FinanceForecastApplication"
+   - Test: `https://your-backend.onrender.com/actuator/health`
 
-### 1. Vercel Deployment (Recommended)
+---
 
-#### Automatic Deployment via GitHub
+### Frontend (Vercel)
 
-1. **Connect GitHub repository to Vercel:**
+1. **Import Project**
    - Go to [Vercel Dashboard](https://vercel.com/dashboard)
-   - Click "New Project"
+   - Click "Add New..." → "Project"
    - Import your GitHub repository
-   - Configure build settings:
-     - Framework: Next.js
-     - Root Directory: `frontend`
-     - Build Command: `npm run build`
-     - Output Directory: `.next`
+   - **Root Directory**: `frontend`
+   - Framework: Next.js (auto-detected)
 
-2. **Set environment variables in Vercel:**
+2. **Configure Environment Variables**
+   
+   In Vercel → Project Settings → Environment Variables:
+   
    ```bash
-   vercel env add NEXT_PUBLIC_API_URL production
-   vercel env add NEXTAUTH_SECRET production
-   vercel env add NEXT_PUBLIC_SENTRY_DSN production
-   # ... add all required environment variables
+   # Required
+   NEXT_PUBLIC_API_URL=https://your-backend.onrender.com/api
+   
+   # Optional
+   NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
+   NEXT_PUBLIC_WEB_VITALS_REPORTING=true
+   NEXT_PUBLIC_ENABLE_ERROR_REPORTING=true
    ```
 
-3. **Deploy:**
-   ```bash
-   vercel --prod
+3. **Update vercel.json**
+   
+   Before deploying, update the API proxy URL in `vercel.json`:
+   ```json
+   {
+     "rewrites": [
+       {
+         "source": "/api/proxy/(.*)",
+         "destination": "https://your-backend.onrender.com/api/$1"
+       }
+     ]
+   }
    ```
 
-#### Manual Deployment
+4. **Deploy**
+   - Click "Deploy"
+   - Wait for build (~2-3 minutes)
+   - Visit your deployed URL
 
-```bash
-# Install Vercel CLI
-npm i -g vercel
-
-# Login to Vercel
-vercel login
-
-# Deploy to staging
-vercel
-
-# Deploy to production
-vercel --prod
-```
-
-### 2. Docker Deployment
-
-#### Using Docker Compose
-
-```bash
-# Build and start all services
-docker-compose -f docker-compose.prod.yml up -d
-
-# View logs
-docker-compose -f docker-compose.prod.yml logs -f
-
-# Stop services
-docker-compose -f docker-compose.prod.yml down
-```
-
-#### Using Docker Swarm
-
-```bash
-# Initialize swarm
-docker swarm init
-
-# Deploy stack
-docker stack deploy -c docker-compose.prod.yml finance-forecast
-
-# View services
-docker service ls
-
-# Scale services
-docker service scale finance-forecast_frontend=3
-```
-
-### 3. Kubernetes Deployment
-
-#### Create Kubernetes manifests
-
-```yaml
-# k8s/namespace.yaml
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: finance-forecast
+5. **Update Backend CORS**
+   
+   After deployment, update backend environment variable:
+   ```bash
+   CORS_ALLOWED_ORIGINS=https://your-actual-app.vercel.app
+   ```
+   
+   Then redeploy the backend service.
 
 ---
-# k8s/configmap.yaml
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: finance-forecast-config
-  namespace: finance-forecast
-data:
-  NODE_ENV: "production"
-  NEXT_PUBLIC_API_URL: "https://api.finance-forecast.app"
+
+## ✅ Verification Checklist
+
+### Backend
+- [ ] Database connection successful
+- [ ] Health endpoint returns 200: `/actuator/health`
+- [ ] Flyway migrations ran successfully
+- [ ] Logs show no errors
+- [ ] SSL enabled for database
+
+### Frontend
+- [ ] Application loads without errors
+- [ ] Can access landing page
+- [ ] API calls work (check Network tab)
+- [ ] No CORS errors in console
+- [ ] Login/signup functionality works
 
 ---
-# k8s/deployment.yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: finance-forecast-frontend
-  namespace: finance-forecast
-spec:
-  replicas: 3
-  selector:
-    matchLabels:
-      app: finance-forecast-frontend
-  template:
-    metadata:
-      labels:
-        app: finance-forecast-frontend
-    spec:
-      containers:
-      - name: frontend
-        image: finance-forecast:latest
-        ports:
-        - containerPort: 3000
-        envFrom:
-        - configMapRef:
-            name: finance-forecast-config
-        resources:
-          requests:
-            memory: "256Mi"
-            cpu: "250m"
-          limits:
-            memory: "512Mi"
-            cpu: "500m"
-```
-
-#### Deploy to Kubernetes
-
-```bash
-# Apply manifests
-kubectl apply -f k8s/
-
-# Check deployment status
-kubectl get pods -n finance-forecast
-
-# View logs
-kubectl logs -f deployment/finance-forecast-frontend -n finance-forecast
-```
-
-## CI/CD Pipeline
-
-### GitHub Actions
-
-The project includes comprehensive GitHub Actions workflows:
-
-- **CI Pipeline** (`.github/workflows/ci.yml`):
-  - Linting and type checking
-  - Unit tests
-  - E2E tests
-  - Performance tests
-  - Security scanning
-  - Docker build
-  - Automatic deployment
-
-- **Preview Deployments** (`.github/workflows/preview.yml`):
-  - Automatic preview deployments for PRs
-  - Lighthouse audits
-  - Accessibility testing
-  - Visual regression testing
-
-### Required Secrets
-
-Add these secrets to your GitHub repository:
-
-```bash
-# Vercel
-VERCEL_TOKEN=your-vercel-token
-VERCEL_ORG_ID=your-vercel-org-id
-VERCEL_PROJECT_ID=your-vercel-project-id
-
-# Monitoring
-LHCI_GITHUB_APP_TOKEN=your-lighthouse-ci-token
-SENTRY_AUTH_TOKEN=your-sentry-auth-token
-
-# Notifications
-SLACK_WEBHOOK=your-slack-webhook-url
-```
-
-## Environment Configuration
-
-### Production Environment Variables
-
-```env
-# API Configuration
-NEXT_PUBLIC_API_URL=https://api.finance-forecast.app
-NEXT_PUBLIC_WS_URL=wss://api.finance-forecast.app/ws
-
-# Authentication
-NEXTAUTH_SECRET=your-production-secret-key
-NEXTAUTH_URL=https://finance-forecast.app
-
-# Error Tracking
-NEXT_PUBLIC_SENTRY_DSN=https://your-sentry-dsn@sentry.io/project-id
-SENTRY_ORG=your-sentry-org
-SENTRY_PROJECT=finance-forecast-frontend
-SENTRY_AUTH_TOKEN=your-sentry-auth-token
 
-# Analytics
-NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
-NEXT_PUBLIC_MIXPANEL_TOKEN=your-mixpanel-token
+## 🔒 Security Checklist
 
-# External Services
-NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY=pk_live_your-stripe-key
-NEXT_PUBLIC_PLAID_CLIENT_ID=your-plaid-client-id
-```
+- [ ] Generated strong JWT_SECRET (256+ characters)
+- [ ] Updated CORS_ALLOWED_ORIGINS with actual domain
+- [ ] Database SSL enabled (DB_SSLMODE=require)
+- [ ] All default passwords changed
+- [ ] Environment variables set (not hardcoded)
+- [ ] HTTPS enabled (automatic on Vercel/Render)
 
-### Staging Environment Variables
+---
 
-```env
-# API Configuration
-NEXT_PUBLIC_API_URL=https://staging-api.finance-forecast.app
-NEXT_PUBLIC_WS_URL=wss://staging-api.finance-forecast.app/ws
+## 📊 Monitoring
 
-# Authentication
-NEXTAUTH_SECRET=your-staging-secret-key
-NEXTAUTH_URL=https://staging.finance-forecast.app
+### Render
+- View logs: Dashboard → Your Service → Logs
+- Metrics: Dashboard → Your Service → Metrics
+- Database: Dashboard → PostgreSQL → Metrics
 
-# Error Tracking
-NEXT_PUBLIC_SENTRY_DSN=https://your-staging-sentry-dsn@sentry.io/project-id
+### Vercel
+- Analytics: Dashboard → Your Project → Analytics
+- Logs: Dashboard → Your Project → Deployments → View Logs
+- Performance: Built-in Web Vitals tracking
 
-# Analytics (use test IDs)
-NEXT_PUBLIC_GOOGLE_ANALYTICS_ID=G-XXXXXXXXXX
-```
+---
 
-## Monitoring and Observability
+## 🐛 Troubleshooting
 
-### Sentry Integration
+### Backend won't start
+1. Check Render logs for errors
+2. Verify all environment variables are set
+3. Ensure database is running
+4. Check build command completed successfully
 
-1. **Create Sentry project:**
-   - Go to [Sentry.io](https://sentry.io)
-   - Create a new project for Next.js
-   - Get your DSN
+### Frontend can't connect to backend
+1. Verify `NEXT_PUBLIC_API_URL` is correct
+2. Check backend CORS settings
+3. Inspect browser Network tab for errors
+4. Ensure backend is running (not spun down)
 
-2. **Configure Sentry:**
-   ```bash
-   # Install Sentry CLI
-   npm i -g @sentry/cli
+### Database connection errors
+1. Verify database credentials
+2. Check SSL mode setting
+3. Ensure database is accessible
+4. Review connection pool settings
 
-   # Login to Sentry
-   sentry-cli login
+### CORS errors
+1. Update `CORS_ALLOWED_ORIGINS` on backend
+2. Include both www and non-www domains
+3. Redeploy backend after changes
+4. Clear browser cache
 
-   # Create release
-   sentry-cli releases new $VERSION
-   sentry-cli releases set-commits $VERSION --auto
-   ```
+---
 
-### Performance Monitoring
+## 💰 Cost Estimate
 
-#### Lighthouse CI
+### Free Tier (Testing)
+- **Render**: Free web service + Free PostgreSQL (90 days)
+- **Vercel**: Free Hobby plan
+- **Total**: $0/month (limited)
 
-```bash
-# Install Lighthouse CI
-npm i -g @lhci/cli
+### Production (Starter)
+- **Render**: $7/month (web service) + $7/month (PostgreSQL)
+- **Vercel**: $20/month (Pro plan)
+- **Total**: $34/month
 
-# Run Lighthouse CI
-lhci autorun --upload.target=temporary-public-storage
-```
+---
 
-#### Web Vitals
+## 📝 Next Steps
 
-The application automatically tracks Core Web Vitals:
+1. Set up custom domain
+2. Configure automated backups
+3. Set up monitoring alerts
+4. Implement CI/CD pipeline
+5. Add staging environment
+6. Configure error tracking (Sentry)
+7. Set up analytics
+8. Enable rate limiting
 
-- First Contentful Paint (FCP)
-- Largest Contentful Paint (LCP)
-- First Input Delay (FID)
-- Cumulative Layout Shift (CLS)
-- Time to First Byte (TTFB)
+---
 
-### Health Checks
+## 📚 Additional Resources
 
-The application includes health check endpoints:
-
-- **Frontend Health:** `GET /api/health`
-- **Backend Health:** `GET /api/health`
-- **Database Health:** `GET /api/health/database`
-
-## Security
-
-### SSL/TLS Configuration
-
-#### Let's Encrypt (Recommended)
-
-```bash
-# Install Certbot
-sudo apt-get install certbot
-
-# Generate certificate
-sudo certbot certonly --standalone -d finance-forecast.app
-
-# Auto-renewal
-sudo crontab -e
-# Add: 0 12 * * * /usr/bin/certbot renew --quiet
-```
-
-#### Custom SSL Certificate
-
-```bash
-# Copy certificates to nginx
-sudo cp cert.pem /etc/nginx/ssl/
-sudo cp key.pem /etc/nginx/ssl/
-
-# Update nginx configuration
-sudo nginx -t
-sudo systemctl reload nginx
-```
-
-### Security Headers
-
-The application includes comprehensive security headers:
-
-- **Strict-Transport-Security:** Enforces HTTPS
-- **X-Frame-Options:** Prevents clickjacking
-- **X-Content-Type-Options:** Prevents MIME sniffing
-- **Content-Security-Policy:** Prevents XSS attacks
-- **Referrer-Policy:** Controls referrer information
-
-### Rate Limiting
-
-Nginx configuration includes rate limiting:
-
-```nginx
-# API rate limiting
-limit_req_zone $binary_remote_addr zone=api:10m rate=10r/s;
-
-# Login rate limiting
-limit_req_zone $binary_remote_addr zone=login:10m rate=1r/s;
-```
-
-## Troubleshooting
-
-### Common Issues
-
-#### Build Failures
-
-```bash
-# Clear Next.js cache
-rm -rf .next
-
-# Clear node_modules
-rm -rf node_modules package-lock.json
-npm install
-
-# Check Node.js version
-node --version
-```
-
-#### Docker Issues
-
-```bash
-# Check Docker status
-docker ps
-
-# View container logs
-docker logs finance-forecast-frontend
-
-# Restart services
-docker-compose -f docker-compose.prod.yml restart
-```
-
-#### Vercel Issues
-
-```bash
-# Check Vercel status
-vercel ls
-
-# View deployment logs
-vercel logs
-
-# Redeploy
-vercel --prod --force
-```
-
-### Performance Issues
-
-#### Bundle Size Optimization
-
-```bash
-# Analyze bundle size
-npm run analyze
-
-# Check for duplicate dependencies
-npm ls --depth=0
-```
-
-#### Database Performance
-
-```sql
--- Check slow queries
-SELECT query, mean_time, calls 
-FROM pg_stat_statements 
-ORDER BY mean_time DESC 
-LIMIT 10;
-
--- Check table sizes
-SELECT 
-  schemaname,
-  tablename,
-  pg_size_pretty(pg_total_relation_size(schemaname||'.'||tablename)) as size
-FROM pg_tables 
-ORDER BY pg_total_relation_size(schemaname||'.'||tablename) DESC;
-```
-
-## Rollback Procedures
-
-### Vercel Rollback
-
-```bash
-# List deployments
-vercel ls
-
-# Rollback to previous deployment
-vercel rollback [deployment-url]
-```
-
-### Docker Rollback
-
-```bash
-# List images
-docker images
-
-# Rollback to previous image
-docker-compose -f docker-compose.prod.yml up -d --scale frontend=0
-docker-compose -f docker-compose.prod.yml up -d --scale frontend=3
-```
-
-### Database Rollback
-
-```bash
-# Restore from backup
-pg_restore -h localhost -U postgres -d finance_forecast backup.sql
-
-# Run specific migration
-npm run migrate:rollback
-```
-
-## Best Practices
-
-### Security
-
-1. **Environment Variables:** Never commit secrets to version control
-2. **HTTPS Only:** Always use HTTPS in production
-3. **Security Headers:** Implement proper security headers
-4. **Regular Updates:** Keep dependencies updated
-5. **Access Control:** Implement proper access controls
-
-### Performance
-
-1. **CDN:** Use CDN for static assets
-2. **Caching:** Implement proper caching strategies
-3. **Compression:** Enable gzip/brotli compression
-4. **Database:** Optimize database queries
-5. **Monitoring:** Monitor performance metrics
-
-### Reliability
-
-1. **Health Checks:** Implement comprehensive health checks
-2. **Error Handling:** Proper error handling and logging
-3. **Backups:** Regular database backups
-4. **Rollback:** Quick rollback procedures
-5. **Monitoring:** 24/7 monitoring and alerting
-
-## Support
-
-For deployment-related issues:
-
-- **Documentation:** This guide and inline comments
-- **GitHub Issues:** Deployment-specific issues
-- **Discord:** #deployment channel
-- **Email:** deployment@finance-forecast.app
+- [Render Documentation](https://render.com/docs)
+- [Vercel Documentation](https://vercel.com/docs)
+- [Spring Boot on Render](https://render.com/docs/deploy-spring-boot)
+- [Next.js on Vercel](https://vercel.com/docs/frameworks/nextjs)

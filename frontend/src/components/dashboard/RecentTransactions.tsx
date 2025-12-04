@@ -2,15 +2,16 @@
 
 import React, { useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-  ArrowUpRight, 
-  ArrowDownLeft, 
-  MoreHorizontal, 
-  Edit, 
-  Trash2, 
+import {
+  ArrowUpRight,
+  ArrowDownLeft,
+  MoreHorizontal,
+  Edit,
+  Trash2,
   Eye,
   ChevronRight,
-  Receipt
+  Receipt,
+  Search
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui';
@@ -42,10 +43,10 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
   const handleTouchMove = (e: React.TouchEvent) => {
     if (!isDragging) return;
-    
+
     currentX.current = e.touches[0].clientX;
     const deltaX = currentX.current - startX.current;
-    
+
     if (deltaX < 0) {
       setSwipeOffset(Math.max(deltaX, -120));
     }
@@ -53,7 +54,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
 
   const handleTouchEnd = () => {
     if (!isDragging) return;
-    
+
     if (swipeOffset < -60) {
       setIsExpanded(true);
     }
@@ -75,7 +76,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="relative overflow-hidden"
+      className="relative overflow-hidden group"
     >
       {/* Swipe actions */}
       <AnimatePresence>
@@ -84,13 +85,13 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
             initial={{ opacity: 0, x: 120 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 120 }}
-            className="absolute right-0 top-0 h-full flex items-center space-x-2 pr-4 bg-gray-100 dark:bg-gray-800 z-10"
+            className="absolute right-0 top-0 h-full flex items-center space-x-2 pr-4 z-10"
           >
             <motion.button
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => onView?.(transaction)}
-              className="p-2 rounded-lg bg-blue-100 dark:bg-blue-900 text-blue-600 dark:text-blue-400 hover:bg-blue-200 dark:hover:bg-blue-800 transition-colors"
+              className="p-2 rounded-xl bg-blue-500/20 text-blue-400 hover:bg-blue-500/30 transition-colors backdrop-blur-md"
             >
               <Eye className="h-4 w-4" />
             </motion.button>
@@ -98,7 +99,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => onEdit?.(transaction)}
-              className="p-2 rounded-lg bg-yellow-100 dark:bg-yellow-900 text-yellow-600 dark:text-yellow-400 hover:bg-yellow-200 dark:hover:bg-yellow-800 transition-colors"
+              className="p-2 rounded-xl bg-yellow-500/20 text-yellow-400 hover:bg-yellow-500/30 transition-colors backdrop-blur-md"
             >
               <Edit className="h-4 w-4" />
             </motion.button>
@@ -106,7 +107,7 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
               whileHover={{ scale: 1.1 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => onDelete?.(transaction)}
-              className="p-2 rounded-lg bg-red-100 dark:bg-red-900 text-red-600 dark:text-red-400 hover:bg-red-200 dark:hover:bg-red-800 transition-colors"
+              className="p-2 rounded-xl bg-red-500/20 text-red-400 hover:bg-red-500/30 transition-colors backdrop-blur-md"
             >
               <Trash2 className="h-4 w-4" />
             </motion.button>
@@ -119,18 +120,21 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
         onTouchStart={handleTouchStart}
         onTouchMove={handleTouchMove}
         onTouchEnd={handleTouchEnd}
-        style={{ 
+        style={{
           transform: `translateX(${swipeOffset}px)`,
           transition: swipeOffset === 0 ? 'transform 0.3s ease' : 'none',
         }}
-        className="relative bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 hover:shadow-md transition-all duration-200 cursor-pointer group"
+        className="relative p-4 rounded-xl bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/10 transition-all duration-300 cursor-pointer"
         onClick={() => onView?.(transaction)}
       >
-        <div className="p-4 flex items-center space-x-4">
+        <div className="flex items-center space-x-4">
           {/* Category icon */}
-          <div 
-            className="w-12 h-12 rounded-full flex items-center justify-center text-white text-lg"
-            style={{ backgroundColor: transaction.categoryColor }}
+          <div
+            className="w-12 h-12 rounded-2xl flex items-center justify-center text-white text-lg shadow-lg"
+            style={{
+              background: `linear-gradient(135deg, ${transaction.categoryColor}, ${transaction.categoryColor}80)`,
+              boxShadow: `0 4px 12px ${transaction.categoryColor}40`
+            }}
           >
             {transaction.categoryIcon}
           </div>
@@ -138,44 +142,52 @@ const TransactionItem: React.FC<TransactionItemProps> = ({
           {/* Transaction details */}
           <div className="flex-1 min-w-0">
             <div className="flex items-center justify-between">
-              <h3 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+              <h3 className="text-base font-medium text-white truncate group-hover:text-blue-400 transition-colors">
                 {transaction.description}
               </h3>
               <div className="flex items-center space-x-2">
                 <span className={cn(
-                  "text-sm font-semibold",
-                  isIncome ? "text-green-600 dark:text-green-400" : "text-red-600 dark:text-red-400"
+                  "text-base font-bold",
+                  isIncome ? "text-green-400" : "text-white"
                 )}>
                   {formatAmount(transaction.amount)}
                 </span>
-                {isIncome ? (
-                  <ArrowUpRight className="h-4 w-4 text-green-500" />
-                ) : (
-                  <ArrowDownLeft className="h-4 w-4 text-red-500" />
-                )}
               </div>
             </div>
             <div className="flex items-center justify-between mt-1">
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {transaction.category}
-              </span>
-              <span className="text-xs text-gray-500 dark:text-gray-400">
-                {transaction.relativeDate}
-              </span>
+              <div className="flex items-center space-x-2">
+                <span className="text-xs px-2 py-0.5 rounded-full bg-white/5 text-gray-400 border border-white/5">
+                  {transaction.category}
+                </span>
+                <span className="text-xs text-gray-500">
+                  {transaction.relativeDate}
+                </span>
+              </div>
+              {isIncome ? (
+                <div className="flex items-center text-green-400 text-xs bg-green-500/10 px-2 py-0.5 rounded-full">
+                  <ArrowUpRight className="h-3 w-3 mr-1" />
+                  Income
+                </div>
+              ) : (
+                <div className="flex items-center text-red-400 text-xs bg-red-500/10 px-2 py-0.5 rounded-full">
+                  <ArrowDownLeft className="h-3 w-3 mr-1" />
+                  Expense
+                </div>
+              )}
             </div>
           </div>
 
           {/* More button */}
           <motion.button
-            whileHover={{ scale: 1.1 }}
+            whileHover={{ scale: 1.1, backgroundColor: 'rgba(255,255,255,0.1)' }}
             whileTap={{ scale: 0.9 }}
             onClick={(e) => {
               e.stopPropagation();
               setIsExpanded(!isExpanded);
             }}
-            className="p-1 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors opacity-0 group-hover:opacity-100"
+            className="p-2 rounded-lg text-gray-400 hover:text-white transition-colors opacity-0 group-hover:opacity-100"
           >
-            <MoreHorizontal className="h-4 w-4 text-gray-400" />
+            <MoreHorizontal className="h-5 w-5" />
           </motion.button>
         </div>
       </motion.div>
@@ -198,22 +210,22 @@ const EmptyState = ({ onViewAll }: { onViewAll?: () => void }) => (
     <motion.div
       initial={{ scale: 0 }}
       animate={{ scale: 1 }}
-      transition={{ delay: 0.2 }}
-      className="w-16 h-16 bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-4"
+      transition={{ delay: 0.2, type: "spring" }}
+      className="w-16 h-16 glass flex items-center justify-center mb-4 rounded-2xl"
     >
       <Receipt className="h-8 w-8 text-gray-400" />
     </motion.div>
-    <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+    <h3 className="text-lg font-medium text-white mb-2">
       No recent transactions
     </h3>
-    <p className="text-gray-500 dark:text-gray-400 mb-4">
+    <p className="text-gray-400 mb-6">
       Start tracking your expenses and income
     </p>
     <motion.button
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={onViewAll}
-      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+      className="px-6 py-2.5 gradient-primary text-white rounded-xl font-medium shadow-lg hover:shadow-purple-500/25 transition-all"
     >
       Add Transaction
     </motion.button>
@@ -231,15 +243,15 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="p-6 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 dark:border-gray-700/50 shadow-lg">
+      <div className="glass p-6 h-full">
         <div className="flex items-center justify-between mb-6">
-          <Skeleton className="h-6 w-40" />
-          <Skeleton className="h-8 w-20" />
+          <Skeleton className="h-8 w-48" />
+          <Skeleton className="h-8 w-24 rounded-lg" />
         </div>
         <div className="space-y-4">
           {[...Array(5)].map((_, index) => (
-            <div key={index} className="flex items-center space-x-4 p-4">
-              <Skeleton className="h-12 w-12 rounded-full" />
+            <div key={index} className="flex items-center space-x-4 p-4 rounded-xl bg-white/5">
+              <Skeleton className="h-12 w-12 rounded-2xl" />
               <div className="flex-1 space-y-2">
                 <Skeleton className="h-4 w-3/4" />
                 <Skeleton className="h-3 w-1/2" />
@@ -254,9 +266,9 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
 
   if (!transactions || transactions.length === 0) {
     return (
-      <div className="p-6 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 dark:border-gray-700/50 shadow-lg">
+      <div className="glass p-6 h-full">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+          <h2 className="text-xl font-bold text-white">
             Recent Transactions
           </h2>
         </div>
@@ -269,18 +281,18 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
-      className="p-6 rounded-2xl bg-white/70 dark:bg-gray-800/70 backdrop-blur-md border border-white/20 dark:border-gray-700/50 shadow-lg"
+      className="glass p-6 h-full relative overflow-hidden"
     >
       {/* Header */}
       <div className="flex items-center justify-between mb-6">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
+        <h2 className="text-xl font-bold text-white">
           Recent Transactions
         </h2>
         <motion.button
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.05, x: 5 }}
           whileTap={{ scale: 0.95 }}
           onClick={onViewAll}
-          className="flex items-center space-x-1 text-sm text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors"
+          className="flex items-center space-x-1 text-sm text-blue-400 hover:text-blue-300 transition-colors font-medium"
         >
           <span>View all</span>
           <ChevronRight className="h-4 w-4" />
@@ -288,15 +300,15 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
       </div>
 
       {/* Transactions list */}
-      <div className="space-y-3">
+      <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
         <AnimatePresence>
           {transactions.map((transaction, index) => (
             <motion.div
               key={transaction.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ delay: index * 0.1 }}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              transition={{ delay: index * 0.05 }}
             >
               <TransactionItem
                 transaction={transaction}
@@ -321,7 +333,7 @@ const RecentTransactions: React.FC<RecentTransactionsProps> = ({
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
             onClick={onLoadMore}
-            className="px-4 py-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white border border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors"
+            className="px-6 py-2 text-sm text-gray-300 hover:text-white border border-white/10 rounded-xl hover:bg-white/5 transition-colors"
           >
             Load more transactions
           </motion.button>

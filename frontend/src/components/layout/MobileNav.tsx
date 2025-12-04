@@ -45,47 +45,47 @@ const MobileNav: React.FC = () => {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 right-0 z-50 bg-white/80 dark:bg-gray-900/80 backdrop-blur-md border-t border-gray-200 dark:border-gray-800 lg:hidden">
-      <div className="flex items-center justify-around px-2 py-2">
+    <nav className="fixed bottom-0 left-0 right-0 z-50 glass-strong border-t border-white/5 lg:hidden pb-safe">
+      <div className="flex items-center justify-around px-2 py-3">
         {mobileNavItems.map((item) => {
           const isActive = pathname === item.href;
           const Icon = item.icon;
 
           return (
-            <Link key={item.name} href={item.href}>
+            <Link key={item.name} href={item.href} className="relative z-10">
               <motion.div
                 className={cn(
-                  'flex flex-col items-center justify-center p-2 rounded-lg transition-all duration-200',
-                  'min-w-0 flex-1',
+                  'flex flex-col items-center justify-center p-2 rounded-xl transition-all duration-200',
+                  'min-w-[64px]',
                   isActive
-                    ? 'text-blue-600 dark:text-blue-400'
-                    : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-300'
+                    ? 'text-white'
+                    : 'text-gray-400 hover:text-gray-200'
                 )}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <div className="relative">
-                  <Icon
-                    className={cn(
-                      'h-5 w-5',
-                      isActive && 'text-blue-600 dark:text-blue-400'
-                    )}
-                  />
                   {isActive && (
                     <motion.div
-                      layoutId="mobile-nav-indicator"
-                      className="absolute -bottom-1 left-1/2 transform -translate-x-1/2 w-1 h-1 bg-blue-600 dark:bg-blue-400 rounded-full"
+                      layoutId="mobileNavActive"
+                      className="absolute inset-[-8px] bg-gradient-to-b from-blue-500/20 to-purple-500/20 rounded-xl blur-sm"
                       initial={false}
-                      transition={{ type: 'spring', stiffness: 500, damping: 30 }}
+                      transition={{ type: "spring", stiffness: 500, damping: 30 }}
                     />
                   )}
+
+                  <Icon
+                    className={cn(
+                      'h-6 w-6 relative z-10',
+                      isActive && 'text-blue-400 drop-shadow-[0_0_8px_rgba(96,165,250,0.6)]'
+                    )}
+                  />
                 </div>
                 <span
                   className={cn(
-                    'text-xs mt-1 truncate max-w-full',
+                    'text-[10px] mt-1 font-medium transition-colors relative z-10',
                     isActive
-                      ? 'text-blue-600 dark:text-blue-400 font-medium'
-                      : 'text-gray-500 dark:text-gray-400'
+                      ? 'text-blue-400'
+                      : 'text-gray-500'
                   )}
                 >
                   {item.name}

@@ -12,18 +12,10 @@
   },
   "build": {
     "env": {
-      "NEXT_PUBLIC_API_URL": "@next_public_api_url",
-      "NEXT_PUBLIC_WS_URL": "@next_public_ws_url",
-      "NEXTAUTH_SECRET": "@nextauth_secret",
-      "NEXTAUTH_URL": "@nextauth_url",
-      "NEXT_PUBLIC_SENTRY_DSN": "@next_public_sentry_dsn",
-      "SENTRY_ORG": "@sentry_org",
-      "SENTRY_PROJECT": "@sentry_project",
-      "SENTRY_AUTH_TOKEN": "@sentry_auth_token",
-      "NEXT_PUBLIC_GOOGLE_ANALYTICS_ID": "@next_public_google_analytics_id",
-      "NEXT_PUBLIC_MIXPANEL_TOKEN": "@next_public_mixpanel_token",
-      "NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY": "@next_public_stripe_publishable_key",
-      "NEXT_PUBLIC_PLAID_CLIENT_ID": "@next_public_plaid_client_id"
+      "NEXT_PUBLIC_API_URL": "",
+      "NEXT_PUBLIC_GOOGLE_ANALYTICS_ID": "",
+      "NEXT_PUBLIC_WEB_VITALS_REPORTING": "",
+      "NEXT_PUBLIC_ENABLE_ERROR_REPORTING": ""
     }
   },
   "functions": {
@@ -121,12 +113,16 @@
   "rewrites": [
     {
       "source": "/api/proxy/(.*)",
-      "destination": "https://api.finance-forecast.app/$1"
+      "destination": "https://your-backend.onrender.com/api/$1"
     }
   ],
   "cleanUrls": true,
   "trailingSlash": false,
-  "regions": ["iad1", "sfo1", "lhr1"],
+  "regions": [
+    "iad1",
+    "sfo1",
+    "lhr1"
+  ],
   "framework": "nextjs",
   "buildCommand": "cd frontend && npm run build",
   "outputDirectory": "frontend/.next",
